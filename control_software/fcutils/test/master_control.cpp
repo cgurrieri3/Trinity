@@ -1214,9 +1214,9 @@ void Process_RC_Msg(const std::string& msg)
 		case Do_HV_Current_Scan:
 			HV_Current_Scan(msg_payload);
 			break;
-                case RE_DOWNLOAD_BACKUP:
-                        ReDownload_Backup(msg_payload);
-                        break;
+    case RE_DOWNLOAD_BACKUP:
+			ReDownload_Backup(msg_payload);
+			break;
 		default:
 			break;
 	}
@@ -1314,24 +1314,24 @@ void master_timer(std::function<void(void)> func, uint32_t interval)
 
 int main()
 {
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::cout << "Staring Master Control at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
+	auto t = std::time(nullptr);
+	auto tm = *std::localtime(&t);
+	std::cout << "Staring Master Control at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
 
-    state_msg_logfile = ARCHIVE_DIR+"State_MSG_LOG_"+Get_DateTime_Str()+".log";
+	state_msg_logfile = ARCHIVE_DIR+"State_MSG_LOG_"+Get_DateTime_Str()+".log";
 
-    fstream runtime_file;
-    std::string filename = CS_DIR+"fcutils/test/include/Run_Duration.txt";
-    runtime_file.open(filename.c_str(),ios::in);
-    if(runtime_file.is_open())
-    {
-    	std::string run_time_str = "120";
-    	if(getline(runtime_file, run_time_str))
-    	{
-    		run_interval = stoi(run_time_str);
-    	}
-    	runtime_file.close();
-    }
+	fstream runtime_file;
+	std::string filename = CS_DIR+"fcutils/test/include/Run_Duration.txt";
+	runtime_file.open(filename.c_str(),ios::in);
+	if(runtime_file.is_open())
+	{
+		std::string run_time_str = "120";
+		if(getline(runtime_file, run_time_str))
+		{
+			run_interval = stoi(run_time_str);
+		}
+		runtime_file.close();
+	}
 
 	rqcs.open();
 	wqcs.open();
