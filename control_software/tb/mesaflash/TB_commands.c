@@ -120,7 +120,7 @@ void Init_TB(board_access_t *access_board, uint32_t* cmd_array)
 	printf("---------- Starting to Initialize TB ------------\n");
 	access_board->eth = 1;
 	access_board->address = 1;
-	access_board->dev_addr = "192.168.3.121";
+	access_board->dev_addr = "192.168.1.121";
 	access_board->device_name = "7I80";
 
 	if(anyio_list_dev(access_board)==0){
@@ -386,20 +386,20 @@ void Get_Global_Ctrs(uint32_t* cmd_array, char *response)
 
 	printf("\nHere are the counters:\n");
 	printf("Clock: %lu\n", counters[0]);
-	printf("Event: %u\n", counters[1]);
-	printf("Bifocal: %d\n", counters[2]);
-	printf("Disc Test: %d\n", counters[3]);
-	printf("Internal: %d\n", counters[4]);
-	printf("External: %d\n", counters[5]);
-	printf("GPS: %d\n", counters[6]);
-	printf("HLED: %d\n", counters[7]);
+	printf("Event: %lu\n", counters[1]);
+	printf("Bifocal: %lu\n", counters[2]);
+	printf("Disc Test: %lu\n", counters[3]);
+	printf("Internal: %lu\n", counters[4]);
+	printf("External: %lu\n", counters[5]);
+	printf("GPS: %lu\n", counters[6]);
+	printf("HLED: %lu\n", counters[7]);
 	
-	printf("Bifocal Live: %d\n", counters[8]);
-	printf("Disc Test Live: %d\n", counters[9]);
-	printf("Internal Live: %d\n", counters[10]);
-	printf("External Live: %d\n", counters[11]);
-	printf("GPS Live: %d\n", counters[12]);
-	printf("HLED Live: %d\n", counters[13]);
+	printf("Bifocal Live: %lu\n", counters[8]);
+	printf("Disc Test Live: %lu\n", counters[9]);
+	printf("Internal Live: %lu\n", counters[10]);
+	printf("External Live: %lu\n", counters[11]);
+	printf("GPS Live: %lu\n", counters[12]);
+	printf("HLED Live: %lu\n", counters[13]);
 
 	printf("TB Busy: %lu\n", counters[14]);
 	printf("CoBo Busy: %lu\n", counters[15]);
@@ -505,7 +505,7 @@ void Save_Events(uint32_t* cmd_array)
 
 	// Writing Events_Writtents to a file
 	char tmp[10];
-	char filename[200] = "/home/cherenkov/Programs/control_software/tb/mesaflash/TB_data_";
+	char filename[200] = "TB_data_";
 	strcat(filename, realtime);
 	sprintf(tmp, "_%04d.bin", Run_Number);
 	strcat(filename, tmp);
@@ -518,7 +518,7 @@ void Save_Events(uint32_t* cmd_array)
 		//First piece of Memory with Block Select Regiter = 0
 		int NofBlocks = (NofWords / BlockSize);
 		int NofLastBlock = (NofWords % BlockSize);
-		write_32bit(Memory_Block_Select, All_Bits_Low);
+		write_32bit(Memory_Block_Select, 0);
 		for (int i=0; i<NofBlocks; i++)
 		{
 			u32 data_word[BlockSize];
@@ -535,7 +535,7 @@ void Save_Events(uint32_t* cmd_array)
 	else if ((NofWords > 8192) && (NofWords <= 16384))
 	{
 		//First piece of Memory with Block Select Regiter = 0
-		write_32bit(Memory_Block_Select, All_Bits_Low);
+		write_32bit(Memory_Block_Select, 0);
 		for (int i=0; i<81; i++)
 		{
 			u32 data_word[100];

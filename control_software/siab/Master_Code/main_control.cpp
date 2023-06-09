@@ -17,11 +17,11 @@ int main (void)
 	int I2C_ADDR = 0;
 	int First_SIAB_ID = 0x10;
 	double* Current_all;
-	int SIAB_ID_List[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,32,31};
+	int SIAB_ID_List[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 	unsigned int temperature;
 	std::string user_input;
 
-	file = open("/dev/i2c-0", O_RDWR);
+	file = open("/dev/i2c-6", O_RDWR);
 	if (file < 0)
 	{
 		std::cout << "Error in opening file ..." << std::endl;

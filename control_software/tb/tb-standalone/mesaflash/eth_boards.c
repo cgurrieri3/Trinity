@@ -21,7 +21,7 @@
 #include "lbp16.h"
 #include "eeprom.h"
 
-//#define USE_RAW_SOCKETS
+#define USE_RAW_SOCKETS
 #define IP4_HDRLEN 20         // IPv4 header length
 #define UDP_HDRLEN  8         // UDP header length, excludes data
 
@@ -583,20 +583,11 @@ void eth_print_info(board_t *board) {
     printf("  memory spaces:\n");
     for (i = 0; i < LBP16_MEM_SPACE_COUNT; i++) {
         u32 size;
-        printf("    cmd_lo: 0x%x\n", cmds[i].cmd_lo);
-        printf("    cmd_hi: 0x%x\n", cmds[i].cmd_hi);
-        printf("    addr_lo: 0x%x\n", cmds[i].addr_lo);
-        printf("    addr_hi: 0x%x\n", cmds[i].addr_hi);
+
         if ((cmds[i].cmd_lo == 0) && (cmds[i].cmd_hi == 0)) continue;
         memset(&mem_area, 0, sizeof(mem_area));
         eth_socket_send_packet(&cmds[i], sizeof(cmds[i]));
         eth_socket_recv_packet(&mem_area, sizeof (mem_area));
-
-        printf("    mem_area cookie: 0x%x\n", mem_area.cookie);
-        printf("    mem_area size: 0x%x\n", mem_area.size);
-        printf("    mem_area range: 0x%x\n", mem_area.range);
-        printf("    mem_area addr: 0x%x\n", mem_area.addr);
-        printf("    mem_area name: %s\n", mem_area.name);
 
         printf("    %d: %.*s (%s, %s", i, sizeof(mem_area.name), mem_area.name, mem_types[(mem_area.size  >> 8) & 0x7F],
           mem_writeable[(mem_area.size & 0x8000) >> 15]);
@@ -649,5 +640,5 @@ void eth_print_info(board_t *board) {
     printf("    board name: %.*s\n", sizeof(info_area.name), info_area.name);
     printf("    LBP16 version %d\n", info_area.LBP16_version);
     printf("    firmware version %d\n", info_area.firmware_version);
-    //printf("    IP address jumpers at boot: %s\n", boot_jumpers_types[info_area.jumpers]);
+    printf("    IP address jumpers at boot: %s\n", boot_jumpers_types[info_area.jumpers]);
 }
