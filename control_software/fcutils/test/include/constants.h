@@ -44,7 +44,8 @@
 #define Do_HV_Current_Scan		0x1C
 #define RE_DOWNLOAD_BACKUP		0x1D
 
-const std::string CS_DIR = "/home/cherenkov/Programs/control_software/";
+const std::string HOME_DIR="/home/trinty-ct-cpu";
+const std::string CS_DIR = HOME_DIR+"/Programs/Trinity/control_software/";
 const std::string SCRIPT_DIR = CS_DIR+"fcutils/test/scripts/";
 const std::string SEQ_DIR = CS_DIR+"sequences/";
 const std::string TB_DIR = CS_DIR+"tb/mesaflash/";
@@ -53,12 +54,12 @@ const std::string PDU_DIR = CS_DIR+"pdu/";
 const std::string BMX160_DIR = CS_DIR+"BMX160/";
 const std::string LOG_DIR = CS_DIR+"fcutils/test/LOGS/";
 const std::string ARCHIVE_DIR = CS_DIR+"Archive/LOGS/";
-const std::string BACKUP_DIR = "/home/cherenkov/Backup/";
-const std::string FINAL_TSCAN_DIR = "/home/cherenkov/Documents/TB_Data/Tscan/";
-const std::string FINAL_COUNTERS_DIR = "/home/cherenkov/Documents/TB_Data/Run_Counters/";
-const std::string HV_SCAN_DIR = "/home/cherenkov/Documents/HV_Scan/";
+const std::string BACKUP_DIR = HOME_DIR+"/Backup/";
+const std::string FINAL_TSCAN_DIR = HOME_DIR+"/Documents/TB_Data/Tscan/";
+const std::string FINAL_COUNTERS_DIR = HOME_DIR+"/Documents/TB_Data/Run_Counters/";
+const std::string HV_SCAN_DIR = HOME_DIR+"/Documents/HV_Scan/";
 const std::string FTP_DIR = "/srv/ftp/data/";
-const std::string STARLINK_DIR = "/home/cherenkov/Documents/StarLinkSyncEngineer/";
+const std::string STARLINK_DIR = HOME_DIR+"/Documents/StarLinkSyncEngineer/";
 
 // Full Commands for Controlling Trigger Board
 // Use TB Configuration Document to modify these!

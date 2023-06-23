@@ -21,7 +21,7 @@ int main (void)
 	unsigned int temperature;
 	std::string user_input;
 
-	file = open("/dev/i2c-6", O_RDWR);
+	file = open("/dev/i2c-1", O_RDWR);
 	if (file < 0)
 	{
 		std::cout << "Error in opening file ..." << std::endl;

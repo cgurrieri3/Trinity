@@ -10,37 +10,40 @@ echo "Starting Up CT CPU"
 #fi
 #systemd-notify --ready --status="Waiting for commands"
 
-sudo rmmod i2c-i801.ko
-sudo insmod /home/cherenkov/Documents/TempDriver/i2c-i801.ko
+#sudo rmmod i2c-i801.ko
+#sudo insmod /home/cherenkov/Documents/TempDriver/i2c-i801.ko
+U_HOME=/home/trinty-ct-cpu
+SFWR=$U_HOME\/Programs/Trinity
+CONTROLSFWR=$SFWR/control_software
 sudo rm /dev/mqueue/*
 
-sudo mkdir -p /tmp/src/20210208/
-sudo cp -r /home/cherenkov/Programs/control_software/CoBo/CoBoFrameViewer/ /tmp/src/20210208/
+#sudo mkdir -p /tmp/src/20210208/
+#sudo cp -r /home/cherenkov/Programs/control_software/CoBo/CoBoFrameViewer/ /tmp/src/20210208/
 
-cd /home/cherenkov/Programs/control_software/fcutils/test/build
-sudo ./control_software -n true >> /home/cherenkov/Programs/control_software/fcutils/test/LOGS/cs.log 2>&1 &
-CS_PID=`echo $!`
+#cd /home/cherenkov/Programs/control_software/fcutils/test/build
+#sudo ./control_software -n true >> /home/cherenkov/Programs/control_software/fcutils/test/LOGS/cs.log 2>&1 &
+#CS_PID=`echo $!`
 
-echo "STARTUP SERVICE: Control Started"
+#echo "STARTUP SERVICE: Control Started"
 
 #systemd-notify --ready --status="Waiting for commands"
 
-sleep 30
+sleep 5
 
-sudo /home/cherenkov/Programs/control_software/fcutils/test/build/master_control >> /home/cherenkov/Programs/control_software/fcutils/test/LOGS/rc.log 2>&1 &
+sudo $CONTROLSFWR/fcutils/test/build/master_control >> ${CONTROLSFWR}/fcutils/test/LOGS/rc.log 2>&1 &
 RC_PID=`echo $!`
 
 echo "STARTUP SERVICE: Master Started"
-sleep 20
+sleep 10
 
-/home/cherenkov/Programs/control_software/eventbuilder/DataProcess.sh >> /home/cherenkov/Programs/control_software/fcutils/test/LOGS/dp.log 2>&1 &
+$SFWR/eventbuilder/DataProcess.sh >> ${CONTROLSFWR}/fcutils/test/LOGS/dp.log 2>&1 &
 DP_PID=`echo $!`
 
 echo "STARTUP SERVICE: File Searching Started"
-sleep 20
+sleep 5
 
-sudo iptables-restore < ~/rules.v4
-echo "STARTUP SERVICE: UDP Packets Blocked"
+#sudo iptables-restore < ~/rules.v4
+#echo "STARTUP SERVICE: UDP Packets Blocked"
 
 systemd-notify --ready
 

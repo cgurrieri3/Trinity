@@ -222,7 +222,7 @@ void BMX_Log()
 		__u8 tbytes_read, bbytes_read = 0;
 
 		std::ofstream BMX_File;
-		std::string BMX_filename = "/home/cherenkov/Programs/control_software/Archive/BMX160/BMX_"+Get_Date_Str()+".log";
+		std::string BMX_filename = "/home/trinty-ct-cpu/Programs/Trinity/control_software/Archive/BMX160/BMX_"+Get_Date_Str()+".log";
 		BMX_File.open(BMX_filename.c_str(), ios::app|ios::ate);
 
 		time_t sample_time = time (NULL);
@@ -291,7 +291,7 @@ int main()
 	auto tm = *std::localtime(&t);
 	std::cout << "Staring at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
 
-	file = open("/dev/i2c-0", O_RDWR);
+	file = open("/dev/i2c-1", O_RDWR);
 	if (file < 0)
 	{
 		std::cout << "Error in opening file ..." << std::endl;
