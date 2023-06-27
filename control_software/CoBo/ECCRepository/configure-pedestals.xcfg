@@ -674,7 +674,7 @@ This Data source ID typically refers to the detector or detector type from which
 			<AsAd id="2">
 				<Control>
 					<!-- Whether the AsAd board is active and should be configured. -->
-					<isActive>true</isActive>
+					<isActive>false</isActive>
 				</Control>
 				<!-- Parameters of the circular buffer. -->
 				<CircularBuffer>
