@@ -44,7 +44,7 @@
 #define Do_HV_Current_Scan		0x1C
 #define RE_DOWNLOAD_BACKUP		0x1D
 
-const std::string HOME_DIR="/home/trinty-ct-cpu";
+const std::string HOME_DIR="/home/trinity";
 const std::string CS_DIR = HOME_DIR+"/Programs/Trinity/control_software/";
 const std::string SCRIPT_DIR = CS_DIR+"fcutils/test/scripts/";
 const std::string SEQ_DIR = CS_DIR+"sequences/";

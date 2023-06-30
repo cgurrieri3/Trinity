@@ -152,7 +152,7 @@ void Kill_COBO()
 
 void Init_LVPS()
 {
-	std::string command = "sudo ./client_lvps -p /dev/ttyS1 >> "+LOG_DIR+"Client_LVPS.log &";
+	std::string command = "sudo ./client_lvps -p /dev/ttyS0 >> "+LOG_DIR+"Client_LVPS.log &";
 	system(command.c_str());
 	LVPS_STATE = Process_ON;
 }

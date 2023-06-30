@@ -291,7 +291,7 @@ int main()
 	auto tm = *std::localtime(&t);
 	std::cout << "Staring at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
 
-	file = open("/dev/i2c-1", O_RDWR);
+	file = open("/dev/i2c-6", O_RDWR);
 	if (file < 0)
 	{
 		std::cout << "Error in opening file ..." << std::endl;
