@@ -43,25 +43,25 @@ void StartDataRouter()
 
 void InitializeExperiment()
 {
-	std::string command = "cd "+CoBo_DIR+"scripts/ && ./ExpectScript.sh";
+	std::string command = CoBo_DIR+"scripts/ExpectScript.sh";
 	system(command.c_str());
 }
 
 void StartRun()
 {
-	std::string command = "cd "+CoBo_DIR+"scripts/ && ./ExpectStartAcq.sh";
+	std::string command = CoBo_DIR+"scripts/ExpectStartAcq.sh";
 	system(command.c_str());
 }
 
 void StopRun()
 {
-	std::string command = "cd "+CoBo_DIR+"scripts/ && ./ExpectStopAcq.sh";
+	std::string command = CoBo_DIR+"scripts/ExpectStopAcq.sh";
 	system(command.c_str());
 }
 
 void ASADOff()
 {
-	std::string command = "cd "+CoBo_DIR+"scripts/ && ./ExpectASADOff.sh";
+	std::string command = CoBo_DIR+"scripts/ExpectASADOff.sh";
 	system(command.c_str());
 }
 

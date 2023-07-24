@@ -1,15 +1,6 @@
-# Disabling State Messages and Sleeping for 15 seconds
-100D00000000000000
-15
 # Resetting All the SIABs and Sleeping for 5 seconds
-20FFFFFFFF01000000
+200000FFFF01000000
 5
-# Turning off Pump at ch8 and Sleeping for 5 seconds
-600308000000000000
-5
-# Turning off LVPS at ch9 and Sleeping for 5 seconds
-600309000000000000
-5
-# Killing All Client Processes (SIAB, TRGB, CoBo, LVPS, PDU, getEccServer, dataRouter) and Sleeping for 5 seconds
+# Killing All Client Processes (SIAB, TRGB, CoBo, LVPS, getEccServer, dataRouter) and Sleeping for 5 seconds
 101700000000000000
 5

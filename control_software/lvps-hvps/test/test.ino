@@ -77,7 +77,7 @@ void setup()
   Serial_Flush();
   delay(100);
   Serial.print("****\t");
-  Serial.println("Welcome to LPVS/HVPS Controller");
+  Serial.println("Welcome to LVPS/HVPS Controller");
   
   pinMode(CSDAC, OUTPUT);
   digitalWrite(CSDAC, HIGH);

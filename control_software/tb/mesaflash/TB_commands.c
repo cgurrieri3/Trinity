@@ -413,14 +413,14 @@ void Get_Global_Ctrs(uint32_t* cmd_array, char *response)
 	char filename[200];
 	if(counter_type == 0)
 	{
-		sprintf(filename, "/home/cherenkov/Programs/control_software/tb/mesaflash/G_Ctrs_%s_%04d.bin", realtime, counter_run_num);
+		sprintf(filename, "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/G_Ctrs_%s_%04d.bin", realtime, counter_run_num);
 	}else if(counter_type == 1){
-		sprintf(filename, "/home/cherenkov/Programs/control_software/tb/mesaflash/TScan_G_%02d_%04d_%02d_%02d_%02d.bin", Tscan_run_num, StartPoint, NofSteps, StepSize, counter_duration);
+		sprintf(filename, "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/TScan_G_%02d_%04d_%02d_%02d_%02d.bin", Tscan_run_num, StartPoint, NofSteps, StepSize, counter_duration);
 	}else{
 		printf("Did you forget to add counter type to the command properly?\n");
 		printf("0 means Regular counters -- 1 means Trigger Scan Counters\n");
 		printf("I am assuming it is a regular counter file for now!\n");
-		sprintf(filename, "/home/cherenkov/Programs/control_software/tb/mesaflash/G_Ctrs_%s_%04d.bin", realtime, counter_run_num);
+		sprintf(filename, "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/G_Ctrs_%s_%04d.bin", realtime, counter_run_num);
 	}
 	filePointer = fopen(filename, "a");
 	fwrite(counters, sizeof(u64), 21, filePointer);
@@ -454,21 +454,21 @@ void Get_Channel_Ctrs(uint32_t* cmd_array)
 	read_32bit(IO_0_rate_Addr, tmp_IO, 64);
 
 	printf("\n");
-	for (int i=0; i<64; i++) {
+	for (int i=0; i<32; i++) {
 		printf("IO#%d: %d\n", i, tmp_IO[i]);
 	}
 
 	FILE *filePointer;
 	char filename[100];
 	if(counter_type == 0){
-		sprintf(filename, "/home/cherenkov/Programs/control_software/tb/mesaflash/C_Ctrs_%s_%04d.bin", realtime, counter_run_num);
+		sprintf(filename, "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/C_Ctrs_%s_%04d.bin", realtime, counter_run_num);
 	}else if(counter_type == 1){
-		sprintf(filename, "/home/cherenkov/Programs/control_software/tb/mesaflash/TScan_C_%02d_%04d_%02d_%02d_%02d.bin", Tscan_run_num, StartPoint, NofSteps, StepSize, counter_duration);
+		sprintf(filename, "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/TScan_C_%02d_%04d_%02d_%02d_%02d.bin", Tscan_run_num, StartPoint, NofSteps, StepSize, counter_duration);
 	}else{
 		printf("Did you forget to add counter type to the command?\n");
 		printf("0 means Regular counters -- 1 means Trigger Scan Counters\n");
 		printf("I am assuming it is a regular counter file for now!\n");
-		sprintf(filename, "/home/cherenkov/Programs/control_software/tb/mesaflash/C_Ctrs_%s_%04d.bin", realtime, counter_run_num);
+		sprintf(filename, "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/C_Ctrs_%s_%04d.bin", realtime, counter_run_num);
 	}
 	filePointer = fopen(filename, "a");
 	fwrite(tmp_IO, sizeof(u32), 64, filePointer);

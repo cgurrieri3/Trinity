@@ -8,8 +8,8 @@
 				<addressField id="*" range="[0, 255]">255</addressField>
 				<addressField id="0">192</addressField>
 				<addressField id="1">168</addressField>
-				<addressField id="2">2</addressField>
-				<addressField id="3">90</addressField>
+				<addressField id="2">40</addressField>
+				<addressField id="3">50</addressField>
 				<port range="[0, 65535]">46001</port>
 			</Endpoint>
 			<batchProcessing>false</batchProcessing>
@@ -19,7 +19,7 @@
 		<Instance id="0">
 			<HardwareConfigId>hardwareDescription_fullCoBoStandAlone.xcfg</HardwareConfigId>
 			<Endpoint>
-				<addressField id="3">90</addressField>
+				<addressField id="3">50</addressField>
 			</Endpoint>
 		</Instance>
 	</Node>

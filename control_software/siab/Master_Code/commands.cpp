@@ -205,6 +205,7 @@ void Load_Music_Config_EPRM(int file, __u32 command)
     {
         std::cout << "An error occured. Did you enter the correct music pin?" << std::endl;
     }
+    //usleep(10000);
 }
 
 void Print_Loaded_Music_Config(int file, __u32 command)
@@ -249,6 +250,8 @@ void Write_Loaded_Config_to_Music(int file, __u32 command)
     {
         std::cout << "An error occured. Did you enter the correct music pin?" << std::endl;
     }
+
+    sleep(1);
 }
 
 __u16 Read_from_Music_Register(int file, __u32 command)

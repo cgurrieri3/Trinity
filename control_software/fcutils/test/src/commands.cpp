@@ -687,7 +687,7 @@ void Update_Music_Config(int file, __u32 command, std::string &response)
     int status;
     __u32 cmd_rebuilt;
     std::string response_fake;    // this is being passed, so the Write_to_Music_Register function does not complain, but we are not using it.
-    std::string filename= "/home/cherenkov/Programs/control_software/siab/Music_Register_Table.csv";
+    std::string filename= "/home/trinity/Programs/Trinity/control_software/siab/Music_Register_Table.csv";
     if(!Read_Music_Config(filename, address, value)){
         status = -60;
     }else{
@@ -712,7 +712,7 @@ void Update_Music_Config(int file, __u32 command, std::string &response)
 void Set_Bias_Voltage(int i, int file, __u32 command, std::string &response)
 {
     int status = 0;
-    std::string filename = "/home/cherenkov/Programs/control_software/siab/DV_Offset.csv";
+    std::string filename = "/home/trinity/Programs/Trinity/control_software/siab/DV_Offset.csv";
     std::ifstream BiasVoltage(filename);
     if(!BiasVoltage.is_open()){
         status = -60;           // this is just to make sure error code for file opening failure is different from other error codes.
@@ -766,7 +766,7 @@ void Set_Bias_Voltage(int i, int file, __u32 command, std::string &response)
 void Set_Trigger_Threshold(int i, int file, __u32 command, std::string &response)
 {
     int status = 0;
-    std::string filename = "/home/cherenkov/Programs/control_software/siab/DV_Th_Offsets.csv";
+    std::string filename = "/home/trinity/Programs/Trinity/control_software/siab/DV_Th_Offsets.csv";
     std::ifstream DiscriminatorOffset(filename);
     int startline = 0;
     int fail_ctr = 0;

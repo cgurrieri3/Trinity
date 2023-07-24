@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     std::cout << "Starting LVPS at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
-	
+
 	boost::optional<std::string> port;
 	po::options_description desc("serial port options");
 	desc.add_options()
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
 	if (vm.count("help") || !port)
 	{
-		std::cout << "Pass the serial port in use like this: ./test_client_lvps -p /dev/ttyS1" << std::endl;
+		std::cout << "Pass the serial port in use like this: ./test_client_lvps -p /dev/ttyUSB0" << std::endl;
 		return 0;
 	}
 
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 					wq.send("0x50");
 				}else{
 					ttsp->write(message.c_str(),message.size()+1);
-					//std::cout << " Enter a message to write into the serial port: \n";					
+					//std::cout << " Enter a message to write into the serial port: \n";
 				}
 				message.clear();
 			}

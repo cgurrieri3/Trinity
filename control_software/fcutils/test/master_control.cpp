@@ -152,7 +152,7 @@ void Kill_COBO()
 
 void Init_LVPS()
 {
-	std::string command = "sudo ./client_lvps -p /dev/ttyS0 >> "+LOG_DIR+"Client_LVPS.log &";
+	std::string command = "sudo ./client_lvps -p /dev/ttyUSB0 >> "+LOG_DIR+"Client_LVPS.log &";
 	system(command.c_str());
 	LVPS_STATE = Process_ON;
 }
@@ -479,11 +479,11 @@ void Stop_Triggering()
 
 	std::cout << "Saving All Counters on TB Memory ..." << std::endl;
 	wqtrgb.send(TB_Save_Counters);
-	sleep(1);
+	sleep(2);
 
 	std::cout << "Recording the Global Counters ..." << std::endl;
 	wqtrgb.send(Update_TB_GC_CMD(Run_Number));
-	sleep(1);
+	sleep(2);
 
 	if(state_response.length() == 16)
 	{
@@ -496,11 +496,11 @@ void Stop_Triggering()
 
 	std::cout << "Recording the Channel Counters ..." << std::endl;
 	wqtrgb.send(Update_TB_CC_CMD(Run_Number));
-	sleep(1);
+	sleep(2);
 
 	std::cout << "Saving the Events data ..." << std::endl;
 	wqtrgb.send(Update_TB_Event_CMD(Run_Number));
-	sleep(2);
+	sleep(4);
 
 	std::cout << "Clearing the Counters ..." << std::endl;
 	wqtrgb.send(TB_Clear_Counters);
@@ -951,7 +951,7 @@ void Do_Trigger_Scan_BF(std::string& msg)
 		int trg_threshold = StartPoint + i*StepSize;
 		std::stringstream trg_stream;
 		trg_stream << std::setfill('0') << std::setw(4) << std::hex << trg_threshold;
-		std::string siab_cmd = "FFFFFFFF2503" + trg_stream.str();
+		std::string siab_cmd = "0000FFFF2503" + trg_stream.str();
 		printf("-------------------------------------------------\n");
 		std::cout << "Setting the threshold on Music chips to: " << trg_threshold << " DAC units." << std::endl;
 		wqsiab.send(siab_cmd);
@@ -998,11 +998,11 @@ void Do_Trigger_Scan_BF(std::string& msg)
 	std::cout << "Finished BF Trigger Scan Number:" << BF_TScanNo << std::endl;
 	printf("-------------------------------------------------\n");
 
-	std::string TScan_DL_TDRSS = "cp "+std::string(filename)+" "+FTP_DIR+"CT_0_"+Get_DateTime_Str()+"_54321.txt &";
-	std::string TScan_STARLINK = "cp "+std::string(filename)+" "+STARLINK_DIR+"CT_0_"+Get_DateTime_Str()+"_54321.txt &";
-	system(TScan_DL_TDRSS.c_str());
+	//std::string TScan_DL_TDRSS = "cp "+std::string(filename)+" "+FTP_DIR+"CT_0_"+Get_DateTime_Str()+"_54321.txt &";
+	//std::string TScan_STARLINK = "cp "+std::string(filename)+" "+STARLINK_DIR+"CT_0_"+Get_DateTime_Str()+"_54321.txt &";
+	//system(TScan_DL_TDRSS.c_str());
 	sleep(1);
-	system(TScan_STARLINK.c_str());
+	//system(TScan_STARLINK.c_str());
 	sleep(1);
 
 	// Passing 0 will archive BF Tscan files
@@ -1122,6 +1122,39 @@ void Do_Trigger_Scan_SF(std::string& msg)
 ///////////////// Control SW Commands //////////////////
 ////////////////////////////////////////////////////////
 
+std::string find_seq_name(const std::string& seq_msg)
+{
+        std::string seq_str = seq_msg.substr(0, 2);
+        int seq_id = stoi(seq_str,0,16);
+        std::string subseq_str = seq_msg.substr(2, 2);
+        std::cout << "Sequence ID: " << seq_id << " was received." << std::endl;
+        std::string filename = "";
+        switch(seq_id)
+        {
+                case POWER_ON_SEQ:
+                        filename = SEQ_DIR + "power_on_seq.txt";
+                        break;
+                case INIT_SEQ:
+                        filename = SEQ_DIR + "init_seq.txt";
+                        break;
+                case CONFIGURE_SEQ:
+                        filename = SEQ_DIR + "config_seq_"+subseq_str+".txt";
+                        break;
+                case START_SEQ:
+                        filename = SEQ_DIR+ "start_daq_seq.txt";
+                        break;
+                case STOP_SEQ:
+                        filename = SEQ_DIR + "stop_daq_seq.txt";
+                        break;
+                case POWER_OFF_SEQ:
+                        filename = SEQ_DIR + "power_off_seq.txt";
+                        break;
+                default:
+                        break;
+        }
+        return filename;
+}
+
 void Process_RC_Msg(const std::string& msg)
 {
 	std::string CMD_str = msg.substr(0, 2);
@@ -1214,7 +1247,7 @@ void Process_RC_Msg(const std::string& msg)
 		case Do_HV_Current_Scan:
 			HV_Current_Scan(msg_payload);
 			break;
-    case RE_DOWNLOAD_BACKUP:
+		case RE_DOWNLOAD_BACKUP:
 			ReDownload_Backup(msg_payload);
 			break;
 		default:
@@ -1275,9 +1308,49 @@ void read_mq_cs(sigval_t sig){
 	while ((numRead = mqp->receive(msg, msg_size)) > 0){
 		std::cout << " Queue: " << mq_name <<", message received: " << msg << std::endl;
 	}
-	Process_Incoming_CMD(msg);
-	msg[0]='\0';
-	delete [] msg;
+
+	std::string umsg(msg);
+	std::string umsg_id_str = umsg.substr(0, 2);
+	int umsg_id = stoi(umsg_id_str,0,16);
+        if(umsg_id == 0xAA)
+        {
+		std::string seq_payload = umsg.substr(2, 16);
+		std::cout << "A sequence was received. Starting to execute the sequence. Here is the sequence payload: " << seq_payload << '\n';
+		std::string filename = find_seq_name(seq_payload);
+
+		std::string line;
+		std::cout << "Loading the filename: " << filename << std::endl;
+		std::ifstream infile;
+		infile.open(filename.c_str());
+		while(std::getline(infile, line))
+		{
+		        std::cout << line << std::endl;
+		        std::getline(infile, line);
+		        std::istringstream iss(line);
+		        std::string command = iss.str();
+		        std::cout << "sequence message: " << command << std::endl;
+		        if(command.substr(0,1) != "*"){
+				Process_Incoming_CMD(command);
+		        }
+		        else{
+		                std::cout << "skipping this command ..." << std::endl;
+		        }
+		        int delay = 0;
+		        std::getline(infile, line);
+		        std::istringstream iss_delay(line);
+		        iss_delay >> delay;
+		        std::cout << "delaying for " << delay << " seconds."<< std::endl;
+		        sleep(delay);
+		}
+                std::cout << "Finished loading this sequence: " << filename << std::endl;
+                infile.close();
+		msg[0]='\0';
+		delete [] msg;
+	}else{
+		Process_Incoming_CMD(msg);
+		msg[0]='\0';
+		delete [] msg;
+	}
 }
 
 void read_mq_rc(sigval_t sig){

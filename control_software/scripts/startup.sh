@@ -12,9 +12,9 @@ echo "Starting Up CT CPU"
 
 #sudo rmmod i2c-i801.ko
 #sudo insmod /home/cherenkov/Documents/TempDriver/i2c-i801.ko
-U_HOME=/home/trinty-ct-cpu
-SFWR=$U_HOME\/Programs/Trinity
-CONTROLSFWR=$SFWR/control_software
+U_HOME=/home/trinity
+SFWR=$U_HOME/Programs
+CONTROLSFWR=$SFWR/Trinity/control_software
 sudo rm /dev/mqueue/*
 
 #sudo mkdir -p /tmp/src/20210208/

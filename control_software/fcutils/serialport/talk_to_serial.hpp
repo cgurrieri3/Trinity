@@ -17,7 +17,7 @@
 #include <memory> // std::enable_shared_from_this, std::shared_ptr
 #include <algorithm> // std::find
 #include <utility> // std::forward
-
+#include <iomanip>
 
 namespace fcutils{
 namespace serialport{
@@ -36,6 +36,9 @@ template<class Data> struct print{
 			std::ostreambuf_iterator<Data> oo (std::cout.rdbuf()); // output iterator for cout
 			std::copy(d,d+l,oo);
 			std::cout << std::endl;
+       			auto t = std::time(nullptr);
+        		auto tm = *std::localtime(&t);
+        		std::cout << "Time: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
 		}
 	}
 };

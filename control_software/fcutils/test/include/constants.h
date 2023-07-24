@@ -1,6 +1,13 @@
 #ifndef _CONSTANTS_H
 #define _CONSTANTS_H
 
+#define POWER_ON_SEQ	0x01
+#define INIT_SEQ	0x02
+#define CONFIGURE_SEQ	0x03
+#define START_SEQ	0x04
+#define STOP_SEQ	0x05
+#define POWER_OFF_SEQ   0x06
+
 #define Process_OFF				0x00
 #define Process_ON				0x01
 
