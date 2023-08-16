@@ -16,7 +16,7 @@ class weatherlogger:
         # Generate the rotating file name
         now = dt.datetime.now()
         logname = '/root/weather_data/weather_' + now.strftime('%Y%m%d')
-        print(logname)
+        #print(logname)
         return logname
 
     def main(self):
