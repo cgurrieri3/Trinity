@@ -33,10 +33,8 @@ set index [lindex $argv 1]
 
 # If the outlet index is set to status then readout status and exit
 if {$index == "STATUS" || $index == "status"} {
-    spawn telnet $IP
-    expect "Login Name: "
-    send "$user\r"
-    expect "Login Password: "
+    spawn ssh -c aes128-cbc $user@$IP
+    expect "password: "
     send "$pass\r"
     expect "> "
     send "oltsta show\r"
@@ -47,12 +45,9 @@ if {$index == "STATUS" || $index == "status"} {
 }
 set act [lindex $argv 2]
 
-spawn telnet $IP
+spawn ssh -c aes128-cbc $user@$IP
 
-expect "Login Name: "
-send "$user\r"
-
-expect "Login Password: "
+expect "password: "
 send "$pass\r"
 
 expect "> "
