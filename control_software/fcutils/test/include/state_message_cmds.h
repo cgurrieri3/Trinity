@@ -15,9 +15,6 @@ using namespace std;
 std::string Byte_to_Str(uint32_t a);
 std::string Short_to_Str(uint32_t a);
 std::string Word_to_Str(uint32_t a);
-int Parse_emon(const std::string s);
-void Get_EMON(int &first_emon, int &second_emon);
 uint32_t *Get_LVPS_data();
-std::string Get_PDU_State();
 
 #endif

@@ -93,9 +93,9 @@ const std::string CoBo_Start_Run 	 		= "0400000000000000";
 const std::string CoBo_Stop_Run 	 		= "0500000000000000";
 const std::string CoBo_ReConfigure	 		= "0600000000000000";
 
-const std::string GET_ALL_SIAB_SIPM_TEMP	= "FFFFFFFF0A010000";
-const std::string GET_ALL_SIAB_UC_TEMP		= "FFFFFFFF0B010000";
-const std::string GET_ALL_SIAB_HV_STATE		= "FFFFFFFF21010000";
+const std::string GET_ALL_SIAB_SIPM_TEMP	= "0000FFFF0A010000";
+const std::string GET_ALL_SIAB_UC_TEMP		= "0000FFFF0B010000";
+const std::string GET_ALL_SIAB_HV_STATE		= "0000FFFF21010000";
 
 const std::string PING_SIAB					= "0000000030000000";
 const std::string PING_ALL					= "3000000000000000";

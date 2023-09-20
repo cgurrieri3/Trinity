@@ -619,132 +619,130 @@ void Disable_State_MSG()
 
 std::string Get_Camera_HV_State()
 {
-    //std::cout << "Getting HV State from SIABs" << std::endl;
-    wqsiab.send(GET_ALL_SIAB_HV_STATE);
-    sleep(4);
+	//std::cout << "Getting HV State from SIABs" << std::endl;
+	wqsiab.send(GET_ALL_SIAB_HV_STATE);
+	sleep(2);
 
-    FILE *hFile = NULL;
-    uint32_t *hBuffer = NULL;
+	FILE *hFile = NULL;
+	uint32_t *hBuffer = NULL;
 	uint32_t HV_Switch_State = 0;
-    uint32_t HV_State[32] = {0};
+  uint32_t HV_State[16] = {0};
 	std::string HV_State_str = "0";
 	std::string hv_filename = "hv_state_tmp.txt";
-    hFile = fopen(hv_filename.c_str(),"rb");
-    if(hFile == NULL){
-        std::cout << "Could not open HV State file. Does it exist?" << std::endl;
-        std::cout << "Error code: " << errno << std::endl;
-	HV_State_str = Word_to_Str(HV_Switch_State);
-    }else{
-        fseek(hFile, 0, SEEK_END);
-        int hSize = ftell(hFile);
-        if(hSize != 128){
-            std::cout << "HV State File Size Mismatch. Size: " << hSize << "\tSkipping this sample"<< std::endl;
-        }else{
-            rewind(hFile);
-            hBuffer = (uint32_t*) malloc (sizeof(uint32_t)*32);
-            size_t hResult = fread(hBuffer, 1, hSize, hFile);
-            for(int i=0; i<32; i++){
-            	HV_State[i] = *(hBuffer + i);
+  hFile = fopen(hv_filename.c_str(),"rb");
+  if(hFile == NULL){
+  	std::cout << "Could not open HV State file. Does it exist?" << std::endl;
+    std::cout << "Error code: " << errno << std::endl;
+    HV_State_str = Short_to_Str(HV_Switch_State);
+  }else{
+  	fseek(hFile, 0, SEEK_END);
+  	int hSize = ftell(hFile);
+  	if(hSize != 64){
+  		std::cout << "HV State File Size Mismatch. Size: " << hSize << "\tSkipping this sample"<< std::endl;
+  	}else{
+  		rewind(hFile);
+  		hBuffer = (uint32_t*) malloc (sizeof(uint32_t)*16);
+  		size_t hResult = fread(hBuffer, 1, hSize, hFile);
+  		for(int i=0; i<16; i++){
+  			HV_State[i] = *(hBuffer + i);
 				if(HV_State[i] == 1){
-					// Doing nothing. Leaving the bit to be zero.
+					//Doing nothing. Leaving the bit to be zero.
 				}
 				else if(HV_State[i] == 2){
 					HV_Switch_State = (HV_Switch_State | (1 << i));
 				}else{
 					std::cout << "Unknown HV State for SIAB#" << i << ": " << HV_State[i] << std::endl;
 				}
-            }
-        }
-        HV_State_str = Word_to_Str(HV_Switch_State);
-        //std::cout << "HV switch: " << HV_Switch_State << std::endl;
+			}
+		}
+		HV_State_str = Short_to_Str(HV_Switch_State);
+		//std::cout << "HV switch: " << HV_Switch_State << std::endl;
 
-        fclose(hFile);
-        free(hBuffer);
-    }
-    system("sudo rm hv_state_tmp.txt &");
-    usleep(1000);
-    return HV_State_str;
+		fclose(hFile);
+		free(hBuffer);
+	}
+
+	system("sudo rm hv_state_tmp.txt &");
+	usleep(1000);
+	return HV_State_str;
 }
 
 std::string Get_Camera_Temp()
 {
-    std::string Temp_str;
-	if(Temp_Flag)
-	{
-    	//std::cout << "Getting Camera SiPM Temperature" << std::endl;
-	    wqsiab.send(GET_ALL_SIAB_SIPM_TEMP);
-    	sleep(4);
-	    FILE *sFile = NULL;
-	    uint32_t *sBuffer = NULL;
-	    uint32_t SiPM_temp[32] = {0};
-	    std::string sipm_filename = "sipm_tmp.txt";
-	    sFile = fopen(sipm_filename.c_str(),"rb");
-	    if(sFile == NULL){
-	        std::cout << "Could not open SiPM Temp file. Does it exist?" << std::endl;
-	        std::cout << "Error code: " << errno << std::endl;
-	    }else{
-	        fseek(sFile, 0, SEEK_END);
-	        int sSize = ftell(sFile);
-	        if(sSize != 128){
-	            std::cout << "SiPM Temp File Size Mismatch. Size: " << sSize << "\tSkipping this sample"<< std::endl;
-	        }else{
-	            rewind(sFile);
-	            sBuffer = (uint32_t*) malloc (sizeof(uint32_t)*32);
-	            size_t sResult = fread(sBuffer, 1, sSize, sFile);
-	            for(int i=0; i<32; i++){
-	                SiPM_temp[i] = *(sBuffer+i);
-	            }
-	        }
-	        fclose(sFile);
-	        free(sBuffer);
-	    }
+	std::string Temp_str;
+	//std::cout << "Getting Camera SiPM Temperature" << std::endl;
+  wqsiab.send(GET_ALL_SIAB_SIPM_TEMP);
+	sleep(2);
+  FILE *sFile = NULL;
+  uint32_t *sBuffer = NULL;
+  uint32_t SiPM_temp[16] = {0};
+  std::string sipm_filename = "sipm_tmp.txt";
+  sFile = fopen(sipm_filename.c_str(),"rb");
+  if(sFile == NULL){
+  	std::cout << "Could not open SiPM Temp file. Does it exist?" << std::endl;
+  	std::cout << "Error code: " << errno << std::endl;
+  }else{
+  	fseek(sFile, 0, SEEK_END);
+  	int sSize = ftell(sFile);
+  	if(sSize != 64){
+  		std::cout << "SiPM Temp File Size Mismatch. Size: " << sSize << "\tSkipping this sample"<< std::endl;
+  	}else{
+  		rewind(sFile);
+  		sBuffer = (uint32_t*) malloc (sizeof(uint32_t)*16);
+  		size_t sResult = fread(sBuffer, 1, sSize, sFile);
+  		for(int i=0; i<16; i++){
+  			SiPM_temp[i] = *(sBuffer+i);
+  		}
+  	}
+  	fclose(sFile);
+  	free(sBuffer);
+  }
 
-        for(int i=0; i<32; i++){
-			std::string stemp_str = Byte_to_Str(SiPM_temp[i]/4);
-        	Temp_str += stemp_str;
-        }
-    	system("sudo rm sipm_tmp.txt &");
-    	usleep(10000);
-	}else{
-		//std::cout << "Getting Camera UC Temperature" << std::endl;
-		wqsiab.send(GET_ALL_SIAB_UC_TEMP);
-    	sleep(4);
-	    FILE *uFile = NULL;
-	    uint32_t *uBuffer = NULL;
-	    uint32_t UC_temp[32] = {0};
-	    std::string UC_temp_str = "0";
-	    std::string uc_filename = "uc_tmp.txt";
-	    uFile = fopen(uc_filename.c_str(),"rb");
-	    if(uFile == NULL){
-	        std::cout << "Could not open UC Temp file. Does it exist?" << std::endl;
-	        std::cout << "Error code: " << errno << std::endl;
-	    }else{
-	        fseek(uFile, 0, SEEK_END);
-	        int uSize = ftell(uFile);
-	        if(uSize != 128){
-	            std::cout << "UC Temp File Size Mismatch. Size: " << uSize << "\tSkipping this sample"<< std::endl;
-	        }else{
-	            rewind(uFile);
-	            uBuffer = (uint32_t*) malloc (sizeof(uint32_t)*32);
-	            size_t uResult = fread(uBuffer, 1, uSize, uFile);
-	            for(int i=0; i<32; i++){
-	                UC_temp[i] = *(uBuffer+i);
-	            }
-	        }
-	        fclose(uFile);
-	        free(uBuffer);
-	    }
+  for(int i=0; i<16; i++){
+  	std::string stemp_str = Short_to_Str(SiPM_temp[i]);
+  	Temp_str += stemp_str;
+  }
 
-        for(int i=0; i<32; i++){
-			std::string utemp_str = Byte_to_Str(UC_temp[i]/4);
-        	Temp_str += utemp_str;
-        }
-    	system("sudo rm uc_tmp.txt &");
-    	usleep(10000);
-	}
+  system("sudo rm sipm_tmp.txt &");
+  usleep(10000);
 
-    Temp_Flag = !Temp_Flag;
-    return Temp_str;
+  //std::cout << "Getting Camera UC Temperature" << std::endl;
+  wqsiab.send(GET_ALL_SIAB_UC_TEMP);
+  sleep(2);
+  FILE *uFile = NULL;
+  uint32_t *uBuffer = NULL;
+  uint32_t UC_temp[16] = {0};
+  std::string UC_temp_str = "0";
+  std::string uc_filename = "uc_tmp.txt";
+  uFile = fopen(uc_filename.c_str(),"rb");
+  if(uFile == NULL){
+  	std::cout << "Could not open UC Temp file. Does it exist?" << std::endl;
+  	std::cout << "Error code: " << errno << std::endl;
+  }else{
+  	fseek(uFile, 0, SEEK_END);
+  	int uSize = ftell(uFile);
+    if(uSize != 64){
+    	std::cout << "UC Temp File Size Mismatch. Size: " << uSize << "\tSkipping this sample"<< std::endl;
+    }else{
+    	rewind(uFile);
+    	uBuffer = (uint32_t*) malloc (sizeof(uint32_t)*16);
+    	size_t uResult = fread(uBuffer, 1, uSize, uFile);
+    	for(int i=0; i<16; i++){
+    		UC_temp[i] = *(uBuffer+i);
+    	}
+    }
+    fclose(uFile);
+    free(uBuffer);
+  }
+
+  for(int i=0; i<16; i++){
+  	std::string utemp_str = Short_to_Str(UC_temp[i]);
+  	Temp_str += utemp_str;
+  }
+
+  system("sudo rm uc_tmp.txt &");
+  usleep(10000);
+  return Temp_str;
 }
 
 bool Get_State_MSG()
@@ -756,71 +754,55 @@ bool Get_State_MSG()
 		IsTakingStateMSG = true;
 
 		// This step adds the status of the processes and trigger rate to state messages
-		int PR_State = (((SIAB_STATE) & 0x01) | ((TRGB_STATE<<1) & 0x02) | ((COBO_STATE<<2) & 0x04) | ((LVPS_STATE<<3) & 0x08) | ((PDU_STATE<<4) & 0x10));
-		if(Temp_Flag) {
-			PR_State = (PR_State | 0x20);	// Adding the temp flag state, if it is true, otherwise leave it.
-		}
+		int PR_State = (((SIAB_STATE) & 0x01) | ((TRGB_STATE<<1) & 0x02) | ((COBO_STATE<<2) & 0x04) | ((LVPS_STATE<<3) & 0x08));
 		if(NewCMDFlag) {
-			PR_State = (PR_State | 0x40);
+			PR_State = (PR_State | 0x10);
 		}
-		std::string state_msg_head = "CT" + Byte_to_Str(PR_State);
+		std::string state_msg = "C" + Byte_to_Str(PR_State);
 
-		std::string state_msg_tail = Short_to_Str(TrigRate);
+		state_msg += Short_to_Str(TrigRate);
 
 		// This step adds the UNIX timestamp to the state message
 		unsigned long int sec = time(NULL);
-		state_msg_tail += Word_to_Str((uint32_t)sec);
-
-		// This step adds the EMON data to the state message
-		int a,b = 0;
-		Get_EMON(a,b);
-		state_msg_tail += Short_to_Str(a) + Short_to_Str(b);
-
-		// This step adds the PDU channels voltage and current to the state message
-		state_msg_tail += Get_PDU_State();
+		state_msg += Word_to_Str((uint32_t)sec);
 
 		// This step adds the HK data to the state message
 		uint32_t* hk_data;
 		hk_data = Get_LVPS_data();
 		uint32_t Music_PWR_State = 0;
-		uint32_t SIAB_current[32] = {0};
-		uint8_t HV_current[8] = {0};
-		uint32_t HV_value[8] = {0};
-		uint32_t MEB_current[8] = {0};
-		uint32_t MEB_temp[8] = {0};
+		uint32_t SIAB_current[16] = {0};
+		uint8_t HV_current[4] = {0};
+		uint32_t HV_value[4] = {0};
+		uint32_t DAQ_current[4] = {0};
 		std::string HV_Value_str;
 		std::string HV_Current_str;
-		for(int i=0; i<32; i++){
+		for(int i=0; i<16; i++){
 			SIAB_current[i] = *(hk_data+i);
 			if(SIAB_current[i] > 4096000){
 				Music_PWR_State = (Music_PWR_State | (1 << i));
 			}
 		}
-		state_msg_tail += Word_to_Str(Music_PWR_State);
+		std::string Music_PWR_str = Short_to_Str(Music_PWR_State);
 
-		for(int i=0; i<8; i++){
+		for(int i=0; i<4; i++){
 			HV_value[i] = *(hk_data+i+48);
 			HV_Value_str = HV_Value_str + Word_to_Str(HV_value[i]);
 			HV_current[i]  = (uint8_t)((*(hk_data+i+32))*2.441406E-06*5);	// This is in mA. We multiply it by 5, so 50mA would show up as 250mA in state messages (Just for the sake of 0.2 mA resolution)
 			HV_Current_str += Byte_to_Str(HV_current[i]);
-			//MEB_current[i] = *(hk_data+i+40);
-			MEB_temp[i] = ((*(hk_data+i+56))*2.44140625E-04/6);		// This converst the ADC counts to mV and then divide it by a factor of 6, so it can fit in one byte (min 0V - Max 1.53V or 0xFF -- temp range ~ 0-100 C)
+			DAQ_current[i] = *(hk_data+i+40);
 		}
-		std::string TempMEB = Byte_to_Str(MEB_temp[0])+Byte_to_Str(MEB_temp[1])+Byte_to_Str(MEB_temp[5]);
 
-		std::string state_msg = state_msg_head + TempMEB + state_msg_tail;
+		std::string AsAd_Current_str = Short_to_Str(DAQ_current[0]);
+		std::string TB_Current_str = Short_to_Str(DAQ_current[2]);
 
 		std::string Camera_Temp_str = Get_Camera_Temp();
 		usleep(1000*100);
 		std::string Camera_HV_str = Get_Camera_HV_State();
 
-		state_msg = state_msg + Camera_HV_str + HV_Value_str + HV_Current_str + Camera_Temp_str;
-		usleep(1000*100);
-		wqcs.send(state_msg);
-		usleep(1000*100);
+		state_msg = state_msg + Music_PWR_str + Camera_HV_str + AsAd_Current_str + TB_Current_str + HV_Value_str + HV_Current_str + Camera_Temp_str;
 
 		std::ofstream StateMSG_File;
-		StateMSG_File.open(state_msg_logfile, ios::app|ios::ate);
+		StateMSG_File.open(state_msg_logfile, ios::app);
 		StateMSG_File << state_msg;
 		StateMSG_File.close();
 		IsTakingStateMSG = false;
@@ -1391,7 +1373,7 @@ int main()
 	auto tm = *std::localtime(&t);
 	std::cout << "Staring Master Control at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
 
-	state_msg_logfile = ARCHIVE_DIR+"State_MSG_LOG_"+Get_DateTime_Str()+".log";
+	state_msg_logfile = ARCHIVE_DIR+"State_MSG_LOG_"+Get_Date_Str()+".txt";
 
 	fstream runtime_file;
 	std::string filename = CS_DIR+"fcutils/test/include/Run_Duration.txt";
