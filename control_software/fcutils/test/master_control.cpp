@@ -31,7 +31,6 @@ bool IsInsideRunTimer = false;
 bool IsTakingStateMSG = false;
 bool IsInsideStopStartRun = false;
 std::string state_response = "1010";
-std::string state_msg_logfile = "0";
 
 std::string LogFileID[9] = {"11111", "22222", "33333", "44444", "55555", "66666", "77777", "88888", "99999"};
 std::string LogFileList[9] = {"startup", "Client_SIAB", "Client_TB", "Client_CoBo", "Client_LVPS", "Client_PDU", "cs", "rc", "dp"};
@@ -164,20 +163,6 @@ void Kill_LVPS()
 	LVPS_STATE = Process_OFF;
 }
 
-void Init_PDU()
-{
-	std::string command = "sudo ./client_pdu >> "+LOG_DIR+"Client_PDU.log &";
-	system(command.c_str());
-	PDU_STATE = Process_ON;
-}
-
-void Kill_PDU()
-{
-	std::cout << "Killing the PDU Process" << std::endl;
-	system("sudo echo $(/bin/ps -fu $USER | awk '/client_pdu/ && !/awk/ {print $2}' | xargs kill)");
-	PDU_STATE = Process_OFF;
-}
-
 void Kill_getEccServer()
 {
 	std::cout << "Killing the getEccServer" << std::endl;
@@ -193,64 +178,11 @@ void Kill_dataRouter()
 void Kill_All()
 {
 	Kill_COBO();
-	Kill_PDU();
 	Kill_SIAB();
 	Kill_TRGB();
 	Kill_LVPS();
 	Kill_getEccServer();
 	Kill_dataRouter();
-}
-
-void Flush_FTP()
-{
-	// Create a backup directory for today's files inside /home/cherenkov/Backup
-	std::string Today_DIR = BACKUP_DIR+"Backup_"+Get_Date_Str()+"/";
-	std::string Create_CMD = "sudo mkdir -p "+Today_DIR+" &";
-	system(Create_CMD.c_str());
-	sleep(1);
-
-	// Make a log of files left in the download folder
-	// Place one copy in today's backup directory and one copy in ftp download directory
-	std::string Ex_Files_Log = "CT_0_"+Get_DateTime_Str()+"_34567.log";
-	std::string List_CMD = "sudo ls -l "+FTP_DIR+" > "+Today_DIR+Ex_Files_Log+ " &";
-	system(List_CMD.c_str());
-	sleep(1);
-
-	// Move all files left in the download folder to today's backup directory
-	std::string Move_CMD = "sudo mv "+FTP_DIR+"* "+Today_DIR+" &";
-	system(Move_CMD.c_str());
-	sleep(60);
-
-	// Place one copy of log of files in ftp download directory
-	std::string CopyList_CMD = "sudo cp "+Today_DIR+Ex_Files_Log+" "+FTP_DIR+" &";
-	system(CopyList_CMD.c_str());
-	sleep(1);
-
-	std::cout << "Finished moving extra files to: " << Today_DIR << std::endl;
-}
-
-void ReDownload_Backup(std::string& msg)
-{
-	std::string FileDate = msg.substr(0, 6);
-	std::string CopyCMD  = "cp "+BACKUP_DIR+FileDate+"/* "+FTP_DIR+" &";
-	system(CopyCMD.c_str());
-	sleep(10);
-}
-
-void Fix_LVPS_Client()
-{
-	bool Flipped_SM = false;
-	if(EN_STATE_MSG){
-		EN_STATE_MSG = false;
-		Flipped_SM = true;
-	}
-	Kill_LVPS();
-	sleep(1);
-	Init_LVPS();
-	sleep(15);
-	if(Flipped_SM){
-		EN_STATE_MSG = true;
-	}
 }
 
 std::string HVInt_to_HVcmdStr(int HV_Value)
@@ -308,7 +240,7 @@ void HV_Current_Scan(std::string& msg)
 	wqlvps.send(lvps_log_5s);
 	sleep(10);
 
-	std::string turn_on_all_music = "FFFFFFFF08000000";
+	std::string turn_on_all_music = "0000FFFF08000000";
 	wqsiab.send(turn_on_all_music);
 	sleep(5);
 
@@ -323,8 +255,8 @@ void HV_Current_Scan(std::string& msg)
 			std::cout << "Setting HV to: " << (float(HV_val)/100) << " V" << std::endl;
 			HVScan_File << "HV Value: " << ((float)HV_val/100) << " V" << std::endl;
 
-			float HV_current[8] = {0};
-			for(int j=0; j<8; j++)
+			float HV_current[4] = {0};
+			for(int j=0; j<4; j++)
 			{
 				wqsiab.send(turn_on_hv[j]);
 				sleep(1);
@@ -333,7 +265,7 @@ void HV_Current_Scan(std::string& msg)
 				uint32_t* hk_data;
 				hk_data = Get_LVPS_data();
 
-				for (int kk=0; kk<8; kk++)
+				for (int kk=0; kk<4; kk++)
 				{
 					std::cout << ((*(hk_data+kk+32))*2.441406E-06) << "\t";
 				}
@@ -356,14 +288,14 @@ void HV_Current_Scan(std::string& msg)
 		}
 	}
 
-        // Now, we revert back hk data rate to 10s again
-        std::string lvps_log_10s = "0727100000000000";
-        wqlvps.send(lvps_log_10s);
+	// Now, we revert back hk data rate to 10s again
+	std::string lvps_log_10s = "0727100000000000";
+	wqlvps.send(lvps_log_10s);
 
 	HVScan_File << "-----------------------------------------" << std::endl;
 	for (int k=0; k<HVNofSteps; k++)
 	{
-		for (int m=0; m<8; m++)
+		for (int m=0; m<4; m++)
 		{
 			HVScan_File << HVchUnsafe[k][m] << "\t";
 		}
@@ -373,12 +305,6 @@ void HV_Current_Scan(std::string& msg)
 	HVScan_File.close();
 	HVScanNo++;
 	std::cout<<"Finished HV Scan"<<endl;
-
-	std::string FTP_CopyCMD = "cp "+std::string(filename)+" "+FTP_DIR+"CT_0_"+Get_DateTime_Str()+"_13579.txt &";
-	std::string Starlink_CopyCMD = "cp "+std::string(filename)+" "+STARLINK_DIR+"CT_0_"+Get_DateTime_Str()+"_13579.txt &";
-	system(FTP_CopyCMD.c_str());
-	sleep(1);
-	system(Starlink_CopyCMD.c_str());
 }
 
 ////////////////////////////////////////////////////////
@@ -471,7 +397,7 @@ void Stop_Triggering()
 
 	std::cout << "Disabling the Global Trigger" << std::endl;
 	wqtrgb.send(TB_Disable_Trigger);
-	sleep(1);
+	usleep(10000);
 
 	std::cout << "Stopping the CoBo ..." << std::endl;
 	wqcobo.send(CoBo_Stop_Run);
@@ -548,31 +474,6 @@ void Check_Run_Status()
 	}
 }
 
-void Get_LOG(std::string& msg)
-{
-	int Client_ID = stoi(msg.substr(0, 2), 0 ,16);
-	int NofLines = stoi(msg.substr(2, 4), 0, 16);
-
-	std::string Copy_TmpFile = "cp "+LOG_DIR+LogFileList[Client_ID]+".log "+LOG_DIR+LogFileList[Client_ID]+"_tmp.log &";
-	system(Copy_TmpFile.c_str());
-	sleep(5);
-	std::string Out_filename = "CT_0_"+Get_DateTime_Str()+"_"+LogFileID[Client_ID]+".log";
-	std::string Tail_CMD = "tail -"+std::to_string(NofLines)+" "+LOG_DIR+LogFileList[Client_ID]+"_tmp.log > "+Out_filename+" &";
-	system(Tail_CMD.c_str());
-	sleep(1);
-
-	std::string Starlink_Copy = "cp "+Out_filename+" "+STARLINK_DIR+" &";
-	system(Starlink_Copy.c_str());
-	sleep(2);
-
-	std::string Move_File = "sudo mv "+Out_filename+" "+FTP_DIR+" &";
-	system(Move_File.c_str());
-	sleep(2);
-
-	std::string Delete_TmpFile = "sudo rm "+LOG_DIR+LogFileList[Client_ID]+"_tmp.log &";
-	system(Delete_TmpFile.c_str());
-}
-
 void Archive_All_Log_Files()
 {
 	// Create a folder inside Archive LOG directory for today's log files
@@ -583,20 +484,6 @@ void Archive_All_Log_Files()
 	std::string LOGS_CopyCMD = "sudo cp " +LOG_DIR+"*.log "+Today_DIR+" &";
 	system(LOGS_CopyCMD.c_str());
 	sleep(10);
-}
-
-void DownloadFiles_Starlink(std::string& msg)
-{
-	int Priority_code = stoi(msg.substr(0, 2), 0, 16);
-	std::string DL_CMD = "echo Unknown Priority Code! &";
-	if (Priority_code == 0) {
-		DL_CMD = CS_DIR+"scripts/GetDataStarlink.sh 0 &";
-	}else if (Priority_code == 1) {
-		DL_CMD = CS_DIR+"scripts/GetDataStarlink.sh 1 &";
-	}else {
-		std::cout << "Please update command payload with 0 or 1." << std::endl;
-	}
-	system(DL_CMD.c_str());
 }
 
 ////////////////////////////////////////////////////////
@@ -776,8 +663,10 @@ bool Get_State_MSG()
 		uint32_t DAQ_current[4] = {0};
 		std::string HV_Value_str;
 		std::string HV_Current_str;
+		std::string SIAB_Current_str;
 		for(int i=0; i<16; i++){
 			SIAB_current[i] = *(hk_data+i);
+			SIAB_Current_str += Short_to_Str(static_cast<uint32_t>(SIAB_current[i]*2.441406E-05));
 			if(SIAB_current[i] > 4096000){
 				Music_PWR_State = (Music_PWR_State | (1 << i));
 			}
@@ -799,10 +688,18 @@ bool Get_State_MSG()
 		usleep(1000*100);
 		std::string Camera_HV_str = Get_Camera_HV_State();
 
-		state_msg = state_msg + Music_PWR_str + Camera_HV_str + AsAd_Current_str + TB_Current_str + HV_Value_str + HV_Current_str + Camera_Temp_str;
+		state_msg = state_msg + Music_PWR_str + Camera_HV_str + AsAd_Current_str + TB_Current_str + HV_Value_str + HV_Current_str + Camera_Temp_str + SIAB_Current_str;
 
-		std::ofstream StateMSG_File;
-		StateMSG_File.open(state_msg_logfile, ios::app);
+		// This is a temporary file that is always being overwritten with most recent message
+		// This file is being copied by grafana for the monitoring purposes.
+		std::string smtmp_filename = ARCHIVE_DIR+"SM_LOG.bin";
+		std::ofstream SM_TMP_File(smtmp_filename);
+		SM_TMP_File << state_msg;
+		SM_TMP_File.close();
+
+		// This is the file that archives all state messages for current date.
+		std::string smlog_filename = ARCHIVE_DIR+"State_MSG_LOG_"+Get_Date_Str()+".bin";
+		std::ofstream StateMSG_File(smlog_filename, ios::app);
 		StateMSG_File << state_msg;
 		StateMSG_File.close();
 		IsTakingStateMSG = false;
@@ -980,13 +877,6 @@ void Do_Trigger_Scan_BF(std::string& msg)
 	std::cout << "Finished BF Trigger Scan Number:" << BF_TScanNo << std::endl;
 	printf("-------------------------------------------------\n");
 
-	//std::string TScan_DL_TDRSS = "cp "+std::string(filename)+" "+FTP_DIR+"CT_0_"+Get_DateTime_Str()+"_54321.txt &";
-	//std::string TScan_STARLINK = "cp "+std::string(filename)+" "+STARLINK_DIR+"CT_0_"+Get_DateTime_Str()+"_54321.txt &";
-	//system(TScan_DL_TDRSS.c_str());
-	sleep(1);
-	//system(TScan_STARLINK.c_str());
-	sleep(1);
-
 	// Passing 0 will archive BF Tscan files
 	Archive_TrigScan(0);
 	BF_TScanNo++;
@@ -997,7 +887,7 @@ void Do_Trigger_Scan_BF(std::string& msg)
 
 void Do_Trigger_Scan_SF(std::string& msg)
 {
-	printf("\n--------------- Starting SF Trigger Scan ---------------\n");
+	printf("\n--------------- Starting Single Focus Trigger Scan ---------------\n");
 	// msg contains 7-bytes.
 	// Byte 0 and 1 are Start point in DAC units, Byte 2 and 3 are Number of Steps,
 	// Byte 4 and 5 are Step Size and Byte 6 is Step Duration.
@@ -1081,14 +971,7 @@ void Do_Trigger_Scan_SF(std::string& msg)
 	std::cout << "Finished SF Trigger Scan Number:" << SF_TScanNo << std::endl;
 	printf("-------------------------------------------------\n");
 
-        std::string TScan_DL_TDRSS = "cp "+std::string(filename)+" "+FTP_DIR+"CT_0_"+Get_DateTime_Str()+"_98765.txt &";
-        std::string TScan_STARLINK = "cp "+std::string(filename)+" "+STARLINK_DIR+"CT_0_"+Get_DateTime_Str()+"_98765.txt &";
-        system(TScan_DL_TDRSS.c_str());
-        sleep(1);
-        system(TScan_STARLINK.c_str());
-        sleep(1);
-
-	// Passing 1 will archive SF Tscan files
+	// Passing 1 will archive Single Focus Tscan files
 	Archive_TrigScan(1);
 	SF_TScanNo++;
 
@@ -1163,12 +1046,6 @@ void Process_RC_Msg(const std::string& msg)
 		case Init_LVPS_ID:
 			Init_LVPS();
 			break;
-		case Init_PDU_ID:
-			Init_PDU();
-			break;
-		case Flush_FTP_ID:
-			Flush_FTP();
-			break;
 		case Update_Runtime_ID:
 			Update_Runtime(msg_payload);
 			break;
@@ -1183,9 +1060,6 @@ void Process_RC_Msg(const std::string& msg)
 			break;
 		case STATE_MSG_DIS_ID:
 			Disable_State_MSG();
-			break;
-		case GET_LOG_ID:
-			Get_LOG(msg_payload);
 			break;
 		case DO_TRG_SCAN_BF:
 			Do_Trigger_Scan_BF(msg_payload);
@@ -1205,9 +1079,6 @@ void Process_RC_Msg(const std::string& msg)
 		case Kill_LVPS_ID:
 			Kill_LVPS();
 			break;
-		case Kill_PDU_ID:
-			Kill_PDU();
-			break;
 		case Kill_dataRouter_ID:
 			Kill_dataRouter();
 			break;
@@ -1217,20 +1088,11 @@ void Process_RC_Msg(const std::string& msg)
 		case Kill_ALL_ID:
 			Kill_All();
 			break;
-		case Fix_LVPS_Client_ID:
-			Fix_LVPS_Client();
-			break;
 		case Archive_LOGS_ID:
 			Archive_All_Log_Files();
 			break;
-		case Get_Files_Starlink:
-			DownloadFiles_Starlink(msg_payload);
-			break;
 		case Do_HV_Current_Scan:
 			HV_Current_Scan(msg_payload);
-			break;
-		case RE_DOWNLOAD_BACKUP:
-			ReDownload_Backup(msg_payload);
 			break;
 		default:
 			break;
@@ -1268,9 +1130,6 @@ void Process_Incoming_CMD(const std::string& msg)
 			break;
 		case QID_LVPS:
 			wqlvps.send(msg_payload);
-			break;
-		case QID_PDU:
-			wqpdu.send(msg_payload);
 			break;
 		default:
 			break;
@@ -1372,8 +1231,6 @@ int main()
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
 	std::cout << "Staring Master Control at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
-
-	state_msg_logfile = ARCHIVE_DIR+"State_MSG_LOG_"+Get_Date_Str()+".txt";
 
 	fstream runtime_file;
 	std::string filename = CS_DIR+"fcutils/test/include/Run_Duration.txt";

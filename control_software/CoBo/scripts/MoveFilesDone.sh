@@ -8,5 +8,4 @@ SAVEDATA="/home/trinity/Documents/Flight"
 DESTDIR="${SAVEDATA}/${TIMESTAMP}/RawDataUnmerged"
 
 sudo mv ${FILEDIR}/*AsAd0* ${DESTDIR}
-#sudo mv ${FILEDIR}/*AsAd2* ${DESTDIR}
 sudo mv ${TBDIR}/TB_data* ${DESTDIR}

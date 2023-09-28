@@ -4,20 +4,9 @@
 #include "fcutils/string/string.hpp"
 #include "smbus.c"
 
-#define BMX160_ACCEL_RANGE_ADDR     0x41
-#define BMX160_GYRO_RANGE_ADDR      0x43
-#define BMX160_MAGN_IF_0_ADDR       0x4C
-#define BMX160_MAGN_IF_1_ADDR       0x4D
-#define BMX160_MAGN_IF_2_ADDR       0x4E
-#define BMX160_MAGN_IF_3_ADDR       0x4F
-#define BMX160_MAGN_CONFIG_ADDR     0x44
-#define BMX160_COMMAND_REG_ADDR     0x7E
-
 int I2C_ADDR = 0;
-int TOP_BMX_ADDR = 0x68;
-int BOT_BMX_ADDR = 0x69;
 int First_SIAB_ID = 0x10;
-int SIAB_ID_List[32] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,32,31};
+int SIAB_ID_List[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
 using namespace std;
 
@@ -831,208 +820,145 @@ void Set_Trigger_Threshold(int i, int file, __u32 command, std::string &response
     }
 }
 
-bool BMX160_Config(int file, int Address)
-{
-    if (ioctl(file, I2C_SLAVE, Address) < 0)
-    {
-        std::cout << "Error in configuring chip address: " << Address << std::endl;
-        return false;
-    }
-
-    // Soft Reset
-    i2c_smbus_write_byte_data(file, BMX160_COMMAND_REG_ADDR, 0xB6);
-    usleep(100000);
-
-    // Set the Power Mode of Accelerometer to normal
-    i2c_smbus_write_byte_data(file, BMX160_COMMAND_REG_ADDR, 0x11);
-    usleep(100000);
-    // Set the Power Mode of Gyroscope to normal
-    i2c_smbus_write_byte_data(file, BMX160_COMMAND_REG_ADDR, 0x15);
-    usleep(100000);
-    // Set the Power Mode of Magnetometer to normal
-    i2c_smbus_write_byte_data(file, BMX160_COMMAND_REG_ADDR, 0x19);
-    usleep(100000);
-
-    // Setting up the Magnetometer Configuration
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_0_ADDR, 0x80);
-    usleep(100000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_3_ADDR, 0x01);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_2_ADDR, 0x4B);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_3_ADDR, 0x04);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_2_ADDR, 0x51);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_3_ADDR, 0x0E);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_2_ADDR, 0x52);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_3_ADDR, 0x02);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_2_ADDR, 0x4C);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_1_ADDR, 0x42);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_CONFIG_ADDR, 0x08);
-    usleep(10000);
-    i2c_smbus_write_byte_data(file, BMX160_MAGN_IF_0_ADDR, 0x03);
-    usleep(100000);
-
-    // Setting the Gyroscope Angular rate measurement range to +/-125 degree/second
-    i2c_smbus_write_byte_data(file, BMX160_GYRO_RANGE_ADDR, 0x04);
-    usleep(100000);
-    // Setting the Accelerometer range to +/-2g
-    i2c_smbus_write_byte_data(file, BMX160_ACCEL_RANGE_ADDR, 0x03);
-
-    return true;
-}
-
 void Process_CMD(int file, std::vector<uint32_t>& vCMD, std::string &response)
 {
     uint32_t SIAB_ID = ((vCMD.at(0) << 24) | (vCMD.at(1) << 16) | (vCMD.at(2) << 8) | (vCMD.at(3)));
     uint32_t CMD_ID = vCMD.at(4);
     uint32_t CMD_Packet = ((vCMD.at(4) << 24) | (vCMD.at(5) << 16) | (vCMD.at(6) << 8) | (vCMD.at(7)));
 
-    if(CMD_ID == 0x26){
-        if(BMX160_Config(file, BOT_BMX_ADDR)) {std::cout << "Finished configuring the Bottom BMX160 Chip." << std::endl;}
-        usleep(100000);
-        if(BMX160_Config(file, TOP_BMX_ADDR)) {std::cout << "Finished configuring the Top BMX160 Chip." << std::endl;}
-    }else{
-        for (int i=0; i<32; i++)
+    for (int i=0; i<16; i++)
+    {
+        int SIAB_bit = 0;
+        SIAB_bit = ((SIAB_ID >> i) & 0x01);
+        if (SIAB_bit)
         {
-            int SIAB_bit = 0;
-            SIAB_bit = ((SIAB_ID >> i) & 0x01);
-            if (SIAB_bit)
+            usleep(25000);
+            std::string temp_response = "0x20202020";
+            I2C_ADDR = First_SIAB_ID + SIAB_ID_List[i];
+            if (ioctl(file, I2C_SLAVE, I2C_ADDR) < 0)
             {
-                usleep(25000);
-                std::string temp_response = "0x20202020";
-                I2C_ADDR = First_SIAB_ID + SIAB_ID_List[i];
-                if (ioctl(file, I2C_SLAVE, I2C_ADDR) < 0)
-                {
-                    response = response + "0x00000000";
-                    std::cout << "Error in setting up SIAB ID: " << i << std::endl;
-                }
-                else{
-                    switch (CMD_ID)
-                    {
-                        case CMD_RESET:
-                            Reset_Atmega328P(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_ON_LED:
-                            Turn_on_LED(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_OFF_LED:
-                            Turn_off_LED(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_ON_3V3:
-                            Turn_on_3V3(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_OFF_3V3:
-                            Turn_off_3V3(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_ON_5V:
-                            Turn_on_5V(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_OFF_5V:
-                            Turn_off_5V(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_ON_3V3_5V:
-                            Turn_on_3V3_5V(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_OFF_3V3_5V:
-                            Turn_off_3V3_5V(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_READ_SIPM_TEMP:
-                            Read_SiPM_Temp(file, CMD_Packet, response);
-                            break;
-                        case CMD_READ_UC_TEMP:
-                            Read_UC_Temp(file, CMD_Packet, response);
-                            break;
-                        case CMD_READ_EPRM_BYTE:
-                            Read_EPRM_Byte(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_READ_EPRM_WORD:
-                            Read_EPRM_Word(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_WRITE_EPRM_BYTE:
-                            Write_EPRM_Byte(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_WRITE_EPRM_WORD:
-                            Write_EPRM_Word(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_INIT_MUSIC:
-                            Init_Music(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_LOAD_MUSIC_CONFIG_EPRM:
-                            Load_Music_Config_EPRM(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_PRINT_LOADED_MUSIC_CONFIG:
-                            Print_Loaded_Music_Config(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_WRITE_LOADED_CONFIG_TO_MUSIC:
-                            Write_Loaded_Config_to_Music(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_READ_FROM_MUSIC_REGISTER:
-                            Read_from_Music_Register(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_WRITE_TO_MUSIC_REGISTER:
-                            Write_to_Music_Register(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_SET_ADC_RATE:
-                            Set_ADC_Rate(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_INITIALIZE_ADC:
-                            Initialize_ADC(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_ENABLE_ADC_RUN:
-                            Enable_ADC_Run(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_DISABLE_ADC_RUN:
-                            Disable_ADC_Run(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_READ_SINGLE_CURRENT:
-                            Read_Single_Current(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_READ_ALL_CURRENT:
-                            Read_All_Current(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_RECORD_ADC_OFFSET:
-                            Record_ADC_Offset(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_RETRIEVE_ADC_OFFSET:
-                            Retrieve_ADC_Offset(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_ON_HV:
-                            Turn_on_HV(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_TURN_OFF_HV:
-                            Turn_off_HV(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_ENABLE_HV_CTR:
-                            Enable_HV_CTR(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_CHECK_HV_STATUS:
-                            Check_HV_Status(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_SET_MAX_CURRENT:
-                            Set_Max_Current(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_UPDATE_MUSIC_CONFIG:
-                            Update_Music_Config(file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_SET_BIAS_VOLTAGE:
-                            Set_Bias_Voltage(i, file, CMD_Packet, temp_response);
-                            break;
-                        case CMD_SET_TRG_THRESHOLD:
-                            Set_Trigger_Threshold(i, file, CMD_Packet, temp_response);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                //response = response + temp_response;
+                response = response + "0x00000000";
+                std::cout << "Error in setting up SIAB ID: " << i << std::endl;
             }
+            else{
+                switch (CMD_ID)
+                {
+                    case CMD_RESET:
+                        Reset_Atmega328P(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_ON_LED:
+                        Turn_on_LED(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_OFF_LED:
+                        Turn_off_LED(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_ON_3V3:
+                        Turn_on_3V3(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_OFF_3V3:
+                        Turn_off_3V3(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_ON_5V:
+                        Turn_on_5V(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_OFF_5V:
+                        Turn_off_5V(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_ON_3V3_5V:
+                        Turn_on_3V3_5V(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_OFF_3V3_5V:
+                        Turn_off_3V3_5V(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_READ_SIPM_TEMP:
+                        Read_SiPM_Temp(file, CMD_Packet, response);
+                        break;
+                    case CMD_READ_UC_TEMP:
+                        Read_UC_Temp(file, CMD_Packet, response);
+                        break;
+                    case CMD_READ_EPRM_BYTE:
+                        Read_EPRM_Byte(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_READ_EPRM_WORD:
+                        Read_EPRM_Word(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_WRITE_EPRM_BYTE:
+                        Write_EPRM_Byte(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_WRITE_EPRM_WORD:
+                        Write_EPRM_Word(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_INIT_MUSIC:
+                        Init_Music(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_LOAD_MUSIC_CONFIG_EPRM:
+                        Load_Music_Config_EPRM(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_PRINT_LOADED_MUSIC_CONFIG:
+                        Print_Loaded_Music_Config(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_WRITE_LOADED_CONFIG_TO_MUSIC:
+                        Write_Loaded_Config_to_Music(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_READ_FROM_MUSIC_REGISTER:
+                        Read_from_Music_Register(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_WRITE_TO_MUSIC_REGISTER:
+                        Write_to_Music_Register(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_SET_ADC_RATE:
+                        Set_ADC_Rate(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_INITIALIZE_ADC:
+                        Initialize_ADC(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_ENABLE_ADC_RUN:
+                        Enable_ADC_Run(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_DISABLE_ADC_RUN:
+                        Disable_ADC_Run(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_READ_SINGLE_CURRENT:
+                        Read_Single_Current(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_READ_ALL_CURRENT:
+                        Read_All_Current(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_RECORD_ADC_OFFSET:
+                        Record_ADC_Offset(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_RETRIEVE_ADC_OFFSET:
+                        Retrieve_ADC_Offset(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_ON_HV:
+                        Turn_on_HV(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_TURN_OFF_HV:
+                        Turn_off_HV(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_ENABLE_HV_CTR:
+                        Enable_HV_CTR(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_CHECK_HV_STATUS:
+                        Check_HV_Status(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_SET_MAX_CURRENT:
+                        Set_Max_Current(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_UPDATE_MUSIC_CONFIG:
+                        Update_Music_Config(file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_SET_BIAS_VOLTAGE:
+                        Set_Bias_Voltage(i, file, CMD_Packet, temp_response);
+                        break;
+                    case CMD_SET_TRG_THRESHOLD:
+                        Set_Trigger_Threshold(i, file, CMD_Packet, temp_response);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //response = response + temp_response;
         }
     }
 }

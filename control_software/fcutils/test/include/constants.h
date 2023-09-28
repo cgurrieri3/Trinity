@@ -16,7 +16,7 @@
 #define QID_TRGB				0x30
 #define QID_COBO				0x40
 #define QID_LVPS				0x50
-#define QID_PDU					0x60
+//#define QID_PDU					0x60
 
 #define REBOOT_CPU_ID			0x01
 #define SHUTDOWN_CPU_ID			0x02
@@ -24,32 +24,32 @@
 #define Init_TRGB_ID			0x04
 #define Init_COBO_ID			0x05
 #define Init_LVPS_ID			0x06
-#define Init_PDU_ID				0x07
-#define Flush_FTP_ID			0x08
+//#define Init_PDU_ID				0x07
+//#define Flush_FTP_ID			0x08
 
 #define Update_Runtime_ID		0x09
 #define RUN_START				0x0A
 #define RUN_STOP				0x0B
 #define STATE_MSG_EN_ID			0x0C
 #define STATE_MSG_DIS_ID		0x0D
-#define GET_LOG_ID				0x0E
+//#define GET_LOG_ID				0x0E
 #define DO_TRG_SCAN_BF			0x0F
 
 #define Kill_SIAB_ID			0x10
 #define Kill_TRGB_ID			0x11
 #define Kill_COBO_ID			0x12
 #define Kill_LVPS_ID			0x13
-#define Kill_PDU_ID				0x14
+//#define Kill_PDU_ID				0x14
 #define Kill_dataRouter_ID		0x15
 #define Kill_getEccServer_ID	0x16
 #define Kill_ALL_ID				0x17
 
-#define Fix_LVPS_Client_ID		0x18
+//#define Fix_LVPS_Client_ID		0x18
 #define Archive_LOGS_ID			0x19
 #define DO_TRG_SCAN_SF			0x1A
-#define Get_Files_Starlink		0x1B
+//#define Get_Files_Starlink		0x1B
 #define Do_HV_Current_Scan		0x1C
-#define RE_DOWNLOAD_BACKUP		0x1D
+//#define RE_DOWNLOAD_BACKUP		0x1D
 
 const std::string HOME_DIR="/home/trinity";
 const std::string CS_DIR = HOME_DIR+"/Programs/Trinity/control_software/";
@@ -58,15 +58,12 @@ const std::string SEQ_DIR = CS_DIR+"sequences/";
 const std::string TB_DIR = CS_DIR+"tb/mesaflash/";
 const std::string CoBo_DIR = CS_DIR+"CoBo/";
 const std::string PDU_DIR = CS_DIR+"pdu/";
-const std::string BMX160_DIR = CS_DIR+"BMX160/";
 const std::string LOG_DIR = CS_DIR+"fcutils/test/LOGS/";
 const std::string ARCHIVE_DIR = CS_DIR+"Archive/LOGS/";
-const std::string BACKUP_DIR = HOME_DIR+"/Backup/";
-const std::string FINAL_TSCAN_DIR = HOME_DIR+"/Documents/TB_Data/Tscan/";
-const std::string FINAL_COUNTERS_DIR = HOME_DIR+"/Documents/TB_Data/Run_Counters/";
-const std::string HV_SCAN_DIR = HOME_DIR+"/Documents/HV_Scan/";
+const std::string FINAL_TSCAN_DIR = CS_DIR+"/Archive/Tscan/";
+const std::string FINAL_COUNTERS_DIR = CS_DIR+"/Archive/TB_Data/Run_Counters/";
+const std::string HV_SCAN_DIR = CS_DIR+"/Archive/HV_Scan/";
 const std::string FTP_DIR = "/srv/ftp/data/";
-const std::string STARLINK_DIR = HOME_DIR+"/Documents/StarLinkSyncEngineer/";
 
 // Full Commands for Controlling Trigger Board
 // Use TB Configuration Document to modify these!
@@ -100,9 +97,7 @@ const std::string GET_ALL_SIAB_HV_STATE		= "0000FFFF21010000";
 const std::string PING_SIAB					= "0000000030000000";
 const std::string PING_ALL					= "3000000000000000";
 
-const std::string turn_on_music[8]  = {"0000030308000000", "00000C0C08000000", "0000303008000000", "0000C0C008000000", "0303000008000000", "0C0C000008000000", "3030000008000000", "C0C0000008000000"};
-const std::string turn_off_music[8] = {"0000030309000000", "00000C0C09000000", "0000303009000000", "0000C0C009000000", "0303000009000000", "0C0C000009000000", "3030000009000000", "C0C0000009000000"};
-const std::string turn_on_hv[8]     = {"000003031E000000", "00000C0C1E000000", "000030301E000000", "0000C0C01E000000", "030300001E000000", "0C0C00001E000000", "303000001E000000", "C0C000001E000000"};
-const std::string turn_off_hv[8]    = {"000003031F000000", "00000C0C1F000000", "000030301F000000", "0000C0C01F000000", "030300001F000000", "0C0C00001F000000", "303000001F000000", "C0C000001F000000"};
+const std::string turn_on_hv[4]     = {"000003031E000000", "00000C0C1E000000", "000030301E000000", "0000C0C01E000000"};
+const std::string turn_off_hv[4]    = {"000003031F000000", "00000C0C1F000000", "000030301F000000", "0000C0C01F000000"};
 
 #endif
