@@ -27,7 +27,7 @@ std::string Word_to_Str(uint32_t a)
 uint32_t *Get_LVPS_data()
 {
     static uint32_t state_msg_arr[64] = {0};
-    std::string get_lvps_sample = "tail -n 2 "+LOG_DIR+"Client_LVPS.log > lvps_tmp.txt &";
+    std::string get_lvps_sample = "tail -n 3 "+LOG_DIR+"Client_LVPS.log > lvps_tmp.txt &";
     system(get_lvps_sample.c_str());
     usleep(100000);
     std::string filename = "lvps_tmp.txt";

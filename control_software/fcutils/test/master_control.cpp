@@ -658,7 +658,7 @@ bool Get_State_MSG()
 		hk_data = Get_LVPS_data();
 		uint32_t Music_PWR_State = 0;
 		uint32_t SIAB_current[16] = {0};
-		uint8_t HV_current[4] = {0};
+		uint32_t HV_current[4] = {0};
 		uint32_t HV_value[4] = {0};
 		uint32_t DAQ_current[4] = {0};
 		std::string HV_Value_str;
@@ -666,7 +666,7 @@ bool Get_State_MSG()
 		std::string SIAB_Current_str;
 		for(int i=0; i<16; i++){
 			SIAB_current[i] = *(hk_data+i);
-			SIAB_Current_str += Short_to_Str(static_cast<uint32_t>(SIAB_current[i]*2.441406E-05));
+			SIAB_Current_str += Word_to_Str(SIAB_current[i]);
 			if(SIAB_current[i] > 4096000){
 				Music_PWR_State = (Music_PWR_State | (1 << i));
 			}
@@ -676,13 +676,13 @@ bool Get_State_MSG()
 		for(int i=0; i<4; i++){
 			HV_value[i] = *(hk_data+i+48);
 			HV_Value_str = HV_Value_str + Word_to_Str(HV_value[i]);
-			HV_current[i]  = (uint8_t)((*(hk_data+i+32))*2.441406E-06*5);	// This is in mA. We multiply it by 5, so 50mA would show up as 250mA in state messages (Just for the sake of 0.2 mA resolution)
-			HV_Current_str += Byte_to_Str(HV_current[i]);
+			HV_current[i]  = *(hk_data+i+32);
+			HV_Current_str += Word_to_Str(HV_current[i]);
 			DAQ_current[i] = *(hk_data+i+40);
 		}
 
-		std::string AsAd_Current_str = Short_to_Str(DAQ_current[0]);
-		std::string TB_Current_str = Short_to_Str(DAQ_current[2]);
+		std::string AsAd_Current_str = Word_to_Str(DAQ_current[0]);
+		std::string TB_Current_str = Word_to_Str(DAQ_current[2]);
 
 		std::string Camera_Temp_str = Get_Camera_Temp();
 		usleep(1000*100);
