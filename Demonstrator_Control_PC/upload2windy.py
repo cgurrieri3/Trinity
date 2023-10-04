@@ -13,7 +13,12 @@ BASE_URL = f'https://stations.windy.com./pws/update/{API_KEY}'
 
 # Find the last line of the latest weather file
 latest_wx_file = os.popen('/bin/ls -rt /root/weather_data/*| /usr/bin/tail -n1').read().split('\n')[0]
-last_line = os.popen(f'/usr/bin/tail -n3 {latest_wx_file}').read().split('\n')[0]
+last_line = os.popen(f'/usr/bin/tail -n3 {latest_wx_file}').read().split('\n')
+for line in last_line:
+    if line == '':
+        continue
+    else:
+        last_line = line
 print(latest_wx_file,"\n",last_line)
 
 # Parse out the infromation to uploaded to Windy
