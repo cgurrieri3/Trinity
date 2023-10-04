@@ -505,7 +505,7 @@ void Save_Events(uint32_t* cmd_array)
 
 	// Writing Events_Writtents to a file
 	char tmp[10];
-	char filename[200] = "TB_data_";
+	char filename[200] = "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/TB_data_";
 	strcat(filename, realtime);
 	sprintf(tmp, "_%04d.bin", Run_Number);
 	strcat(filename, tmp);
