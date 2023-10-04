@@ -21,11 +21,14 @@ class weatherlogger:
 
     def main(self):
         while True:
-            ser = serial.Serial(self.COM,self.BAUDRATE,timeout=self.TIMEOUT)
-            line = ser.readline().decode('ascii')
-            f = open(self.rotate_file(), "a")
-            print(line,file=f)
-            f.close()
+            try:
+                ser = serial.Serial(self.COM,self.BAUDRATE,timeout=self.TIMEOUT)
+                line = ser.readline().decode('ascii')
+                f = open(self.rotate_file(), "a")
+                print(line,file=f)
+                f.close()
+            except:
+                print("Some error...but keep looking at weather data")
 
 if __name__=='__main__':
     weatherlogger()
