@@ -31,6 +31,7 @@ bool IsInsideRunTimer = false;
 bool IsTakingStateMSG = false;
 bool IsInsideStopStartRun = false;
 std::string state_response = "1010";
+std::string ftdi_device_name = "/dev/ttyUSB0";
 
 std::string LogFileID[9] = {"11111", "22222", "33333", "44444", "55555", "66666", "77777", "88888", "99999"};
 std::string LogFileList[9] = {"startup", "Client_SIAB", "Client_TB", "Client_CoBo", "Client_LVPS", "Client_PDU", "cs", "rc", "dp"};
@@ -151,7 +152,7 @@ void Kill_COBO()
 
 void Init_LVPS()
 {
-	std::string command = "sudo ./client_lvps -p /dev/ttyUSB0 >> "+LOG_DIR+"Client_LVPS.log &";
+	std::string command = "sudo ./client_lvps -p "+ftdi_device_name+" >> "+LOG_DIR+"Client_LVPS.log &";
 	system(command.c_str());
 	LVPS_STATE = Process_ON;
 }
@@ -679,6 +680,22 @@ bool Get_State_MSG()
 			HV_current[i]  = *(hk_data+i+32);
 			HV_Current_str += Word_to_Str(HV_current[i]);
 			DAQ_current[i] = *(hk_data+i+40);
+		}
+
+		// This part is checking the HV current consumption and if it is above 20mA, it shuts down SIABs HV switches connected to that channel.
+		for(int i=0; i<4; i++){
+			if(((double)HV_current[i]*2.441406E-06) > 20.0){
+				std::cout << "---------------------------------------------------------------------" << std::endl;
+				std::cout << "---------------------------------------------------------------------" << std::endl;
+				std::cout << "UNIX Time is: " << Word_to_Str((uint32_t)sec) << std::endl;
+				std::cout << "Measured HV on channel#" << i << ": " << ((double)HV_current[i]*2.441406E-06) << " mA" << std::endl;
+				std::cout << "Turning off HV channel#" << i << std::endl;
+				wqsiab.send(turn_off_hv[i]);
+				std::cout << "This is HV for 4 SIABs on the " << SIAB_HV_list[i] << " of the camera looking at the focal plane" << std::endl;
+				std::cout << "---------------------------------------------------------------------" << std::endl;
+				std::cout << "---------------------------------------------------------------------" << std::endl;
+				sleep(1);
+			}
 		}
 
 		std::string AsAd_Current_str = Word_to_Str(DAQ_current[0]);
@@ -1226,8 +1243,15 @@ void master_timer(std::function<void(void)> func, uint32_t interval)
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 
-int main()
+int main(int argc, char* argv[])
 {
+	if(argc > 1) {
+		ftdi_device_name = argv[1];
+		std::cout << "Using given USB port: " << ftdi_device_name << " for LVPS microcontroller board" << std::endl;
+	}else{
+		std::cout << "Using default USB port: " << ftdi_device_name << " for LVPS microcontroller board" << std::endl;
+	}
+
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
 	std::cout << "Staring Master Control at: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;

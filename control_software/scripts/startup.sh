@@ -1,49 +1,37 @@
 #!/bin/bash
 
-#source ${UPROFILE}
 echo "Starting Up CT CPU"
 
-#ping 192.168.2.1;
-
-##if [ $0 -ne 0 ]; then
-#	sleep 30
-#fi
-#systemd-notify --ready --status="Waiting for commands"
-
-#sudo rmmod i2c-i801.ko
-#sudo insmod /home/cherenkov/Documents/TempDriver/i2c-i801.ko
 U_HOME=/home/trinity
 SFWR=$U_HOME/Programs
 CONTROLSFWR=$SFWR/Trinity/control_software
 sudo rm /dev/mqueue/*
 
-#sudo mkdir -p /tmp/src/20210208/
-#sudo cp -r /home/cherenkov/Programs/control_software/CoBo/CoBoFrameViewer/ /tmp/src/20210208/
+list_ftdi_devices() {
+  for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
+      (
+          syspath="${sysdevpath%/dev}"
+          devname="$(udevadm info -q name -p $syspath)"
+          [[ "$devname" == "bus/"* ]] && exit
+          eval "$(udevadm info -q property --export -p $syspath)"
+          [[ -z "$ID_SERIAL" ]] && exit
+          ftdi_device=$(echo "/dev/$devname - $ID_SERIAL" | grep FTDI | grep -oE '/dev/ttyUSB[0-9]+')
+          [[ -n "$ftdi_device" ]] && echo "$ftdi_device"
+      )
+  done
+}
 
-#cd /home/cherenkov/Programs/control_software/fcutils/test/build
-#sudo ./control_software -n true >> /home/cherenkov/Programs/control_software/fcutils/test/LOGS/cs.log 2>&1 &
-#CS_PID=`echo $!`
+ftdi=$(list_ftdi_devices)
 
-#echo "STARTUP SERVICE: Control Started"
-
-#systemd-notify --ready --status="Waiting for commands"
-
-sleep 5
-
-sudo $CONTROLSFWR/fcutils/test/build/master_control >> ${CONTROLSFWR}/fcutils/test/LOGS/rc.log 2>&1 &
+sudo $CONTROLSFWR/fcutils/test/build/master_control $ftdi >> ${CONTROLSFWR}/fcutils/test/LOGS/rc.log 2>&1 &
 RC_PID=`echo $!`
-
 echo "STARTUP SERVICE: Master Started"
 sleep 10
 
 $SFWR/eventbuilder/DataProcess.sh >> ${CONTROLSFWR}/fcutils/test/LOGS/dp.log 2>&1 &
 DP_PID=`echo $!`
-
 echo "STARTUP SERVICE: File Searching Started"
 sleep 5
-
-#sudo iptables-restore < ~/rules.v4
-#echo "STARTUP SERVICE: UDP Packets Blocked"
 
 systemd-notify --ready
 
@@ -53,7 +41,6 @@ do
 	then
 		systemd-notify --status="Master Control Crashed! Restarting..."
 		exit 128
-		#sudo service startupCT stop
 	else
 		systemd-notify --status="Listening on ${RC_PID}"
 		sleep 60

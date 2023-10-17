@@ -97,7 +97,9 @@ const std::string GET_ALL_SIAB_HV_STATE		= "0000FFFF21010000";
 const std::string PING_SIAB					= "0000000030000000";
 const std::string PING_ALL					= "3000000000000000";
 
-const std::string turn_on_hv[4]     = {"000003031E000000", "00000C0C1E000000", "000030301E000000", "0000C0C01E000000"};
-const std::string turn_off_hv[4]    = {"000003031F000000", "00000C0C1F000000", "000030301F000000", "0000C0C01F000000"};
+const std::string turn_on_hv[4]     = {"000030301E000000", "0000C0C01E000000", "000003031E000000", "00000C0C1E000000"};
+const std::string turn_off_hv[4]    = {"000030301F000000", "0000C0C01F000000", "000003031F000000", "00000C0C1F000000"};
+
+const std::string SIAB_HV_list[4]   = {"Bottom Left", "Top Left", "Bottom Right", "Top Left"};
 
 #endif
