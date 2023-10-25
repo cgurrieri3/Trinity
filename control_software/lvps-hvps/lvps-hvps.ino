@@ -30,6 +30,8 @@ volatile int ADCFlag = 0;
 volatile int sample_counter = 0;
 volatile uint32_t loop_delay = 10000;
 volatile double adc_vals[NofADC][16];
+const float HV_Safe_Value = 20.0;
+const float HV_Current_Limit = 20.0;
 const float HV_offset[4] = {0.0, 0.0, 0.01, 0.01};
 const float HV_Fixed_Val[4] = {42.00, 42.00, 42.01, 42.01};
 const char *HK_list[] = {"BP0", "BP1", "HK1", "HK2"}; 
@@ -255,6 +257,15 @@ void Get_ADC_Value()
     digitalWrite(CSHK[i], HIGH);
   }
 
+  for (int i=0; i<4; i++)
+  {
+    if((adc_vals[2][i]*2.441406E-06) > HV_Current_Limit)
+    {
+      AD5686R_SetVoltage(DAC_Ch_list[i], HV_Safe_Value);
+      delay(200);
+    };
+  }
+
   if(bin_mode)
   {
     for (int i=0; i<NofADC; i++)
@@ -314,7 +325,6 @@ void Reset_All_HV()
 void Set_Fixed_HV()
 {
   Reset_All_HV();
-  
   Serial.print("****\t");
   Serial.print("Setting Fixed HV on Channel 1 to ");
   Serial.println(HV_Fixed_Val[0]);
