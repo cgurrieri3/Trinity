@@ -41,7 +41,7 @@ void FolderDataSum(std::string folString, std::string treeString)
 	//assembles the directory where merged .root data files are saved; assumes that each date (folString) contains a directory "RawDataMerged" where the merged files are saved
 	std::string dirname = Form("%s%s/RawDataMerged/",dataDir.c_str(),folString.c_str());
 	cout << dirname << std::endl;
-	//declare a counter for total number of entries to average over as well as vectors to store the averages of each value of interest
+	//declare a counter for total number of entries to average over as well as vectors to store the averages of each parameter
 	int tEntries = 0;
 	//vector of vectors to store pixel averages
 	//Means[0] is mead pedestal
@@ -50,6 +50,19 @@ void FolderDataSum(std::string folString, std::string treeString)
 	//Means[3] is the mean number of charges recorded during events
 	//Means[4] is the mean time of the signal peak of each event
 	std::vector<std::vector<Double_t>> Means(5,std::vector<Double_t>(MaxNofChannels, 0.0));
+
+	//Initialize/declare vectors to store event times (TB times) and camera averages of parameters. eventMeans indexing follows same order as Means
+	std::vector<uint64_t> eventTimes;
+	std::vector<std::vector<Double_t>> eventMeans(5,std::vector<Double_t>());
+
+	//Initialize vector of TGraph objects to plot eventMeans on
+	TGraph *gEvents = new TGraph();
+	std::vector<TGraph *> gDraw;
+	//Create histogram objects
+	for(int i = 0; i < 5; i++){
+		TGraph *gi = new TGraph();
+		gDraw.push_back(gi);
+	}
 
 	//Declare directory object and dirent struct to use to parse through all files in directory
 	//DIR is a directory stream; ordered sequence of all directory entries in a directory
@@ -82,6 +95,12 @@ void FolderDataSum(std::string folString, std::string treeString)
 				for(int EventCounter = 0; EventCounter < nEntries; EventCounter++){
 					//Get the tree entry associated with event number EventCounter
 					tree->GetEntry(EventCounter);
+					//adds TB time of current event to eventTimes
+					eventTimes.push_back(ev->GetTBTime()*1e-8);
+					//initialize eventMeans value by adding a new value of 0.0
+					for(int i = 0; i < 5; i++){
+						eventMeans[i].push_back(0.0);
+					}
 					//Create pulse object pointed named pulse
 					Pulse *pulse;
 					for(int i = 0; i < MaxNofChannels; i++){
@@ -93,8 +112,19 @@ void FolderDataSum(std::string folString, std::string treeString)
 						Means[2][i] += pulse->GetAmplitude();
 						Means[3][i] += pulse->GetCharge();
 						Means[4][i] += pulse->GetTimePeak();
+
+						eventMeans[0][EventCounter] += pulse->GetPedestal();
+						eventMeans[1][EventCounter] += pulse->GetPedestalRMS();
+						eventMeans[2][EventCounter] += pulse->GetAmplitude();
+						eventMeans[3][EventCounter] += pulse->GetCharge();
+						eventMeans[4][EventCounter] += pulse->GetTimePeak();
 						//have to delete pulse object here to avoid memory leak
 						delete pulse;
+					}
+					//Average eventMeans values; add points to TGraph objects
+					for(int i = 0; i < 5; i++){
+						eventMeans[i][EventCounter] /= MaxNofChannels;
+						gDraw[i]->SetPoint(tEntries-nEntries+EventCounter,eventTimes[EventCounter],eventMeans[i][EventCounter]);
 					}
 				}
 				//have to delete ev, tree, f0 objects here to avoid memory leak
@@ -143,10 +173,27 @@ void FolderDataSum(std::string folString, std::string treeString)
 		hDraw[i]->SetMaximum(hRanges[i*2+1]);
 		//Don't draw stats box
 		hDraw[i]->SetStats(0);
+		//Set margin size so palette values aren't clipped
+		c_disp->SetRightMargin(0.15);
 		//Draw histogram to canvas; colz is defined in THistPainter ROOT documentation
 		hDraw[i]->Draw("colz");
 		//DrawMUSICBoundaries is defined below
 		DrawMUSICBoundaries();
+		//Add current canvas as page to output pdf
+		c_disp->Print(Form("%s%s.pdf",outDir.c_str(),folString.c_str()));
+		c_disp->Clear();
+		//Set marker to filled circle/dot
+		gDraw[i]->SetMarkerStyle(20);
+		//Set TGraph title
+		gDraw[i]->SetTitle(htitles[i*2 + 1].c_str());
+		//Set X axis to display as a readable time rather than in UNIX time/seconds
+		gDraw[i]->GetXaxis()->SetTimeDisplay(1);
+		gDraw[i]->GetXaxis()->SetNdivisions(505);
+		gDraw[i]->GetXaxis()->SetTimeFormat("%H:%M");
+		gDraw[i]->GetXaxis()->SetTimeOffset(0,"gmt");
+		gDraw[i]->GetXaxis()->SetTitle("UTC Time of Events [HH:MM]");
+		//Draw TGraph using markers
+		gDraw[i]->Draw("AP");
 		//Add current canvas as page to output pdf
 		c_disp->Print(Form("%s%s.pdf",outDir.c_str(),folString.c_str()));
 	}
