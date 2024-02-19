@@ -113,18 +113,18 @@ void FolderDataSum(std::string folString, std::string treeString)
 						Means[3][i] += pulse->GetCharge();
 						Means[4][i] += pulse->GetTimePeak();
 
-						eventMeans[0][EventCounter] += pulse->GetPedestal();
-						eventMeans[1][EventCounter] += pulse->GetPedestalRMS();
-						eventMeans[2][EventCounter] += pulse->GetAmplitude();
-						eventMeans[3][EventCounter] += pulse->GetCharge();
-						eventMeans[4][EventCounter] += pulse->GetTimePeak();
+						eventMeans[0][tEntries-nEntries+EventCounter] += pulse->GetPedestal();
+						eventMeans[1][tEntries-nEntries+EventCounter] += pulse->GetPedestalRMS();
+						eventMeans[2][tEntries-nEntries+EventCounter] += pulse->GetAmplitude();
+						eventMeans[3][tEntries-nEntries+EventCounter] += pulse->GetCharge();
+						eventMeans[4][tEntries-nEntries+EventCounter] += pulse->GetTimePeak();
 						//have to delete pulse object here to avoid memory leak
 						delete pulse;
 					}
 					//Average eventMeans values; add points to TGraph objects
 					for(int i = 0; i < 5; i++){
-						eventMeans[i][EventCounter] /= MaxNofChannels;
-						gDraw[i]->SetPoint(tEntries-nEntries+EventCounter,eventTimes[EventCounter],eventMeans[i][EventCounter]);
+						eventMeans[i][tEntries-nEntries+EventCounter] /= MaxNofChannels;
+						gDraw[i]->SetPoint(tEntries-nEntries+EventCounter,eventTimes[tEntries-nEntries+EventCounter],eventMeans[i][tEntries-nEntries+EventCounter]);
 					}
 				}
 				//have to delete ev, tree, f0 objects here to avoid memory leak
