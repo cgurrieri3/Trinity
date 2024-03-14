@@ -5,6 +5,7 @@ import check_wx as cwx
 import check_lt as clt
 import check_data as cdata
 import check_rc as crc
+import pixel_testing as pxlt
 import ssh_scripts as ssh
 import communicate as lets
 import time
@@ -770,6 +771,7 @@ def main():
 			cutoff = input('Manual cut off date and time ex: "2023-11-15 12:43:09": ')
 			if cutoff == '' or cutoff == ' ':
 				clt.create_file()
+				
 			else:
 				date_format = "%Y-%m-%d %H:%M:%S"
 				try:
@@ -779,6 +781,18 @@ def main():
 					print('see EON_time.txt to confirm')
 				except:
 					print('Invalid input please try again')
+		elif com_in == 'SIAB_test': # used to run the pixel testing so there can be monitoring
+
+			wx_override = input("Do you want to overrride the weather ex. yes or no: ")
+			if wx_override == 'yes':
+				pwd_wx_ovrd = input("Please enter a password: ")
+				if pwd_wx_ovrd != "oct3":
+					wx_override = 'no'
+      
+			print('Starting SAIB testing script on CTCPU')
+			exit_mesesage=pxlt.SIAB_testing(wx_override)
+			#	full_shutdown(exit_message)  
+			print(f'shut down {exit_mesesage}')
 
 		# make trigger rate scan option and HVscan options
 if __name__ == "__main__":
