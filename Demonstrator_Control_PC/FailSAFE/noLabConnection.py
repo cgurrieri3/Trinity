@@ -2,9 +2,9 @@ import subprocess
 import time
 
 # run an expect script
-def run_shut_down_ct():
+def run_commands(command):
     # Specify the path to your Expect script
-    expect_script = "/home/trinity/control_software/FailSAFE/ct_exact_scripts/shut_down.exp"
+    expect_script = f"/root/FailSAFE/expect_scripts/{command}.exp"
 
     # Run the Expect script using the 'expect' command
     process = subprocess.Popen(["expect", expect_script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -16,19 +16,18 @@ def run_shut_down_ct():
     if process.returncode == 0:
         print("Expect script executed successfully")
         print("Output:\n", stdout)
-        log_file(f'Shut down camera Successful ')
+        log_file(f'{command} Successful ')
     else:
         print("Error running Expect script")
         print("Error Output:\n", stdout)
-        log_file(f'Shut down camera failed')
-
+        log_file(f'{command} FAILURE {stdout}')
 
 
 # add to log file
 def log_file(message):
     current_time = time.time()
     current_time = time.ctime(current_time)
-    with open("/home/trinity/control_software/FailSAFE/noLabConnection.log", "a") as file:
+    with open("/root/FailSAFE/noLabConnection.log", "a") as file:
         file.write(message + str(current_time) + '\n')
 
 def ping(host):
@@ -44,13 +43,16 @@ if ping(host_to_ping):
     #print(f"{host_to_ping} is reachable.")
     log_file(f"{host_to_ping} is reachable. -")
     
-    #run_shut_down_ct()
+    #run_commands('shut_door')
     
 else:
     log_file(f"{host_to_ping} is not reachable. -")
     
-    run_shut_down_ct()
-
+    run_commands('shut_door')
+    time.sleep(500) # this is the time needed for the camera to turn off if it also lost internet at the same time
+    log_file('Turning off outlets ')
+    
+    run_commands('outlets_off')
 
     
 
