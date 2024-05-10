@@ -1,0 +1,1891 @@
+Using given USB port: /dev/ttyUSB0 for LVPS microcontroller board
+Staring Master Control at: 03-05-2024 16-32-51
+Using given USB port: /dev/ttyUSB0 for LVPS microcontroller board
+Staring Master Control at: 03-05-2024 16-33-21
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240503_163509
+ Queue: /CStoRC, message received: 101a00000000000001
+CPU Time is: 240503_163529
+
+--------------- Starting Single Focus Trigger Scan ---------------
+Start Point: 0
+Number of Steps: 0
+Step Size: 0
+Step Duration: 2 Seconds
+TScan Configuration Command: 0506010240005802
+Finished SF Trigger Scan Number:0
+mv: cannot stat '/home/trinity/Programs/Trinity/control_software/tb/mesaflash/TScan_G_*': No such file or directory
+mv: cannot stat '/home/trinity/Programs/Trinity/control_software/tb/mesaflash/TScan_C_*': No such file or directory
+-------------------------------------------------
+Moving Trigger Scan Counters to: /home/trinity/Programs/Trinity/control_software//Archive/Tscan/240503/SF/163530/
+Using given USB port: /dev/ttyUSB0 for LVPS microcontroller board
+Staring Master Control at: 03-05-2024 16-36-17
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240503_163701
+ Queue: /CStoRC, message received: 101a0078000a000a01
+CPU Time is: 240503_163721
+
+--------------- Starting Single Focus Trigger Scan ---------------
+Start Point: 120
+Number of Steps: 10
+Step Size: 10
+Step Duration: 2 Seconds
+TScan Configuration Command: 0506010240005802
+-------------------------------------------------
+Setting the threshold on Music chips to: 120 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+terminate called after throwing an instance of 'std::out_of_range'
+  what():  basic_string::substr: __pos (which is 8) > this->size() (which is 4)
+Using given USB port: /dev/ttyUSB0 for LVPS microcontroller board
+Staring Master Control at: 03-05-2024 16-38-32
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240503_180847
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240503_183401
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240503_183441
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240503_194130
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240503_194210
+ Queue: /CStoRC, message received: aa0600000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0600000000000000
+Sequence ID: 6 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt
+# Disabling State Messages and Sleeping for 10 seconds
+sequence message: 100D00000000000000
+CPU Time is: 240503_194230
+delaying for 10 seconds.
+# Resetting All the SIABs and Sleeping for 5 seconds
+sequence message: 200000FFFF01000000
+CPU Time is: 240503_194240
+delaying for 5 seconds.
+# Killing All Client Processes (SIAB, TRGB, CoBo, LVPS, getEccServer, dataRouter) and Sleeping for 5 seconds
+sequence message: 101700000000000000
+CPU Time is: 240503_194245
+Killing the CoBo Process
+
+Usage:
+ kill [options] <pid> [...]
+
+Options:
+ <pid> [...]            send signal to every <pid> listed
+ -<signal>, -s, --signal <signal>
+                        specify the <signal> to be sent
+ -l, --list=[<signal>]  list all signal names, or convert one to a name
+ -L, --table            list all signal names in a nice table
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see kill(1).
+
+Killing the SIAB Process
+
+Usage:
+ kill [options] <pid> [...]
+
+Options:
+ <pid> [...]            send signal to every <pid> listed
+ -<signal>, -s, --signal <signal>
+                        specify the <signal> to be sent
+ -l, --list=[<signal>]  list all signal names, or convert one to a name
+ -L, --table            list all signal names in a nice table
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see kill(1).
+
+Killing the Trigger Board Process
+
+Usage:
+ kill [options] <pid> [...]
+
+Options:
+ <pid> [...]            send signal to every <pid> listed
+ -<signal>, -s, --signal <signal>
+                        specify the <signal> to be sent
+ -l, --list=[<signal>]  list all signal names, or convert one to a name
+ -L, --table            list all signal names in a nice table
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see kill(1).
+
+Killing the LVPS Process
+
+Usage:
+ kill [options] <pid> [...]
+
+Options:
+ <pid> [...]            send signal to every <pid> listed
+ -<signal>, -s, --signal <signal>
+                        specify the <signal> to be sent
+ -l, --list=[<signal>]  list all signal names, or convert one to a name
+ -L, --table            list all signal names in a nice table
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see kill(1).
+
+Killing the getEccServer
+
+Usage:
+ kill [options] <pid> [...]
+
+Options:
+ <pid> [...]            send signal to every <pid> listed
+ -<signal>, -s, --signal <signal>
+                        specify the <signal> to be sent
+ -l, --list=[<signal>]  list all signal names, or convert one to a name
+ -L, --table            list all signal names in a nice table
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see kill(1).
+
+Killing the dataRouter
+
+Usage:
+ kill [options] <pid> [...]
+
+Options:
+ <pid> [...]            send signal to every <pid> listed
+ -<signal>, -s, --signal <signal>
+                        specify the <signal> to be sent
+ -l, --list=[<signal>]  list all signal names, or convert one to a name
+ -L, --table            list all signal names in a nice table
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see kill(1).
+
+delaying for 5 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt
+Using given USB port: /dev/ttyUSB0 for LVPS microcontroller board
+Staring Master Control at: 04-05-2024 03-22-11
+ Queue: /CStoRC, message received: aa0100000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0100000000000000
+Sequence ID: 1 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/power_on_seq.txt
+# Initializing the SIAB Process and Sleeping for 2 seconds
+sequence message: 100300000000000000
+CPU Time is: 240504_032339
+delaying for 2 seconds.
+# Initializing the TRGB Process and Sleeping for 2 seconds
+sequence message: 100400000000000000
+CPU Time is: 240504_032341
+delaying for 2 seconds.
+# Initializing the COBO Process and Sleeping for 2 seconds
+sequence message: 100500000000000000
+CPU Time is: 240504_032343
+delaying for 2 seconds.
+# Initializing the LVPS Process and Sleeping for 5 seconds
+sequence message: 100600000000000000
+CPU Time is: 240504_032345
+delaying for 5 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_on_seq.txt
+ Queue: /CStoRC, message received: aa0200000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0200000000000000
+Sequence ID: 2 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/init_seq.txt
+# Turning on Music Chips on SIABs and Sleeping for 4 seconds
+sequence message: 200000FFFF08000000
+CPU Time is: 240504_032359
+delaying for 4 seconds.
+# Initializing the Music SPI communication and Sleeping for 4 seconds
+sequence message: 200000FFFF10000000
+CPU Time is: 240504_032403
+delaying for 4 seconds.
+# Initializing the Trigger Board and Sleeping for 3 seconds
+sequence message: 300200000000000000
+CPU Time is: 240504_032407
+delaying for 3 seconds.
+# Preparing the Trigger Board and Sleeping for 3 seconds
+sequence message: 300400640000000000
+CPU Time is: 240504_032410
+delaying for 3 seconds.
+# Running the getEccServer and Sleeping for 5 seconds
+sequence message: 400100000000000000
+CPU Time is: 240504_032413
+delaying for 5 seconds.
+# Running the DataRouter and Sleeping for 5 seconds
+sequence message: 400200000000000000
+CPU Time is: 240504_032418
+delaying for 5 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/init_seq.txt
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_032434
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_032554
+ Queue: /CStoRC, message received: aa0302000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0302000000000000
+Sequence ID: 3 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/config_seq_02.txt
+# Load the bottom Music Configuration from EEPROM and Sleeping for 5 Seconds
+sequence message: 200000FFFF11010000
+CPU Time is: 240504_032614
+delaying for 5 seconds.
+# Load the top Music Configuration from EEPROM and Sleeping for 5 Seconds
+sequence message: 200000FFFF11020000
+CPU Time is: 240504_032619
+delaying for 5 seconds.
+# Write the Loaded Configuration into bottom Music chips and Sleeping for 30 Seconds
+sequence message: 200000FFFF13010000
+CPU Time is: 240504_032624
+delaying for 15 seconds.
+# Write the Loaded Configuration into top Music chips and Sleeping for 30 Seconds
+sequence message: 200000FFFF13020000
+CPU Time is: 240504_032639
+delaying for 15 seconds.
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_032654
+# Load the Bias Voltage into top and Bottom Music chips and Sleeping for 90 Seconds
+sequence message: 200000FFFF24000000
+CPU Time is: 240504_032654
+delaying for 50 seconds.
+# Configure the Trigger Board and Sleeping for 5 seconds
+sequence message: 3005040502000F51C3
+CPU Time is: 240504_032747
+delaying for 5 seconds.
+# Initialize the CoBo and Sleeping for 30 seconds
+sequence message: 400300000000000000
+CPU Time is: 240504_032752
+delaying for 30 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/config_seq_02.txt
+ Queue: /CStoRC, message received: aa0400000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0400000000000000
+Sequence ID: 4 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+# Starting the Global Run in Master Control and sleeping for 15 seconds
+sequence message: 100A00000000000000
+CPU Time is: 240504_032948
+
+---------------------
+Starting the run#0
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+delaying for 15 seconds.
+Stopping the Run automatically ...
+Stopping the run#0
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000012
+Number of Triggered Events: 18
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#1
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#1
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#2
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#2
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#3
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#3
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#4
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#4
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#5
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#5
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#6
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#6
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#7
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#7
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#8
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#8
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#9
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#9
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000066
+Number of Triggered Events: 102
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#10
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240504_035009
+Disabling Run_Enabled Flag ...
+Stopping the Run Manually ...
+Stopping the run#10
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000065
+Number of Triggered Events: 101
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Run is stopped Manually.
+---------------------
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_035352
+ Queue: /CStoRC, message received: 101a00000000000001
+CPU Time is: 240504_035412
+
+--------------- Starting Single Focus Trigger Scan ---------------
+Start Point: 0
+Number of Steps: 0
+Step Size: 0
+Step Duration: 2 Seconds
+TScan Configuration Command: 0506010240005802
+Finished SF Trigger Scan Number:0
+mv: cannot stat '/home/trinity/Programs/Trinity/control_software/tb/mesaflash/TScan_G_*': No such file or directory
+mv: cannot stat '/home/trinity/Programs/Trinity/control_software/tb/mesaflash/TScan_C_*': No such file or directory
+-------------------------------------------------
+Moving Trigger Scan Counters to: /home/trinity/Programs/Trinity/control_software//Archive/Tscan/240504/SF/035413/
+-------------------------------------------------
+-------------------------------------------------
+
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_035820
+ Queue: /CStoRC, message received: aa0306000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0306000000000000
+Sequence ID: 3 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/config_seq_06.txt
+# Load the bottom Music Configuration from EEPROM and Sleeping for 5 Seconds
+sequence message: 200001FFFF11010000
+CPU Time is: 240504_035840
+delaying for 5 seconds.
+# Load the top Music Configuration from EEPROM and Sleeping for 5 Seconds
+sequence message: 200001FFFF11020000
+CPU Time is: 240504_035845
+delaying for 5 seconds.
+# Write the Loaded Configuration into bottom Music chips and Sleeping for 20 Seconds
+sequence message: 200001FFFF13010000
+CPU Time is: 240504_035850
+delaying for 20 seconds.
+# Write the Loaded Configuration into top Music chips and Sleeping for 20 Seconds
+sequence message: 200001FFFF13020000
+CPU Time is: 240504_035910
+delaying for 20 seconds.
+# Load the Bias Voltage into top and Bottom Music chips and Sleeping for 50 Seconds
+sequence message: 200001FFFF24000000
+CPU Time is: 240504_035930
+delaying for 50 seconds.
+# Configure the Trigger Board and Sleeping for 5 seconds
+sequence message: 3005060502640F51C3
+CPU Time is: 240504_040020
+delaying for 5 seconds.
+# Initialize the CoBo and Sleeping for 30 seconds
+sequence message: 400300000000000000
+CPU Time is: 240504_040025
+delaying for 30 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/config_seq_06.txt
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_040110
+ Queue: /CStoRC, message received: 500a04040000000000
+CPU Time is: 240504_040301
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_040421
+ Queue: /CStoRC, message received: 200000ffff1e000000
+CPU Time is: 240504_040441
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_040501
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_040704
+ Queue: /CStoRC, message received: 101a00820008000a01
+CPU Time is: 240504_040724
+
+--------------- Starting Single Focus Trigger Scan ---------------
+Start Point: 130
+Number of Steps: 8
+Step Size: 10
+Step Duration: 2 Seconds
+TScan Configuration Command: 0506010240005802
+-------------------------------------------------
+Setting the threshold on Music chips to: 130 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000c9
+-------------------------------------------------
+Setting the threshold on Music chips to: 140 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000ca
+-------------------------------------------------
+Setting the threshold on Music chips to: 150 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000ca
+-------------------------------------------------
+Setting the threshold on Music chips to: 160 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000ca
+-------------------------------------------------
+Setting the threshold on Music chips to: 170 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000ce
+-------------------------------------------------
+Setting the threshold on Music chips to: 180 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000dc
+-------------------------------------------------
+Setting the threshold on Music chips to: 190 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x0000010d
+-------------------------------------------------
+Setting the threshold on Music chips to: 200 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x00000240
+Finished SF Trigger Scan Number:1
+-------------------------------------------------
+Moving Trigger Scan Counters to: /home/trinity/Programs/Trinity/control_software//Archive/Tscan/240504/SF/041021/
+-------------------------------------------------
+-------------------------------------------------
+
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_041248
+ Queue: /CStoRC, message received: 200000008015840314
+CPU Time is: 240504_041308
+ Queue: /CStoRC, message received: 200000ffff25030078
+CPU Time is: 240504_041318
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_041338
+ Queue: /CStoRC, message received: aa0400000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0400000000000000
+Sequence ID: 4 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+# Starting the Global Run in Master Control and sleeping for 15 seconds
+sequence message: 100A00000000000000
+CPU Time is: 240504_041433
+
+---------------------
+Starting the run#11
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+delaying for 15 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+Stopping the Run automatically ...
+Stopping the run#11
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000d5f¿
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#12
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#12
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#13
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#13
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#14
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#14
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#15
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240504_042406
+Disabling Run_Enabled Flag ...
+Stopping the Run Manually ...
+Stopping the run#15
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Run is stopped Manually.
+---------------------
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 200000ffff250300a0
+CPU Time is: 240504_042735
+ Queue: /CStoRC, message received: aa0400000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0400000000000000
+Sequence ID: 4 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+# Starting the Global Run in Master Control and sleeping for 15 seconds
+sequence message: 100A00000000000000
+CPU Time is: 240504_042847
+
+---------------------
+Starting the run#16
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+delaying for 15 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+Stopping the Run automatically ...
+Stopping the run#16
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f¿
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#17
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#17
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#18
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#18
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#19
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240504_043533
+Disabling Run_Enabled Flag ...
+Stopping the Run Manually ...
+Stopping the run#19
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Run is stopped Manually.
+---------------------
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 200000ffff250300b4
+CPU Time is: 240504_043807
+ Queue: /CStoRC, message received: aa0400000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0400000000000000
+Sequence ID: 4 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+# Starting the Global Run in Master Control and sleeping for 15 seconds
+sequence message: 100A00000000000000
+CPU Time is: 240504_043922
+
+---------------------
+Starting the run#20
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+delaying for 15 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+Stopping the Run automatically ...
+Stopping the run#20
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f¿
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#21
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#21
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#22
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#22
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#23
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#23
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#24
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#24
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#25
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#25
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#26
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#26
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#27
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#27
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#28
+Please wait 10 seconds before stopping the run
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240504_045432
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+You can stop the run manually now, if you want!
+Disabling Run_Enabled Flag ...
+Stopping the Run Manually ...
+Stopping the run#28
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x0000031d
+Number of Triggered Events: 797
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Run is stopped Manually.
+---------------------
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_045518
+ Queue: /CStoRC, message received: aa0600000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0600000000000000
+Sequence ID: 6 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt
+# Disabling State Messages and Sleeping for 10 seconds
+sequence message: 100D00000000000000
+CPU Time is: 240504_045532
+delaying for 10 seconds.
+# Resetting All the SIABs and Sleeping for 5 seconds
+sequence message: 200000FFFF01000000
+CPU Time is: 240504_045542
+delaying for 5 seconds.
+# Killing All Client Processes (SIAB, TRGB, CoBo, LVPS, getEccServer, dataRouter) and Sleeping for 5 seconds
+sequence message: 101700000000000000
+CPU Time is: 240504_045547
+Killing the CoBo Process
+
+Killing the SIAB Process
+
+Killing the Trigger Board Process
+
+Killing the LVPS Process
+
+Killing the getEccServer
+
+Killing the dataRouter
+
+delaying for 5 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt
+Using given USB port: /dev/ttyUSB0 for LVPS microcontroller board
+Staring Master Control at: 04-05-2024 04-57-49
+ Queue: /CStoRC, message received: aa0100000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0100000000000000
+Sequence ID: 1 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/power_on_seq.txt
+# Initializing the SIAB Process and Sleeping for 2 seconds
+sequence message: 100300000000000000
+CPU Time is: 240504_045914
+delaying for 2 seconds.
+# Initializing the TRGB Process and Sleeping for 2 seconds
+sequence message: 100400000000000000
+CPU Time is: 240504_045916
+delaying for 2 seconds.
+# Initializing the COBO Process and Sleeping for 2 seconds
+sequence message: 100500000000000000
+CPU Time is: 240504_045918
+delaying for 2 seconds.
+# Initializing the LVPS Process and Sleeping for 5 seconds
+sequence message: 100600000000000000
+CPU Time is: 240504_045920
+delaying for 5 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_on_seq.txt
+ Queue: /CStoRC, message received: aa0200000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0200000000000000
+Sequence ID: 2 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/init_seq.txt
+# Turning on Music Chips on SIABs and Sleeping for 4 seconds
+sequence message: 200000FFFF08000000
+CPU Time is: 240504_045934
+delaying for 4 seconds.
+# Initializing the Music SPI communication and Sleeping for 4 seconds
+sequence message: 200000FFFF10000000
+CPU Time is: 240504_045938
+delaying for 4 seconds.
+# Initializing the Trigger Board and Sleeping for 3 seconds
+sequence message: 300200000000000000
+CPU Time is: 240504_045942
+delaying for 3 seconds.
+# Preparing the Trigger Board and Sleeping for 3 seconds
+sequence message: 300400640000000000
+CPU Time is: 240504_045945
+delaying for 3 seconds.
+# Running the getEccServer and Sleeping for 5 seconds
+sequence message: 400100000000000000
+CPU Time is: 240504_045948
+delaying for 5 seconds.
+# Running the DataRouter and Sleeping for 5 seconds
+sequence message: 400200000000000000
+CPU Time is: 240504_045953
+delaying for 5 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/init_seq.txt
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_050009
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_050155
+ Queue: /CStoRC, message received: aa0306000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0306000000000000
+Sequence ID: 3 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/config_seq_06.txt
+# Load the bottom Music Configuration from EEPROM and Sleeping for 5 Seconds
+sequence message: 200001FFFF11010000
+CPU Time is: 240504_050210
+delaying for 5 seconds.
+# Load the top Music Configuration from EEPROM and Sleeping for 5 Seconds
+sequence message: 200001FFFF11020000
+CPU Time is: 240504_050215
+delaying for 5 seconds.
+# Write the Loaded Configuration into bottom Music chips and Sleeping for 20 Seconds
+sequence message: 200001FFFF13010000
+CPU Time is: 240504_050220
+delaying for 20 seconds.
+# Write the Loaded Configuration into top Music chips and Sleeping for 20 Seconds
+sequence message: 200001FFFF13020000
+CPU Time is: 240504_050240
+delaying for 20 seconds.
+# Load the Bias Voltage into top and Bottom Music chips and Sleeping for 50 Seconds
+sequence message: 200001FFFF24000000
+CPU Time is: 240504_050300
+delaying for 50 seconds.
+# Configure the Trigger Board and Sleeping for 5 seconds
+sequence message: 3005060502640F51C3
+CPU Time is: 240504_050350
+delaying for 5 seconds.
+# Initialize the CoBo and Sleeping for 30 seconds
+sequence message: 400300000000000000
+CPU Time is: 240504_050355
+delaying for 30 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/config_seq_06.txt
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_050440
+ Queue: /CStoRC, message received: 500a04040000000000
+CPU Time is: 240504_050631
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_050755
+ Queue: /CStoRC, message received: 200000ffff1e000000
+CPU Time is: 240504_050810
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_050830
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_051013
+ Queue: /CStoRC, message received: 101a00820008000a01
+CPU Time is: 240504_051033
+
+--------------- Starting Single Focus Trigger Scan ---------------
+Start Point: 130
+Number of Steps: 8
+Step Size: 10
+Step Duration: 2 Seconds
+TScan Configuration Command: 0506010240005802
+-------------------------------------------------
+Setting the threshold on Music chips to: 130 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000c9
+-------------------------------------------------
+Setting the threshold on Music chips to: 140 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000ca
+-------------------------------------------------
+Setting the threshold on Music chips to: 150 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000c9
+-------------------------------------------------
+Setting the threshold on Music chips to: 160 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000cb
+-------------------------------------------------
+Setting the threshold on Music chips to: 170 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000cd
+-------------------------------------------------
+Setting the threshold on Music chips to: 180 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000d5
+-------------------------------------------------
+Setting the threshold on Music chips to: 190 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000000fa
+-------------------------------------------------
+Setting the threshold on Music chips to: 200 DAC units.
+Done.
+Preparing the Trigger Board
+Configuring the Trigger Board
+Starting the Global Trigger
+
+Waiting for 2 Seconds
+
+Stopping the Global Trigger
+Saving All the Counters
+Recording Channel Counters
+Recording Global Counters
+ Queue: /writetoRC, message received: TB0x0A0x000001e6
+Finished SF Trigger Scan Number:0
+-------------------------------------------------
+Moving Trigger Scan Counters to: /home/trinity/Programs/Trinity/control_software//Archive/Tscan/240504/SF/051330/
+-------------------------------------------------
+-------------------------------------------------
+
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_051654
+ Queue: /CStoRC, message received: 200000008015840314
+CPU Time is: 240504_051714
+ Queue: /CStoRC, message received: 200000ffff25030078
+CPU Time is: 240504_051724
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_051744
+ Queue: /CStoRC, message received: aa0400000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0400000000000000
+Sequence ID: 4 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+# Starting the Global Run in Master Control and sleeping for 15 seconds
+sequence message: 100A00000000000000
+CPU Time is: 240504_051840
+
+---------------------
+Starting the run#0
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+delaying for 15 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+Stopping the Run automatically ...
+Stopping the run#0
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000db9
+Number of Triggered Events: 3513
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#1
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#1
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#2
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#2
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#3
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#3
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#4
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240504_052617
+Disabling Run_Enabled Flag ...
+Stopping the Run Manually ...
+Stopping the run#4
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000493
+Number of Triggered Events: 1171
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Run is stopped Manually.
+---------------------
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_052837
+ Queue: /CStoRC, message received: 200000ffff250300aa
+CPU Time is: 240504_053043
+ Queue: /CStoRC, message received: aa0400000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0400000000000000
+Sequence ID: 4 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+# Starting the Global Run in Master Control and sleeping for 15 seconds
+sequence message: 100A00000000000000
+CPU Time is: 240504_053322
+
+---------------------
+Starting the run#5
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+delaying for 15 seconds.
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_053338
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+Stopping the Run automatically ...
+Stopping the run#5
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000882¿
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#6
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#6
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#7
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#7
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#8
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#8
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#9
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#9
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#10
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#10
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#11
+Please wait 10 seconds before stopping the run
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+CPU Time is: 240504_054404
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+You can stop the run manually now, if you want!
+Disabling Run_Enabled Flag ...
+Stopping the Run Manually ...
+Stopping the run#11
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x000002bf
+Number of Triggered Events: 703
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Run is stopped Manually.
+---------------------
+delaying for 10 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_054525
+ Queue: /CStoRC, message received: 200000ffff25030096
+CPU Time is: 240504_054954
+ Queue: /CStoRC, message received: 100c00000000000000
+CPU Time is: 240504_055137
+ Queue: /CStoRC, message received: aa0400000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0400000000000000
+Sequence ID: 4 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+# Starting the Global Run in Master Control and sleeping for 15 seconds
+sequence message: 100A00000000000000
+CPU Time is: 240504_055235
+
+---------------------
+Starting the run#12
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+delaying for 15 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/start_daq_seq.txt
+Stopping the Run automatically ...
+Stopping the run#12
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f¿
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#13
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#13
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#14
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#14
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#15
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#15
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#16
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#16
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#17
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#17
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#18
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#18
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#19
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#19
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#20
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#20
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#21
+Please wait 10 seconds before stopping the run
+You can stop the run manually now, if you want!
+Stopping the Run automatically ...
+Stopping the run#21
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+ Queue: /CStoRC, message received: aa0500000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0500000000000000
+Sequence ID: 5 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+# Stopping the Global Run on Master Control and sleeping for 10 seconds
+sequence message: 100B00000000000000
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x00000f9f
+Number of Triggered Events: 3999
+Recording the Channel Counters ...
+CPU Time is: 240504_061155
+Waiting 2 Seconds for Run Timer to finish ...
+Saving the Events data ...
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+Clearing the Counters ...
+---------------------
+Starting the Run automatically ...
+
+---------------------
+Starting the run#22
+Please wait 10 seconds before stopping the run
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+Waiting 2 Seconds for Run Timer to finish ...
+You can stop the run manually now, if you want!
+Disabling Run_Enabled Flag ...
+Stopping the Run Manually ...
+Stopping the run#22
+Disabling the Global Trigger
+Stopping the CoBo ...
+Saving All Counters on TB Memory ...
+Recording the Global Counters ...
+ Queue: /writetoRC, message received: TB0x0A0x0000025e
+Number of Triggered Events: 606
+Recording the Channel Counters ...
+Saving the Events data ...
+Clearing the Counters ...
+---------------------
+Run is stopped Manually.
+---------------------
+delaying for 10 seconds.
+ Queue: /CStoRC, message received: 100d00000000000000
+CPU Time is: 240504_061231
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt
+ Queue: /CStoRC, message received: aa0600000000000000
+A sequence was received. Starting to execute the sequence. Here is the sequence payload: 0600000000000000
+Sequence ID: 6 was received.
+Loading the filename: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt
+# Disabling State Messages and Sleeping for 10 seconds
+sequence message: 100D00000000000000
+CPU Time is: 240504_061251
+delaying for 10 seconds.
+# Resetting All the SIABs and Sleeping for 5 seconds
+sequence message: 200000FFFF01000000
+CPU Time is: 240504_061301
+delaying for 5 seconds.
+# Killing All Client Processes (SIAB, TRGB, CoBo, LVPS, getEccServer, dataRouter) and Sleeping for 5 seconds
+sequence message: 101700000000000000
+CPU Time is: 240504_061306
+Killing the CoBo Process
+
+Killing the SIAB Process
+
+Killing the Trigger Board Process
+
+Killing the LVPS Process
+
+Killing the getEccServer
+
+Killing the dataRouter
+
+delaying for 5 seconds.
+Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt
