@@ -107,6 +107,10 @@ ISR(TIMER1_COMPA_vect)
     if(DEBUG_STATUS) {Serial.println("");}
     PcInt::attachInterrupt(interruptPin, ADC_ready, (const char*) 0 , FALLING);
   }
+  
+  // This part resets the microcontoller I2C interface, every second to avoid any lock.
+  SMBusInit();
+  SMBEnable();
 }
 
 void GetTemp(void)
