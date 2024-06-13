@@ -81,7 +81,7 @@ int main(int argc, char **argv){
 	// The creatation of a variable that will count how many values are outside the set view for the plots the users see 
 	std::vector<int> ViewOverFlow(7,0);
 	// View limits for the plots the users sees in order of apperance 
-	std::vector<double> ylimits = {3770,3800,15,40,75,200,175,375,235,260,200,600,-0.5,0.5};
+	std::vector<double> ylimits = {3770,3800,15,40,75,200,175,375,235,260,0,600,-0.5,0.7};
 
   	bool found = false;
   	while (std::getline(logFile, line)) { // Read file line by line
@@ -116,6 +116,7 @@ int main(int argc, char **argv){
 	//declare a counter for total number of entries to average over as well as vectors to store the averages of each parameter
 	int tEntries = 0;
 	int tEntriesLED = 0;
+	TH1::AddDirectory(false); // removes warning for memory leak https://root-forum.cern.ch/t/troot-append-replacing-existing-th1-h-potential-memory-leak/42387/8
 	TH1 *ledDist = new TH1F("hledDist","Amplitudes normalized to camera median",100,0,2);
 	//vector of vectors to store pixel averages
 	//Means[0] is mead pedestal
@@ -133,16 +134,6 @@ int main(int argc, char **argv){
 	std::vector<uint64_t> eventTimesLED;
 	std::vector<std::vector<Double_t>> eventMeans(7,std::vector<Double_t>());
 
-	//Initialize vector of TGraph objects to plot eventMeans on
-	std::vector<TGraph *> gDraw;
-	std::vector<TGraph *> gDraw2;
-	//Create histogram objects
-	for(int i = 0; i < 7; i++){
-		TGraph *gi = new TGraph();
-		TGraph *gi2 = new TGraph();
-		gDraw.push_back(gi);
-		gDraw2.push_back(gi2);
-	}
 
 	// Declate the vectors for the running average
 	std::vector<std::vector<Double_t>> RunningMean(7,std::vector<Double_t>());
@@ -222,15 +213,14 @@ int main(int argc, char **argv){
 				}
 				eventMeans[6][tEntriesLED-nEntriesLED+EventCounter] = ledDist->GetStdDev();
 				eventMeans[5][tEntriesLED-nEntriesLED+EventCounter] /= MaxNofChannels;
-				//Average eventMeans values; add points to TGraph objects
+				//Average eventMeans values; add points to vector
 				for(int i = 5; i < 7; i++){
-					gDraw[i]->SetPoint(tEntriesLED-nEntriesLED+EventCounter,eventTimesLED[tEntriesLED-nEntriesLED+EventCounter],eventMeans[i][tEntriesLED-nEntriesLED+EventCounter]);
+					
 					if (eventMeans[i][tEntriesLED-nEntriesLED+EventCounter] < ylimits[i*2] ||  eventMeans[i][tEntriesLED-nEntriesLED+EventCounter] > ylimits[i*2+1]){
 						ViewOverFlow[i] += 1;
 					}
 					runningSum[i] += eventMeans[i][tEntriesLED-nEntriesLED+EventCounter];
 					RunningMean[i][tEntriesLED-nEntriesLED+EventCounter] = runningSum[i]/(tEntriesLED-nEntriesLED+EventCounter+1);
-					gDraw2[i]->SetPoint(tEntriesLED-nEntriesLED+EventCounter,eventTimesLED[tEntriesLED-nEntriesLED+EventCounter],RunningMean[i][tEntriesLED-nEntriesLED+EventCounter]);
 				}
 			}
 			cout << "Flasher events kept: " << tEntriesLED << endl;
@@ -283,16 +273,14 @@ int main(int argc, char **argv){
 					//have to delete pulse object here to avoid memory leak
 					delete pulse;
 				}
-				//Average eventMeans values; add points to TGraph objects
+				//Average eventMeans to vector; 
 				for(int i = 0; i < 5; i++){
 					eventMeans[i][tEntries-nEntries+EventCounter] /= MaxNofChannels;
-					gDraw[i]->SetPoint(tEntries-nEntries+EventCounter,eventTimes[tEntries-nEntries+EventCounter],eventMeans[i][tEntries-nEntries+EventCounter]);
 					if (eventMeans[i][tEntries-nEntries+EventCounter] < ylimits[i*2] ||  eventMeans[i][tEntries-nEntries+EventCounter] > ylimits[i*2+1]){
 						ViewOverFlow[i] += 1;
 					}
 					runningSum[i] += eventMeans[i][tEntries-nEntries+EventCounter];
 					RunningMean[i][tEntries-nEntries+EventCounter] = runningSum[i]/(tEntries-nEntries+EventCounter+1);
-					gDraw2[i]->SetPoint(tEntries-nEntries+EventCounter,eventTimes[tEntries-nEntries+EventCounter],RunningMean[i][tEntries-nEntries+EventCounter]);
 				}
 			}
 			//have to delete ev, tree, f0 objects here to avoid memory leak
@@ -328,6 +316,74 @@ int main(int argc, char **argv){
 			hDraw[j]->SetBinContent(nx+1,ny+1,Means[j][i]);
 		}
 	}
+
+	//Create historgram for Flasher Events
+	auto min_timeF = *std::min_element(eventTimesLED.begin(), eventTimesLED.end());
+	auto max_timeF = *std::max_element(eventTimesLED.begin(), eventTimesLED.end());
+	// Create histograms for scatter plots
+    std::vector<TH1F *> hDrawF;
+	for(int i = 0; i < 2; i++){
+	// Ensure valid indices for htitles
+	
+	// Corrected constructor call
+	TH1F *hiF = new TH1F("hiF", // Name
+		htitles[i*2 + 11].c_str(),      // Title
+		static_cast<Int_t>(eventTimesLED.size()), // Number of bins in X-axis
+		min_timeF,                      // X-axis lower bound
+		max_timeF                    // X-axis upper bound
+	);
+	hDrawF.push_back(hiF);
+	}
+
+	// Create histograms for scatter plots
+    std::vector<TH1F *> runAF;
+	for(int i = 0; i < 2; i++){
+	// Ensure valid indices for htitles
+	
+	// Corrected constructor call
+	TH1F *runF = new TH1F("runF", // Name
+		htitles[i*2 + 11].c_str(),      // Title
+		static_cast<Int_t>(eventTimesLED.size()), // Number of bins in X-axis
+		min_timeF,                      // X-axis lower bound
+		max_timeF                    // X-axis upper bound
+	);
+	runAF.push_back(runF);
+	}
+
+	
+	auto min_time = *std::min_element(eventTimes.begin(), eventTimes.end());
+	auto max_time = *std::max_element(eventTimes.begin(), eventTimes.end());
+	// Create histograms for regular events
+    std::vector<TH1F *> hDraw2;
+	for(int i = 0; i < 5; i++){
+	// Ensure valid indices for htitles
+	
+	// Corrected constructor call
+	TH1F *hi2 = new TH1F("hi2", // Name
+		htitles[i*2 + 1].c_str(),      // Title
+		static_cast<Int_t>(eventTimes.size()), // Number of bins in X-axis
+		min_time,                      // X-axis lower bound
+		max_time                    // X-axis upper bound
+	);
+	hDraw2.push_back(hi2);
+	}
+
+	// Create histograms for scatter plots
+    std::vector<TH1F *> runA;
+	for(int i = 0; i < 5; i++){
+	// Ensure valid indices for htitles
+	
+	// Corrected constructor call
+	TH1F *runAvg = new TH1F("runAvg", // Name
+		htitles[i*2 + 1].c_str(),      // Title
+		static_cast<Int_t>(eventTimes.size()), // Number of bins in X-axis
+		min_time,                      // X-axis lower bound
+		max_time                    // X-axis upper bound
+	);
+	runA.push_back(runAvg);
+	}
+
+
 	Double_t medianNightLED = Median(Means[5]);
 	TH2F *hAmpLEDNorm = (TH2F*)hDraw[5]->Clone(htitles[12].c_str());
 	hDraw.push_back(hAmpLEDNorm);
@@ -337,14 +393,35 @@ int main(int argc, char **argv){
 	//Begin writing c_disp TCanvas as a pdf; bracket "[" indicates the first page, and subsequent prints to the same file will append as pages
 	c_disp->Print(Form("%s%s.pdf[",outDir.c_str(),folString.c_str()));
 	
-  	TGraph *g = new TGraph(unixTimeFile_vec.size());
+	auto min_timeTr = *std::min_element(unixTimeFile_vec.begin(), unixTimeFile_vec.end());
+	auto max_timeTr = *std::max_element(unixTimeFile_vec.begin(), unixTimeFile_vec.end());
+	std::string title = day + " Trigger Rate" ;
+	TH1F *trigR = new TH1F("trigR", // Name
+		title.c_str(),      // Title
+		static_cast<Int_t>(unixTimeFile_vec.size()), // Number of bins in X-axis
+		min_timeTr,                      // X-axis lower bound
+		max_timeTr                    // X-axis upper bound
+	);
+
 	for (size_t i = 0; i < unixTimeFile_vec.size(); ++i) {
-    	g->SetPoint(i, unixTimeFile_vec[i], triggerRate_vec[i]);
+    	//g->SetPoint(i, unixTimeFile_vec[i], triggerRate_vec[i]);
+		trigR->AddBinContent(i,triggerRate_vec[i]);
   	}
-  	std::string title = day + " Trigger Rate";
-  	g->SetTitle(title.c_str()); //set the date as the title
-  	g->Draw("AP");
-  	g->SetMarkerStyle(20);
+  	
+	trigR->GetXaxis()->SetTimeDisplay(1);
+	trigR->GetXaxis()->SetNdivisions(505);
+	trigR->GetXaxis()->SetTimeFormat("%H:%M");
+	trigR->GetXaxis()->SetTimeOffset(0,"gmt");
+	trigR->GetXaxis()->SetTitle("UTC Time of Events [HH:MM]");
+  	trigR->GetYaxis()->SetTitle("Trigger Rate [Events/s]");
+
+	//Don't draw stats box
+	trigR->SetStats(0);
+	trigR->SetMarkerStyle(7);
+	trigR->SetMarkerSize(10);
+	trigR->SetMarkerColor(1);
+	trigR->Draw("P");
+
 	// Add label
 	std::vector<Double_t>::iterator trigIt = std::max_element(triggerRate_vec.begin(),triggerRate_vec.end());
   	Double_t ymax = *trigIt;
@@ -359,12 +436,7 @@ int main(int argc, char **argv){
 		label->Draw();
 	}
 
-  	g->GetXaxis()->SetTimeDisplay(1);
-	g->GetXaxis()->SetNdivisions(505);
-	g->GetXaxis()->SetTimeFormat("%H:%M");
-	g->GetXaxis()->SetTimeOffset(0,"gmt");
-	g->GetXaxis()->SetTitle("UTC Time of Events [HH:MM]");
-  	g->GetYaxis()->SetTitle("Trigger Rate [Events/s]");
+
 
   	//Add current canvas as page to output pdf
   	c_disp->Print(Form("%s%s.pdf",outDir.c_str(),folString.c_str()));
@@ -376,50 +448,70 @@ int main(int argc, char **argv){
 	
 	std::vector<double> hRanges = {3500,4000,0,50,0,500,0,1100,235,255,0,700,0.75,1.25};
 	//Loop through each histogram
-	for(int i = 5; i < 7; i++){
+	for(int i = 0; i < 2; i++){
 		//Clear canvas so we can keep reusing the same canvas object
 		c_disp->Clear();
 		c_disp->Divide(2,1);
 		c_disp->cd(1);
 		//Set min and max range for bin value gradient
-		hDraw[i]->SetMinimum(hRanges[i*2]);
-		hDraw[i]->SetMaximum(hRanges[i*2+1]);
+		hDraw[i+5]->SetMinimum(hRanges[i*2+10]);
+		hDraw[i+5]->SetMaximum(hRanges[i*2+11]);
 		//Don't draw stats box
-		hDraw[i]->SetStats(0);
+		hDraw[i+5]->SetStats(0);
 		//Set margin size so palette values aren't clipped
 		c_disp->cd(1)->SetRightMargin(0.15);
 		//Draw histogram to canvas; colz is defined in THistPainter ROOT documentation
-		hDraw[i]->Draw("colz");
+		hDraw[i+5]->Draw("colz");
 		//DrawMUSICBoundaries is defined below
 		DrawMUSICBoundaries();
 		//Add current canvas as page to output pdf
 		c_disp->cd(2);
-		//Set marker to filled circle/dot
-		gDraw[i]->SetMarkerStyle(20);
-		//Set TGraph title
-		gDraw[i]->SetTitle(htitles[i*2 + 1].c_str());
-		//Set X axis to display as a readable time rather than in UNIX time/seconds
-		gDraw[i]->GetXaxis()->SetTimeDisplay(1);
-		gDraw[i]->GetXaxis()->SetNdivisions(505);
-		gDraw[i]->GetXaxis()->SetTimeFormat("%H:%M");
-		gDraw[i]->GetXaxis()->SetTimeOffset(0,"gmt");
-		gDraw[i]->GetXaxis()->SetTitle("UTC Time of Events [HH:MM]");
-		gDraw[i]->SetMinimum(ylimits[i*2]);
-   		gDraw[i]->SetMaximum(ylimits[i*2+1]);
-		//Draw TGraph using markers
-		gDraw[i]->Draw("AP");
-		gDraw2[i]->SetLineStyle(20);
-		gDraw2[i]->SetMarkerStyle(10);
-		gDraw2[i]->SetMarkerColor(6);
-		gDraw2[i]->Draw("PL SAME");
+		//Fill the histogram with values from the arrays
+    	for (size_t p = 0; p < eventTimesLED.size(); ++p) {
+        	hDrawF[i]->AddBinContent(p,eventMeans[i+5][p]);
+			//cout << p <<"*** " <<eventMeans[i][p] << " ";
+        	runAF[i]->AddBinContent(p,RunningMean[i+5][p]);
+			//cout << p <<"*** " <<eventMeans[i][p] << " ";
+    	}
+	
+		hDrawF[i]->GetXaxis()->SetTimeDisplay(1);
+		hDrawF[i]->GetXaxis()->SetNdivisions(505);
+		hDrawF[i]->GetXaxis()->SetTimeFormat("%H:%M");
+		hDrawF[i]->GetXaxis()->SetTimeOffset(0,"gmt");
+		hDrawF[i]->GetXaxis()->SetTitle("UTC Time of Events [HH:MM]");
+		hDrawF[i]->SetMaximum(ylimits[i*2+11]);
+		hDrawF[i]->SetMinimum(ylimits[i*2+10]);
 
+		//DonFt draw stats box
+		hDrawF[i]->SetStats(0);
+		hDrawF[i]->SetMarkerStyle(6);
+		hDrawF[i]->SetMarkerSize(6);
+		hDrawF[i]->SetMarkerColor(1);
+		hDrawF[i]->Draw("P");
+
+		runAF[i]->SetMarkerStyle(6);
+		runAF[i]->SetMarkerSize(6);
+		runAF[i]->SetMarkerColor(6);
+		runAF[i]->Draw("P,SAME");
+
+		// // // Add green line 
+		// TLine *l=new TLine(eventTimes[0],AverageValuesVector[i],eventTimes[eventTimes.size()-1],AverageValuesVector[i]);
+		// l->SetLineColor(kGreen);
+		// l->SetLineColorAlpha(kGreen,0.6);
+		// l->SetLineWidth(4);
+		// l->Draw("SAME");
+
+
+		// // Add Legend
 		auto legend = new TLegend(0.1,0.86,0.9,0.94);
 		legend->SetNColumns(4);
-		std::string overFlowMess = "Overflow points : " + std::to_string(ViewOverFlow[i]);
+		std::string overFlowMess = "Overflow points : " + std::to_string(ViewOverFlow[i+5]);
 		legend->SetHeader(overFlowMess.c_str(),"C"); // option "C" allows to center the header
-		legend->AddEntry(gDraw[i],"Data Points","p");
-		legend->AddEntry(gDraw2[i],"Running Avg","p");
-		legend->Draw();
+		legend->AddEntry(hDrawF[i],"Data Points","p");
+		legend->AddEntry(runAF[i],"Running Avg","p");
+		// legend->AddEntry(l,"Expected Avg","l");
+		legend->Draw("SAME");
+
 		//Add current canvas as page to output pdf
 		c_disp->Print(Form("%s%s.pdf",outDir.c_str(),folString.c_str()));
 	}
@@ -443,46 +535,61 @@ int main(int argc, char **argv){
 		DrawMUSICBoundaries();
 		//Add current canvas as page to output pdf
 		c_disp->cd(2);
-		//Set marker to filled circle/dot
-		gDraw[i]->SetMarkerStyle(20);
-		//Set TGraph title
-		gDraw[i]->SetTitle(htitles[i*2 + 1].c_str());
-		//Set X axis to display as a readable time rather than in UNIX time/seconds
-		gDraw[i]->GetXaxis()->SetTimeDisplay(1);
-		gDraw[i]->GetXaxis()->SetNdivisions(505);
-		gDraw[i]->GetXaxis()->SetTimeFormat("%H:%M");
-		gDraw[i]->GetXaxis()->SetTimeOffset(0,"gmt");
-		gDraw[i]->GetXaxis()->SetTitle("UTC Time of Events [HH:MM]");
-		gDraw[i]->SetMinimum(ylimits[i*2]);
-   		gDraw[i]->SetMaximum(ylimits[i*2+1]);
-		//Draw TGraph using markers
-		gDraw[i]->Draw("AP");
-		gDraw2[i]->SetLineStyle(20);
-		gDraw2[i]->SetMarkerStyle(10);
-		gDraw2[i]->SetMarkerColor(6);
-		gDraw2[i]->Draw("PL SAME");
+		//Fill the histogram with values from the arrays
+    	for (size_t p = 0; p < eventTimes.size(); ++p) {
+        	hDraw2[i]->AddBinContent(p,eventMeans[i][p]);
+			//cout << p <<"*** " <<eventMeans[i][p] << " ";
+    	}
+		for (size_t p = 0; p < eventTimes.size(); ++p) {
+        	runA[i]->AddBinContent(p,RunningMean[i][p]);
+			//cout << p <<"*** " <<eventMeans[i][p] << " ";
+    	}
+	
+		hDraw2[i]->GetXaxis()->SetTimeDisplay(1);
+		hDraw2[i]->GetXaxis()->SetNdivisions(505);
+		hDraw2[i]->GetXaxis()->SetTimeFormat("%H:%M");
+		hDraw2[i]->GetXaxis()->SetTimeOffset(0,"gmt");
+		hDraw2[i]->GetXaxis()->SetTitle("UTC Time of Events [HH:MM]");
+		hDraw2[i]->SetMaximum(ylimits[i*2+1]);
+		hDraw2[i]->SetMinimum(ylimits[i*2]);
 
+		//Don't draw stats box
+		hDraw2[i]->SetStats(0);
+
+		hDraw2[i]->SetMarkerStyle(6);
+		hDraw2[i]->SetMarkerSize(6);
+		hDraw2[i]->SetMarkerColor(1);
+		hDraw2[i]->Draw("P");
+
+		runA[i]->SetMarkerStyle(6);
+		runA[i]->SetMarkerSize(6);
+		runA[i]->SetMarkerColor(6);
+		runA[i]->Draw("P,SAME");
+
+		// // Add green line 
 		TLine *l=new TLine(eventTimes[0],AverageValuesVector[i],eventTimes[eventTimes.size()-1],AverageValuesVector[i]);
 		l->SetLineColor(kGreen);
 		l->SetLineColorAlpha(kGreen,0.6);
 		l->SetLineWidth(4);
-		l->Draw();
+		l->Draw("SAME");
 
+		// // Add Legend
 		auto legend = new TLegend(0.1,0.86,0.9,0.94);
 		legend->SetNColumns(4);
 		std::string overFlowMess = "Overflow points : " + std::to_string(ViewOverFlow[i]);
 		legend->SetHeader(overFlowMess.c_str(),"C"); // option "C" allows to center the header
-		legend->AddEntry(gDraw[i],"Data Points","p");
-		legend->AddEntry(gDraw2[i],"Running Avg","p");
+		legend->AddEntry(hDraw2[i],"Data Points","p");
+		legend->AddEntry(runA[i],"Running Avg","p");
 		legend->AddEntry(l,"Expected Avg","l");
-		legend->Draw();
+		legend->Draw("SAME");
 		//Add current canvas as page to output pdf
 		c_disp->Print(Form("%s%s.pdf",outDir.c_str(),folString.c_str()));
-		delete l;
+		
 	}
 	//Closes the pdf (doesn't add another page)
 	c_disp->Print(Form("%s%s.pdf]",outDir.c_str(),folString.c_str()));
 	system(Form("chmod 660 %s%s.pdf",outDir.c_str(),folString.c_str()));
+	
 	return 0;
 }
 
