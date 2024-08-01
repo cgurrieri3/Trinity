@@ -1,4 +1,4 @@
-#!/bin/bash
+ls#!/bin/bash
 
 echo "Starting Up CT CPU"
 
@@ -34,6 +34,11 @@ DP_PID=`echo $!`
 echo "STARTUP SERVICE: File Searching Started"
 sleep 5
 
+
+$SCRIPTS/DataMonitoring.sh >> ${CONTROLSFWR}/fcutils/test/LOGS/dm.log 2>&1 &
+DM_PID=$!
+echo "STARTUP SERVICE: Data Monitoring Started"
+sleep 5
 
 systemd-notify --ready
 

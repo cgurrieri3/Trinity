@@ -23,8 +23,8 @@
 #define SWITCH_TO_BIN_LOG     0x0B
 #define SWITCH_TO_ASCII_LOG   0x0C
 
-volatile bool bin_mode = false;
-volatile bool dec_mode = true;
+volatile bool bin_mode = true;
+volatile bool dec_mode = false;
 volatile bool log_data = true;
 volatile int ADCFlag = 0;
 volatile int sample_counter = 0;
@@ -32,7 +32,7 @@ volatile uint32_t loop_delay = 10000;
 volatile double adc_vals[NofADC][16];
 const float HV_Safe_Value = 20.0;
 const float HV_Current_Limit = 20.0;
-const float HV_offset[4] = {0.0, 0.0, 0.01, 0.01};
+const float HV_offset[4] = {-0.01, -0.01, -0.06, -0.06};
 const float HV_Fixed_Val[4] = {42.00, 42.00, 42.01, 42.01};
 const char *HK_list[] = {"BP0", "BP1", "HK1", "HK2"}; 
 const int DAC_Ch_list[4] = {AD5686R_ADDR_DAC_A, AD5686R_ADDR_DAC_B, AD5686R_ADDR_DAC_C, AD5686R_ADDR_DAC_D};

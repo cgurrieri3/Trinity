@@ -34,20 +34,23 @@ def log_file(message):
 def ping(host):
     try:
         subprocess.check_output(['ping', '-c', '4', host])  # Use '-n' instead of '-c' on Windows
+        log_file(f"{host} is reachable. -")
         return True
     except subprocess.CalledProcessError:
+        log_file(f"{host} is NOT reachable. -")
         return False
 
 # ping gatech lab computer
-host_to_ping = 'phys43199.physics.gatech.edu'
-if ping(host_to_ping):
+host_to_ping2 = 'phys43199.physics.gatech.edu'
+host_to_ping1 = 'cos-4a10345.cos.gatech.edu'
+if ping(host_to_ping1) or ping(host_to_ping2):
     #print(f"{host_to_ping} is reachable.")
-    log_file(f"{host_to_ping} is reachable. -")
-    
+    #log_file(f"{host_to_ping1} is reachable. -")
+    log_file('Pinging Complete -')
     #run_shut_down_ct()
     
 else:
-    log_file(f"{host_to_ping} is not reachable. -")
+    log_file(f"{host_to_ping} is NOT reachable. -")
     
     run_shut_down_ct()
 

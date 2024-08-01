@@ -11,6 +11,7 @@
 #include "fcutils/utility/utility.hpp"
 #include "fcutils/string/string.hpp"
 #include "state_message_cmds.h"
+#include <unistd.h>
 
 using namespace std;
 using fcutils::system::posix_message_queue;
@@ -435,6 +436,7 @@ void Stop_Triggering()
 	Archive_Counters();
 	Run_Number++;
 
+	sleep(5);
 	std::string Move_Files = CoBo_DIR+"scripts/MoveFilesDone.sh &";
 	system(Move_Files.c_str());
 	std::cout << "---------------------" << std::endl;

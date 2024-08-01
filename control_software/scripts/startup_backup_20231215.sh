@@ -5,7 +5,6 @@ echo "Starting Up CT CPU"
 U_HOME=/home/trinity
 SFWR=$U_HOME/Programs
 CONTROLSFWR=$SFWR/Trinity/control_software
-SCRIPTS=$U_HOME/Scripts
 sudo rm /dev/mqueue/*
 
 list_ftdi_devices() {
@@ -33,7 +32,6 @@ $SFWR/eventbuilder/DataProcess.sh >> ${CONTROLSFWR}/fcutils/test/LOGS/dp.log 2>&
 DP_PID=`echo $!`
 echo "STARTUP SERVICE: File Searching Started"
 sleep 5
-
 
 systemd-notify --ready
 

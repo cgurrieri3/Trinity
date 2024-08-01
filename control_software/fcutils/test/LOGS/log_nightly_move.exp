@@ -27,6 +27,5 @@ spawn mv "/home/trinity/control_software/fcutils/test/LOGS/Client_TB.log" $desti
 spawn mv "/home/trinity/control_software/fcutils/test/LOGS/Client_SIAB.log" $destinationPath
 spawn mv "/home/trinity/control_software/fcutils/test/LOGS/Client_CoBo.log" $destinationPath
 spawn mv "/home/trinity/control_software/fcutils/test/LOGS/Client.log" $destinationPath
-spawn mv "/home/trinity/control_software/Archive/LOGS/State_MSG_LOG_$shortDate.bin" $destinationPath
-
-
+spawn mv "/home/trinity/control_software/Archive/LOGS/State_MSG_LOG_${shortDate}.bin" "$destinationPath"
+expect eof
