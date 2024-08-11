@@ -10,24 +10,26 @@ import communicate as lets
 
 # Import the warnings module
 import warnings
-import shutup 
+#import shutup 
 from collections import deque
-shutup.please()
+#shutup.please()
 
 warnings.filterwarnings("ignore", message="MatplotlibDeprecationWarning:") 
 warnings.filterwarnings("ignore")
 
+folder_path = "/data/TrinityLabComputer/obs_prgm/rcLogs/"
+
 
 # file to check the last line 
-def lab_directory():
+def rclog_directory():
     # directory with all expect scripts are located
-    directory = os.path.expanduser("~/obs_prgm/rcLogs")
+    directory = os.path.expanduser(folder_path)
     os.chdir(directory)
 
 
 def run_ssh(command):
     # Run the command and capture its output
-    lab_directory()
+    rclog_directory()
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # Remove ANSI escape codes
     #result = re.sub(r'\x1b\[[0-9;]*m', '', result.decode())
@@ -76,9 +78,10 @@ def check_rc_log(keyword):
     # try:
     stdout=run_ssh('./rclog_Copy.sh')
     #print(stdout)
+
     if stdout == 1:
         
-        file_path = "/home/mpotts32/obs_prgm/rcLogs/rc.log"
+        file_path = f"{folder_path}/rc.log"
 
         # Open the file in write mode, which truncates the file
         with open(file_path, 'w'):
@@ -90,7 +93,7 @@ def check_rc_log(keyword):
     if keyword == 'Starting the run#':
         lines = 6
 
-    log=LastNlines("/home/mpotts32/obs_prgm/rcLogs/rc.log",lines)
+    log=LastNlines(f"{folder_path}rc.log",lines)
     #print(log)
     output=log.find(f'{keyword}')
     #print(output)
@@ -107,7 +110,7 @@ def check_rc_log(keyword):
 
 def plot_triggerRate_scan():
     run_ssh('./rclog_Copy.sh')
-    folder_lab_machine = "/home/mpotts32/obs_prgm/rcLogs/"
+    folder_lab_machine = folder_path
     log=LastNlines(f'{folder_lab_machine}rc.log',3)
     print(log)
     output=log.find(f'Moving Trigger Scan Counters to:')
@@ -132,8 +135,9 @@ def plot_triggerRate_scan():
     plt.xlabel('Threshold')
     plt.ylabel('Trigger Rate')
     plt.ylim([0,50])
-    plt.savefig(f'{folder_lab_machine}Plots/Tscan_now.png')
-    plt.show()
+    plt.savefig(f'{folder_lab_machine}Plots/Tscan_now_{folder_date}_{folder_time}.png')
+    print(f'Plot saved to {folder_lab_machine}Plots/Tscan_now_{folder_date}_{folder_time}.png')
+    #plt.show()
 #plot_triggerRate_scan()
 #check_rc_log('Staring Master Control at:') 
 
@@ -169,7 +173,7 @@ def count_lines_between_phrases(file_path, start_phrase, end_phrase,lines_to_che
 
 def check_daq():
     run_ssh('./rclog_Copy.sh')
-    rc_filepath = "/home/mpotts32/obs_prgm/rcLogs/rc.log"
+    rc_filepath = f"/data/TrinityLabComputer/obs_prgm/rcLogs/rc.log"
     start_phrase = 'Clearing the Counters ...'
     end_phrase = 'Saving the Events data ...'
     num_lines = count_lines_between_phrases(rc_filepath,start_phrase,end_phrase)

@@ -6,6 +6,7 @@ import communicate as lets
 import parseMetar as pm
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
@@ -19,11 +20,17 @@ import numpy as np
 def get_screenshot(link, output_png):
 	lets.communicate('Taking screenshot...')
 	# Set up Firefox options for headless mode
+	#firefox_options = Options()
+	#firefox_options.add_argument('--headless')  # Run Firefox in headless mode
+
+	# Create a Firefox webdriver with the specified options
+	#browser = webdriver.Firefox(options=firefox_options)
+	service = Service(executable_path="/snap/bin/geckodriver")
 	firefox_options = Options()
 	firefox_options.add_argument('--headless')  # Run Firefox in headless mode
 
 	# Create a Firefox webdriver with the specified options
-	browser = webdriver.Firefox(options=firefox_options)
+	browser = webdriver.Firefox(service=service,options=firefox_options)
 	browser.get(link)
 
 	try:
@@ -42,8 +49,8 @@ def take_screenshot():
 
 def get_difference(png1):
 	# Load the two images
-	image = cv2.imread(f'/home/mpotts32/obs_prgm/Weather_radar/{png1}.png')
-	image_base = cv2.imread(f'/home/mpotts32/obs_prgm/Weather_radar/{png1}_baseline.png')
+	image = cv2.imread(f'/data/TrinityLabComputer/obs_prgm/Weather_radar/{png1}.png')
+	image_base = cv2.imread(f'/data/TrinityLabComputer/obs_prgm/Weather_radar/{png1}_baseline.png')
 	
 	#crop the image
 	x,y,width, height = 550,250,400,400
@@ -97,8 +104,8 @@ def get_difference(png1):
 	# cv2.waitKey(0)
 	# cv2.destroyAllWindows()
 
-	# image1 =Image.open(f'/home/mpotts32/obs_prgm/Weather_radar/{png1}.jpg')
-	# image2 =Image.open(f'/home/mpotts32/obs_prgm/Weather_radar/{png1}_baseline.jpg')
+	# image1 =Image.open(f'/data/TrinityLabComputer//obs_prgm/Weather_radar/{png1}.jpg')
+	# image2 =Image.open(f'/data/TrinityLabComputer//obs_prgm/Weather_radar/{png1}_baseline.jpg')
 	# difference = ImageChops.difference(image2,image1)
 	# difference.show()
 	if percentage_difference_small > 4000:
@@ -138,9 +145,10 @@ def query_last_wx():
 	# Local host lines for access
 	host = 'localhost'
 	port = 8086
-	username = 'mpotts32'
+	#username = 'mpotts32'
+	username = 'admin'
 	password = 'Ttys@210'
-	database = 'Trinity' # Database for independent measurements for each day, need to change the measurent line in cre_df_list()
+	database = 'dbWX' # Database for independent measurements for each day, need to change the measurent line in cre_df_list()
     #database = 'Trinity1'
 
     # Initialize the InfluxDB client and write the points in batches
@@ -222,10 +230,10 @@ def query_last_wx():
 
 		
 	# wind speeds can be higher when they do not impact the door
-	if wind_value < 12 and wind_direction < 315 and wind_direction > 225:
+	if wind_value < 13 and wind_direction < 315 and wind_direction > 225:
 		all_good = 1 + all_good
 		#print('WX: Wind good')
-	elif wind_value < 20:
+	elif wind_value < 10.5:
 		all_good = 1 + all_good
 	else:
 		lets.communicate(f'WX: Wind to high = {wind_value} ')

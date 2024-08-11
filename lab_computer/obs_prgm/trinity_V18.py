@@ -244,35 +244,7 @@ def turn_on_CT_config(config):
 			ssh.CTM_config_hled()
 		elif config == 'external':
 			ssh.CTM_config_single()
-			
-def daqRECONFIGURE(rate, wx_override):
 
-	ssh.CTM_stop()
-	time.sleep(5)
-	
-	lets.fancy_communicate('DAQ stop \n SM disabled')
-	lets.log_file('stopping DAQ')
-	
-	ssh.CTM_config_single()
-	lets.communicate("sequence config single focus only complete")
-	lets.log_file("sequence singlefocus only complete")
-	
-	ssh.CTM_set_trigger(rate) # state messages enabled
-			
-	lets.fancy_communicate(f'Trigger Rate {rate} \n SM enabled')
-	lets.log_file(f'Trigger Rate set {rate} ')
-
-	time.sleep(5)
-	ssh.CTM_start()
-
-	lets.fancy_communicate('DAQ start \n SM enabled')
-	lets.log_file('Starting DAQ')
-	
-	monitor_to_shutdown(wx_override)
-
-	
-	
-	
 def full_shutdown(exit_mess):
 	lets.fancy_communicate('Shuting Down Operations')
 	lets.log_file('Camera shuting down ')
@@ -430,7 +402,7 @@ def find_tRate(df):
 
 def get_new_tRate(wx_override):
     lets.communicate('Starting Trigger Rate Scan')
-    trigger_scan('newScan',250,11,5,270,wx_override)
+    trigger_scan('newScan',100,12,10,170,wx_override)
     lets.communicate('Finished Trigger Rate Scan')
     # get the value from the rc log
     time.sleep(20)
@@ -458,13 +430,7 @@ def get_new_tRate(wx_override):
     lets.communicate(df)
     trate=find_tRate(df)
     lets.fancy_communicate(f'New trigger rate to be set to {trate}')
-    lets.communicate("Single Focus Only reconfigure starting")
-    ssh.CTM_config_single()
-    time.sleep(120)
-    lets.communicate("Single Focus Only reconfigure complete")
     return trate
-    
-
 
 def body_extrigs(wx_override = 'no'):
 	lets.fancy_communicate('External Configure Complete \n SM enabled')	
@@ -516,31 +482,42 @@ def body_extrigs(wx_override = 'no'):
 				safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
 
 			if safe_proceed == 1:
+				ssh.door('up')
+				lets.fancy_communicate('Door Up')
+				lets.log_file('Door up ')
+
+				lets.fancy_communicate('Trigger Rate Scan')
+
+				rate= get_new_tRate(wx_override);
+
+
 				lets.fancy_communicate('Setting trigger rate')
 				# add the trigger rate scan 
 				
-				rate = 270
 				ssh.CTM_set_trigger(rate) # state messages enabled
 				
 				lets.fancy_communicate(f'Trigger Rate {rate} \n SM enabled')
 				lets.log_file(f'Trigger Rate set {rate} ')
-        
-				inputbyuser = input("To continue type \"c\" and open the door") 
-				if inputbyuser == "c":
-					ssh.door('up')
-					lets.fancy_communicate('Door Up')
-					lets.log_file('Door up ')
 
-					#lets.fancy_communicate('Trigger Rate Scan')
-					#rate= get_new_tRate(wx_override)
-		
-					ssh.CTM_start()
+				time.sleep(5)
+				ssh.CTM_start()
 
-					lets.fancy_communicate('DAQ start \n SM enabled')
-					lets.log_file('Starting DAQ')
-					
-					monitor_to_shutdown(wx_override)
-		
+				lets.fancy_communicate('DAQ start \n SM enabled')
+				lets.log_file('Starting DAQ')
+				
+				monitor_to_shutdown(wx_override)
+	
+				# data completed or error
+
+				# lets.fancy_communicate('Camera shutting down')
+				
+				# shut_down_CT() # stops data
+
+				# lets.fancy_communicate('Camera SHUT DOWN')
+				# lets.log_file('Camera shutdown')
+				# lets.send_email(exit_mess)
+				# lets.log_file(f'Email sent for reason {exit_mess} ')	
+
 def external_triggers(process,wx_override='no'): # LEFT OFF COMMENTING HERE
 	clt.create_file()
 	safe_light=clt.check_current_time() 
@@ -796,7 +773,7 @@ def main():
 
 		elif com_in == 'extrigs': # re only after intrigs - so the command intrigs and statemessages on and daq stopped 
 			# start seqence off or freshly rebooted 
-			com_in = input("Reconfig or start from power off re, start, DAQre: ")
+			com_in = input("Reconfig or start from power off re, start: ")
 
 			wx_override = input("Do you want to override the weather ex. yes or no: ")
 			if wx_override == 'yes':
@@ -825,11 +802,6 @@ def main():
 
 				else:
 					print('Incorrect process based on rc log')
-					
-			if com_in == 'DAQre':
-				double_check = input("This is to reconfigure after DAQ starts do you want to proceed enter a trigger RATE!: ")
-				if double_check.is_digit():
-					daqRECONFIGURE(double_check,wx_override)
 
 		elif com_in == 'triggerScan':
 			password = input('Password: ')

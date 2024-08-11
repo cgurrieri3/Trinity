@@ -6,7 +6,7 @@ import communicate as lets
 
 def lab_directory():
 	# directory with all expect scripts are located
-	directory = os.path.expanduser("~/control_comp")
+	directory = os.path.expanduser("/data/TrinityLabComputer/control_comp")
 	os.chdir(directory)
 
 
@@ -26,6 +26,12 @@ def run_ssh(command):
 	    # Command encountered an error
 	    lets.communicate(f"{command} output error: {result.stderr} ")
 	return result.stdout
+
+def rclog_sync():
+	os.chdir("/data/TrinityLabComputer/obs_prgm/rcLogs/")
+	command = f'./rclog_Copy.sh'
+	run_ssh(command)
+	lab_directory()
  
 def SIAB_testing():
   lab_directory()
@@ -62,6 +68,8 @@ def MagnaPS(status):
 	# The command you want to run
 	command = f'./outletcontrol.exp rc 6 {status}'  # Replace with your desired command
 	run_ssh(command)
+ 
+
 
 def MicroTSA(status):
 	lab_directory()
@@ -119,9 +127,8 @@ def LVPS(status):
 	lab_directory()
 	run_ssh(f'./MagnaPS_power.exp {status}')
 
-def trigger_scan(start=140,size=10,step=10):
+def trigger_scan(start=120,size=10,step=10):
 	lab_directory()
 	run_ssh(f'./CTM_run_trigScan.exp {start} {step} {size}')
  
-
 

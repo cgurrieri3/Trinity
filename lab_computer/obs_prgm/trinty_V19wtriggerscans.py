@@ -516,31 +516,42 @@ def body_extrigs(wx_override = 'no'):
 				safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
 
 			if safe_proceed == 1:
+				ssh.door('up')
+				lets.fancy_communicate('Door Up')
+				lets.log_file('Door up ')
+
+				lets.fancy_communicate('Trigger Rate Scan')
+
+				rate= get_new_tRate(wx_override);
+
+
 				lets.fancy_communicate('Setting trigger rate')
 				# add the trigger rate scan 
 				
-				rate = 270
 				ssh.CTM_set_trigger(rate) # state messages enabled
 				
 				lets.fancy_communicate(f'Trigger Rate {rate} \n SM enabled')
 				lets.log_file(f'Trigger Rate set {rate} ')
-        
-				inputbyuser = input("To continue type \"c\" and open the door") 
-				if inputbyuser == "c":
-					ssh.door('up')
-					lets.fancy_communicate('Door Up')
-					lets.log_file('Door up ')
 
-					#lets.fancy_communicate('Trigger Rate Scan')
-					#rate= get_new_tRate(wx_override)
-		
-					ssh.CTM_start()
+				time.sleep(5)
+				ssh.CTM_start()
 
-					lets.fancy_communicate('DAQ start \n SM enabled')
-					lets.log_file('Starting DAQ')
-					
-					monitor_to_shutdown(wx_override)
-		
+				lets.fancy_communicate('DAQ start \n SM enabled')
+				lets.log_file('Starting DAQ')
+				
+				monitor_to_shutdown(wx_override)
+	
+				# data completed or error
+
+				# lets.fancy_communicate('Camera shutting down')
+				
+				# shut_down_CT() # stops data
+
+				# lets.fancy_communicate('Camera SHUT DOWN')
+				# lets.log_file('Camera shutdown')
+				# lets.send_email(exit_mess)
+				# lets.log_file(f'Email sent for reason {exit_mess} ')	
+
 def external_triggers(process,wx_override='no'): # LEFT OFF COMMENTING HERE
 	clt.create_file()
 	safe_light=clt.check_current_time() 

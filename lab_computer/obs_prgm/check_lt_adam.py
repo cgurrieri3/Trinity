@@ -41,7 +41,7 @@ def moon_position_over_time(latitude, longitude, start_date, interval_minutes):
 	moon_times = []
 	moon_altitudes = []
 
-	for hour in range(25):
+	for hour in range(24):
 		current_time = start_date + timedelta(hours=hour)
 
 		for minute in range(0, 60, interval_minutes):
@@ -78,7 +78,7 @@ def sun_position_over_time(latitude, longitude, start_date, interval_minutes):
 	sun_times = []
 	sun_altitudes = []
 
-	for hour in range(25):
+	for hour in range(24):
 		current_time = start_date + timedelta(hours=hour)
 
 		for minute in range(0, 60, interval_minutes):
@@ -92,7 +92,7 @@ def sun_position_over_time(latitude, longitude, start_date, interval_minutes):
 	sunrise_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > -15 and sun_altitudes[i - 1] <= -15), None)
 	time_of_sunrise_crit = sun_times[sunrise_index] if sunrise_index is not None else None
 
-	sunset_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] < -18 and sun_altitudes[i - 1] >= -18), None)
+	sunset_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] < -15 and sun_altitudes[i - 1] >= -15), None)
 	time_of_sunset_crit = sun_times[sunset_index] if sunset_index is not None else None
 
 	sunrise_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > 0 and sun_altitudes[i - 1] <= 0), None)
@@ -202,22 +202,22 @@ def create_file(user_input='nope'):
 		sun_moon_list.append(endtime.strftime(date_format))
 
 
-	with open("/data/TrinityLabComputer/obs_prgm/EON_time.txt", "w") as file:
+	with open("/data/TrinityLabComputer/obs_prgm/EON_time_adam.txt", "w") as file:
 	    	# Loop through the list and write each element to the file
 		for item in sun_moon_list:
 			file.write(str(item) + '\n')
 		file.close()
 
-
+	print(" ")
 	print("Moonrise time (UTC):", time_of_moonrise.strftime("%Y-%m-%d %H:%M"))
 	print("Moonset time (UTC):", time_of_moonset.strftime("%Y-%m-%d %H:%M"))
 	print("Sunrise time (UTC):", time_of_sunrise.strftime("%Y-%m-%d %H:%M"))
 	print("Sunset time (UTC):", time_of_sunset.strftime("%Y-%m-%d %H:%M"))
-	print("---")
-	print("\033[1mStart extrigs time (UTC):\033[1m", start_time.strftime("%Y-%m-%d %H:%M"))
+	print(" ")
+	print("\033[1mExtrigs time (UTC):\033[1m", start_time.strftime("%Y-%m-%d %H:%M"))
 	print("\033[1mCutoff time (UTC):\033[1m", endtime.strftime("%Y-%m-%d %H:%M"))
-	print("---")
-	lets.log_file('EON_time.txt created')
+
+	lets.log_file('EON_time_adam.txt created')
 
 
 
@@ -226,7 +226,7 @@ def create_file(user_input='nope'):
 # Check current time
 
 def check_current_time():
-	df = pd.read_csv('/data/TrinityLabComputer/obs_prgm/EON_time.txt',header=None)
+	df = pd.read_csv('/data/TrinityLabComputer/obs_prgm/EON_time_adam.txt',header=None)
 	df.columns = ['UTC DateTime']
 	df['UTC DateTime'] = pd.to_datetime(df['UTC DateTime'])
 	row_titles = [ 'Sunrise', 'Sunset','Moonrise', 'Moonset', 'Start Extrigs',  'Cutoff']
