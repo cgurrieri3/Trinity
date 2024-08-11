@@ -17,7 +17,7 @@ import decodeT as de
 def log_file(message):
     current_time = time.time()
     current_time = time.ctime(current_time)
-    with open("/home/mpotts32/Database/ctcpu_state_mess/sm_upload.log", "a") as file:
+    with open("/data/TrinityLabComputer/Database/ctcpu_state_mess/sm_upload.log", "a") as file:
         file.write(message + ' ' + str(current_time) + ' \n')
 
 
@@ -32,7 +32,7 @@ def get_filenames(folder_path):
 # Takes: a array of filenames
 # Returns: gets the last file path in the list of file paths
 def get_last_file(arr_filenames):
-    last_file = max(arr_filenames)
+    last_file = min(arr_filenames)
     #print(last_file)
     return last_file
 
@@ -109,6 +109,7 @@ def get_last_message(fpath):
         last_104_bytes = file.read()
         #print(last_104_bytes) # use this if you want to see the last 64 bytes
         hex_string = last_104_bytes.hex()
+        #print('     ')
         #print(hex_string)
 
         dec_array=get_array(hex_string)
@@ -123,7 +124,7 @@ if __name__ == '__main__':
 
     ################# Location of weather data ################
 
-    wd_path = '/home/mpotts32/Database/ctcpu_state_mess/Log/'
+    wd_path = '/data/TrinityLabComputer/Database/ctcpu_state_mess/Log/'
 
     ###########################################################
 
@@ -133,9 +134,10 @@ if __name__ == '__main__':
     # Local host lines for access
     host = 'localhost'
     port = 8086
-    username = 'mpotts32'
+    #username = 'mpotts32'
+    username = 'admin'
     password = 'Ttys@210'
-    database = 'trinity_ct' # Database for independent measurements for each day, need to change the measurent line in cre_df_list()
+    database = 'dbSM' # Database for independent measurements for each day, need to change the measurent line in cre_df_list()
     #database = 'Trinity1'
 
     # Initialize the InfluxDB client and write the points in batches
@@ -160,8 +162,10 @@ if __name__ == '__main__':
         #print(file)
         current_file = cov_filename_ment(file)
         log_file(f'Last line of {current_file} being read')
+        #print(f'Last line of {current_file} being read')
 
         message = get_last_message(file)
+        #print(message)
         #message = b'CT\x1fisb\x00\x00d&\t\xa2\x00\x8d\x00b\t[\r\xc9\to\x00\x8b\xff\xff\xff\xff\x00\x00\x00\x00\x003p\x7f\x003\x96|\x003\xa3\xe1\x003\xd1\xfa\x003l\xdf\x003\x91M\x003\xa0H\x003\xd1\xd1\r\r\r\r\r\r\r\rWZV[UYWYZ[XZTXWWSWZOZLZZWYXYZWVX'
         #print(f'message before: {message}')
         if message_prior != message:
