@@ -26,13 +26,13 @@ import cv2
 def log_file(message):
     current_time = time.time()
     current_time = time.ctime(current_time)
-    with open("/home/mpotts32/cams/horizon_snap.log", "a") as file:
+    with open("/data/TrinityLabComputer/cams/horizon_snap.log", "a") as file:
         file.write(message + str(current_time) + '\n')
 
 
 def lab_directory():
 	# directory with all expect scripts are located
-	directory = os.path.expanduser("~/control_comp")
+	directory = os.path.expanduser("/data/TrinityLabComputer/control_comp")
 	os.chdir(directory)
 
 
@@ -64,7 +64,7 @@ def horizon_snap(dur, unit):
 	
 def sync_folder():
 	
-	directory = os.path.expanduser("~/cams")
+	directory = os.path.expanduser("/data/TrinityLabComputer/cams")
 	os.chdir(directory)
 	
 	command = f'./update_horizon_only.exp'  # Replace with your desired command
@@ -72,7 +72,7 @@ def sync_folder():
 
 def website_upload():
 	
-	directory = os.path.expanduser("~/cams")
+	directory = os.path.expanduser("/data/TrinityLabComputer/cams")
 	os.chdir(directory)
 	
 	command = f'./update_site_horizon_only.exp'  # Replace with your desired command
@@ -80,7 +80,7 @@ def website_upload():
 
 
 def get_file_size():
-	file_path=get_most_recent_file('/home/mpotts32/cams/Horizon/jpg/')
+	file_path=get_most_recent_file('/data/TrinityLabComputer/cams/Horizon/jpg/')
 	size = os.path.getsize(file_path)
 	return size/1000
 
@@ -97,7 +97,7 @@ def analyze_image(image_path):
     return avg_intensity
 
 def adjust_exposure(avg_intensity, target_intensity):
-    file_path_exposure = "/home/mpotts32/cams/exposure.txt"
+    file_path_exposure = "/data/TrinityLabComputer/cams/exposure.txt"
     with open(file_path_exposure, "r") as file:
       # Read the entire contents of the file
       current_exposure = file.read()
@@ -151,7 +151,7 @@ def set_units(exp):
 
 def add_time_stamp():
 	# image opening
-	latest_file = get_most_recent_file('/home/mpotts32/cams/Horizon/jpg/')
+	latest_file = get_most_recent_file('/data/TrinityLabComputer/cams/Horizon/jpg/')
 	
 	#latest_file = '/home/mpotts32/cams/Horizon/jpg/05-02-2024_21-21-57.jpg'
 	image = Image.open(latest_file)
@@ -180,7 +180,7 @@ def add_time_stamp():
 
 	   
 	fnt = ImageFont.truetype("~Pillow/Tests/fonts/FreeMono.ttf", 17)
-	timestamp = convert_format_date(latest_file[32:-4])
+	timestamp = convert_format_date(latest_file[42:-4])
 	
 	draw.rectangle([box_left, box_top, box_right, box_bottom], fill=box_color)
 	draw.text((x, y), timestamp , fill=(0,0,0), anchor='ms',font=fnt)
@@ -200,7 +200,7 @@ def add_time_stamp():
 	
 	# add image water mark 
 	# to open the image
-	Logo_image = Image.open("/home/mpotts32/cams/TrinityLogo.png")
+	Logo_image = Image.open("/data/TrinityLabComputer/cams/TrinityLogo.png")
 	# this open the photo viewer
 	#Logo_image.show()
 	#plt.imshow(Logo_image)
@@ -213,11 +213,13 @@ def add_time_stamp():
 	watermark_image.paste(Logo_image, (1100, 885))
 	
 	#watermark_image.show() 
-	watermark_image.save("/home/mpotts32/cams/Horizon/jpg/horizon_snap.jpg")
+	watermark_image.save("/data/TrinityLabComputer/cams/Horizon/jpg/horizon_snap.jpg")
 
 
 # check the exposure
-avg_intensity=analyze_image("/home/mpotts32/cams/Horizon/jpg/horizon_snap.jpg")
+
+
+avg_intensity=analyze_image("/data/TrinityLabComputer/cams/Horizon/jpg/horizon_snap.jpg")
 log_file(f'avg_int: {avg_intensity}')
 new_exp=adjust_exposure(avg_intensity, 80.0)
 log_file(f'new exposure: {new_exp}')
@@ -225,6 +227,7 @@ log_file(f'new exposure: {new_exp}')
 log_file('Starting process ')
 exp, units=set_units(new_exp)
 horizon_snap(exp,units)
+#horizon_snap(8,'ms')
 log_file('Image Created ')
 sync_folder()
 log_file('Folder sync')

@@ -6,7 +6,7 @@ import argparse
 from multiprocessing import Pool
 
 
-HOME = '/home/mpotts32/cams'
+HOME = '/data/TrinityLabComputer/cams'
 
 def make_vids(date,cam):
     # Run bash commands to do everything
