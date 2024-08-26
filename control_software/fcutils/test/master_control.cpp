@@ -998,6 +998,127 @@ void Do_Trigger_Scan_SF(std::string& msg)
 	printf("-------------------------------------------------\n\n");
 }
 
+// Performs a SF trigger scan, pixel-wise.
+// Raise threshold on all  pixels not scanned, record the threshold and 
+// rate. Once completed, switch to different pixel.
+
+void Do_Trigger_Scan_SF_PBP(std::string& msg)
+{
+	printf("\n--------------- Starting Single Focus Trigger Scan ---------------\n");
+	// msg contains 7-bytes.
+	// Byte 0 and 1 are Start point in DAC units, Byte 2 and 3 are Number of Steps,
+	// Byte 4 and 5 are Step Size and Byte 6 is Step Duration.
+	int NoOfPixels = 16*16;
+	int StartPoint   = stoi(msg.substr(0, 4),0,16);
+	int NofSteps     = stoi(msg.substr(4, 4),0,16);
+	int StepSize     = stoi(msg.substr(8, 4),0,16);
+	int StepDuration = stoi(msg.substr(12,2),0,16);
+	std::cout << "Start Point: " << StartPoint << std::endl;
+	std::cout << "Number of Steps: " << NofSteps << std::endl;
+	std::cout << "Step Size: " << StepSize << std::endl;
+	std::cout << "Step Duration: " << rate_counter_period[StepDuration] << " Seconds" << std::endl;
+
+	std::string TScan_Config = Update_TScan_Config(StepDuration, TB_Tscan_SF_Config);							// This updates the TB config based on step duration code.
+	std::string TScan_Get_GC = Update_TScan_Gname(SF_TScanNo, StartPoint, NofSteps, StepSize, StepDuration);	// This just updates the TB command with run number.
+	std::string TScan_Get_CC = Update_TScan_Cname(SF_TScanNo, StartPoint, NofSteps, StepSize, StepDuration);	// This just updates the TB command with run number.
+
+	wqtrgb.send(TB_Init);
+	sleep(1);
+
+	char tmp[100];
+	char filename[100];
+	std::ofstream TScan_File;
+	strcpy(filename, TB_DIR.c_str());
+	strcat(filename, "TScan_Output_SF_PBP");
+	strcat(filename, Get_DateTime_Str().c_str());
+	sprintf(tmp, "_%02d.txt", SF_TScanNo);
+	strcat(filename, tmp);
+	TScan_File.open(filename, ios::app|ios::ate);
+	TScan_File << "Pixel No." << "\t" << "Rate" << std::endl;
+	for(int i = 0; i < NofSteps; i++){
+		TScan_File << StartPoint + i*StepSize<<"\t";
+	}
+	TScan_File<<std::endl;
+
+	printf("-------------------------------------------------\n");
+	printf("Setting all discriminators to Max Threshold\n");
+	printf("-------------------------------------------------\n");
+
+
+	std::stringstream trg_stream;
+	trg_stream << std::setfill('0') << std::setw(4) << std::hex << 0;
+	std::string siab_cmd = "0000FFFF2503" + trg_stream.str();
+	wqsiab.send(siab_cmd);
+	sleep(10);
+	std::cout << "Done." << std::endl;
+	std::stringstream siabID;
+	for(int i=0; i<NoOfPixels; i++){
+		printf("-------------------------------------------------\n");
+		printf("Running Trigger Scan on pixel no.: %d\n",i);
+
+		siabID << std::setfill('0') << std::setw(8) << std::hex << trg_threshold;
+		for(int j=0; j<NofSteps; j++){
+			int trg_threshold = StartPoint + i*StepSize;
+			trg_stream << std::setfill('0') << std::setw(3) << std::hex << trg_threshold;
+			trg_stream << std::setfill('0') << std::setw(1) << std::hex << i%16;
+			std::string siab_cmd = siabID+"2503" + trg_stream.str();
+			printf("-------------------------------------------------\n");
+			std::cout << "Setting the threshold on Music chips to: " << trg_threshold << " DAC units." << std::endl;
+			wqsiab.send(siab_cmd);
+			sleep(10);
+			std::cout << "Done." << std::endl;
+
+			std::cout << "Preparing the Trigger Board" << std::endl;
+			wqtrgb.send(TB_Prepare);
+			sleep(1);
+			std::cout << "Configuring the Trigger Board" << std::endl;
+			wqtrgb.send(TScan_Config);
+			sleep(2);
+			std::cout << "Starting the Global Trigger\n" << std::endl;
+			wqtrgb.send(TB_Enable_Trigger);
+
+			std::cout << "Waiting for " << rate_counter_period[StepDuration] << " Seconds\n" << std::endl;
+			sleep(rate_counter_period[StepDuration]);
+
+			// Waiting another 10ms to make sure rate period is over.
+			usleep(1000*10);
+
+			std::cout << "Stopping the Global Trigger" << std::endl;
+			wqtrgb.send(TB_Disable_Trigger);
+			sleep(2);
+
+			std::cout << "Saving All the Counters" << std::endl;
+			wqtrgb.send(TB_Save_Counters);
+			sleep(1);
+
+			std::cout << "Recording Channel Counters" << std::endl;
+			wqtrgb.send(TScan_Get_CC);
+			sleep(2);
+
+			std::cout << "Recording Global Counters" << std::endl;
+			wqtrgb.send(TScan_Get_GC);
+			sleep(2);
+
+			int Trigger_Rate = stoi(state_response.substr(8, 8), 0 ,16);
+			state_response.clear();
+			TScan_File << i << "\t\t" << trg_threshold << "\t\t" << Trigger_Rate << std::endl;
+		}
+
+	}
+	
+
+	TScan_File.close();
+	std::cout << "Finished SF Trigger Scan Number:" << SF_TScanNo << std::endl;
+	printf("-------------------------------------------------\n");
+
+	// Passing 1 will archive Single Focus Tscan files
+	Archive_TrigScan(1);
+	SF_TScanNo++;
+
+	printf("-------------------------------------------------\n");
+	printf("-------------------------------------------------\n\n");
+}
+
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
