@@ -1,16 +1,18 @@
 import smtplib, ssl
 from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 import time
 import sources as src
 
 # Sends Emails
 def send_email(reason):
-    port = 465  # For starttls
-    smtp_server = "smtp.gmail.com"
-    sender_email = "sofiastepanoff22@gmail.com"
-    receiver_email = "TrinityObservations@groups.gatech.edu"
-    password = 'jjxqrdecssjizosh'
-    
+    # SMTP server details
+    # Email configuration
+    sender_email = 'sstepanoff3@gatech.edu'
+    receiver_email = 'TrinityObservations@groups.gatech.edu'
     # Set the subject and body of the email
     subject = 'Trinity EON'
     body = f"""
@@ -18,30 +20,28 @@ def send_email(reason):
 
     """
 
-    em = EmailMessage()
-    em['From'] = sender_email
-    em['To'] = receiver_email
-    em['Subject'] = subject
-    em.set_content(body)
+    # Create the email message
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg.attach(MIMEText(body, "plain"))
 
+    # Connect to the SMTP server
+    smtp_server = smtplib.SMTP('outbound.mail.gatech.edu', 25)  # Assuming smtp.gatech.edu is the SMTP server for gatech.edu
+    smtp_server.set_debuglevel(1)  # Optional: This will print debug information
+    smtp_server.sendmail(sender_email, receiver_email, msg.as_string())
 
-    context = ssl.create_default_context()
-    #server.starttls(context=context)
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
-        server.ehlo()
-        
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, em.as_string())
-        server.close()
-        print('successfully sent the mail')
-        log_file('successfully sent the mail')
+    # Close the connection
+    smtp_server.quit()
+    log_file(f'Email send with EON reason: {reason}')
 
 # Saves to log file
 
 def log_file(message):
     current_time = time.time()
     current_time = time.ctime(current_time)
-    with open("/home/mpotts32/obs_prgm/trinity.log", "a") as file:
+    with open("/data/TrinityLabComputer/obs_prgm/LOGS/trinity.log", "a") as file:
         file.write(message + str(current_time) + '\n')
 
 
@@ -83,6 +83,5 @@ def get_source_times():
     print('TXS 0506+056:')
     communicate(source2)
     
-
 get_source_times()
 

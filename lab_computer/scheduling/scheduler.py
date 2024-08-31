@@ -95,16 +95,16 @@ def sun_position_over_time(latitude, longitude, start_date, interval_minutes):
     sunrise_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > 0 and sun_altitudes[i - 1] <= 0), None)
     time_of_sunrise = sun_times[sunrise_index] if sunrise_index is not None else None
 
-    # Finding the time of critical sunrise time (positive slope crossing y=-15) **WORKING BUT NOT USED**
-    sunrise_crit_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > -15 and sun_altitudes[i - 1] <= 0), None)
+    # Finding the time of critical sunrise time (positive slope crossing y=-15)
+    sunrise_crit_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > -15 and sun_altitudes[i - 1] <= -15), None)
     time_of_sunrise_crit = sun_times[sunrise_crit_index] if sunrise_crit_index is not None else None
 
     # Find the time of sunset (negative slope crossing y=0)
     sunset_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] < 0 and sun_altitudes[i - 1] >= 0), None)
     time_of_sunset = sun_times[sunset_index] if sunset_index is not None else None
 
-    # Finding the time of critical sunset time (negative slope crossing y=-15) **CURRENTLY NOT WORKING**
-    sunset_crit_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] < -15 and sun_altitudes[i - 1] >= 0), None)
+    # Finding the time of critical sunset time (negative slope crossing y=-15)
+    sunset_crit_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] < -18 and sun_altitudes[i - 1] >= -18), None)
     time_of_sunset_crit = sun_times[sunset_crit_index] if sunset_crit_index is not None else None
 
     return sun_times, sun_altitudes, time_of_sunrise, time_of_sunset, time_of_sunrise_crit, time_of_sunset_crit
@@ -173,32 +173,30 @@ index = ['Times']
 df = pd.DataFrame(data, index=index)
 df_sorted = df.apply(lambda x: pd.to_datetime(x).sort_values(), axis=1)
 
-if not ((time_of_sunset + timedelta(minutes=90)) < time_of_moonset < (time_of_sunrise - timedelta(minutes=90))):
-    start_time = (time_of_sunset + timedelta(minutes=90))
+if not ((time_of_sunset_crit) < time_of_moonset < (time_of_sunrise_crit)):
+    start_time = (time_of_sunset_crit)
 else:
     start_time = time_of_moonset
 
-if not ((time_of_sunset + timedelta(minutes=90)) < time_of_max_altitude < (time_of_sunrise - timedelta(minutes=90))):
-    end_time = (time_of_sunrise - timedelta(minutes=90))
+if not ((time_of_sunset_crit) < time_of_max_altitude < (time_of_sunrise_crit)):
+    end_time = (time_of_sunrise_crit)
 else:
     end_time = time_of_max_altitude
 
-if start_time == (time_of_sunset + timedelta(minutes=90)) and end_time == time_of_max_altitude:
-    if (time_of_sunset + timedelta(minutes=90)) < df_sorted['Moonset Time'].iloc[0] < (time_of_sunrise - timedelta(minutes=90)):
-        start_time_2 = df_sorted['Moonset Time'].iloc[0]
-        end_time_2 = (time_of_sunrise - timedelta(minutes=90))
+if start_time == (time_of_sunset_crit) and end_time == time_of_max_altitude:
+    if (time_of_sunset_crit) < time_of_moonset < (time_of_sunrise_crit):
+        start_time_2 = time_of_moonset
+        end_time_2 = (time_of_sunrise_crit)
 
 if start_time > end_time == time_of_max_altitude:
     start_time_2 = start_time
-    start_time = time_of_sunset + timedelta(minutes=90)
-    end_time_2 = time_of_sunrise - timedelta(minutes=90)
+    start_time = time_of_sunset_crit
+    end_time_2 = time_of_sunrise_crit
 
 if not (start_time_2 == None and end_time_2 == None):
     if start_time_2 > end_time_2:
         start_time_2 = None
         end_time_2 = None
-
-
 
 if not (start_time_2 == None and end_time_2 == None):
     if (end_time_2 - start_time_2) < timedelta(minutes=45):
@@ -242,7 +240,7 @@ def ngc_position_over_time(latitude, longitude, start_date, interval_minutes):
     ngc_times = []
     ngc_altitudes = []
 
-    for hour in range(27):
+    for hour in range(24):
         current_time = start_date + timedelta(hours=hour)
 
         for minute in range(0, 60, interval_minutes):
@@ -272,7 +270,7 @@ def txs_position_over_time(latitude, longitude, start_date, interval_minutes):
     txs_times = []
     txs_altitudes = []
 
-    for hour in range(27):
+    for hour in range(24):
         current_time = start_date + timedelta(hours=hour)
 
         for minute in range(0, 60, interval_minutes):
@@ -290,7 +288,7 @@ txs_times, txs_altitudes = txs_position_over_time(latitude, longitude, start_dat
 
 ngc_observing = []
 for i in range(len(ngc_times) - 1):
-    if ((0 > ngc_altitudes[i] > -10) or (0 > ngc_altitudes[i+1] > -10)) and (time_of_sunset < ngc_times[i] < time_of_sunrise):
+    if ((0 > ngc_altitudes[i] > -10) or (0 > ngc_altitudes[i+1] > -10)) and (ngc_altitudes[i] > ngc_altitudes[i+1]):
         ngc_observing.append(ngc_times[i])
 for i in range(len(ngc_observing) - 1):
     ax.axvspan(ngc_observing[i], ngc_observing[i + 1], color='blue', alpha=0.05)
@@ -298,7 +296,7 @@ for i in range(len(ngc_observing) - 1):
 #text2 = ax.text(0.02, 0.9094, 'TXS 0506+056 observing window', color='purple', fontsize=7, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
 txs_observing = []
 for i in range(len(txs_times) - 1):
-    if ((0 > txs_altitudes[i] > -10) or (0 > txs_altitudes[i+1] > -10)) and (time_of_sunset < txs_times[i] < time_of_sunrise):
+    if ((0 > txs_altitudes[i] > -10) or (0 > txs_altitudes[i+1] > -10)) and (txs_altitudes[i] > txs_altitudes[i+1]):
         txs_observing.append(txs_times[i])
 for i in range(len(txs_observing) - 1):
     ax.axvspan(txs_observing[i], txs_observing[i + 1], color='purple', alpha=0.05)
@@ -361,19 +359,41 @@ illumination = moon_illumination(latitude, longitude, start_date)
 
 
 if illumination >= 90:
-    text3 = ax.text(0.78, -0.1, 'Moon Phase = ' + str(illumination) + '%', color='red', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
+
     '''
+    text3 = ax.text(0.78, -0.1, 'Moon Phase = ' + str(illumination) + '%', color='red', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
     for i in range(len(moon_altitudes) - 1):
         if not (sun_times[i] in time_list):
             ax.axvspan(sun_times[i], sun_times[i + 1], color='grey', alpha=0.05)
     '''
+
+    legend_elements = [
+    Patch(color='blue', alpha = 0.5, label='NGC 1068 Obs. Window'),
+    Patch(color='purple', alpha=0.5, label='TXS 0506+056 Obs. Window'),
+    Patch(facecolor='green', label = f'Obs. Start Time: {start_time.strftime("%H:%M")} UTC'),
+    Patch(facecolor='red', label = f'Obs. End Time: {end_time.strftime("%H:%M")} UTC'),
+    Patch(color='grey', alpha = 0.5, label = 'Moon Position Relative'),
+    Patch(color='orange', alpha=0.5, label = 'Sun Position Relative'),
+    Patch(color='white', label = f'Moonphase: {illumination}%')
+    ]
+
+
+    legend = ax.legend(fontsize=8, loc='lower right',handles=legend_elements)
+    legend.get_frame().set_facecolor('white')
+    legend.get_frame().set_alpha(1)
+
+    for text in legend.get_texts():
+        label = text.get_text()
+        if 'Moonphase' in label:
+            text.set_color('red')
+
 else:
     #text3 = ax.text(0.784, 0.06, 'Moon Phase = ' + str(illumination) + '%', color='black', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
     #text4 = ax.text(0.784, 0.1795, 'Trinity Start Time', color='green', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
     #text5 = ax.text(0.784, 0.12, 'Trinity End Time', color='Red', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
     plt.axvline(x=start_time - timedelta(minutes=10), color='green', linestyle='--', linewidth=2, alpha=1)
     plt.axvline(x=end_time + timedelta(minutes=10), color='red', linestyle='--', linewidth=2, alpha=1)
-    
+
     if not (start_time_2 == None and end_time_2 == None):
         plt.axvline(x=start_time_2 - timedelta(minutes=10), color='green', linestyle='--', linewidth=2, alpha=0.5)
         plt.axvline(x=end_time_2, color='red', linestyle='--', linewidth=2, alpha=0.5)
@@ -383,24 +403,24 @@ else:
             ax.axvspan(sun_times[i], sun_times[i + 1], color='grey', alpha=0.05)
 
 #Adding custom legend entries
-legend_elements = [
-    Patch(color='blue', alpha = 0.5, label='NGC 1068 Obs. Window'),
-    Patch(color='purple', alpha=0.5, label='TXS 0506+056 Obs. Window'),
-    Patch(facecolor='green', label = f'Obs. Start Time: {start_time.strftime("%H:%M")} UTC'),
-    Patch(facecolor='red', label = f'Obs. End Time: {end_time.strftime("%H:%M")} UTC'),
-    Patch(color='grey', alpha = 0.5, label = 'Moon Position Relative'),
-    Patch(color='orange', alpha=0.5, label = 'Sun Position Relative'),
-    Patch(color='white', label = f'Moonphase: {illumination}%')
+    legend_elements = [
+        Patch(color='blue', alpha = 0.5, label='NGC 1068 Obs. Window'),
+        Patch(color='purple', alpha=0.5, label='TXS 0506+056 Obs. Window'),
+        Patch(facecolor='green', label = f'Obs. Start Time: {start_time.strftime("%H:%M")} UTC'),
+        Patch(facecolor='red', label = f'Obs. End Time: {end_time.strftime("%H:%M")} UTC'),
+        Patch(color='grey', alpha = 0.5, label = 'Moon Position Relative'),
+        Patch(color='orange', alpha=0.5, label = 'Sun Position Relative'),
+        Patch(color='white', label = f'Moonphase: {illumination}%')
+    ]
 
-]
 
 # Adding legend with custom legend entries
 #plt.legend(handles=legend_elements)
+    legend = ax.legend(fontsize=8, loc='lower right',handles=legend_elements)
+    legend.get_frame().set_facecolor('white')
+    legend.get_frame().set_alpha(1)
 
 
-legend = ax.legend(fontsize=8, loc='lower right',handles=legend_elements)
-legend.get_frame().set_facecolor('white')
-legend.get_frame().set_alpha(1)
 
 os.chdir('/data/TrinityLabComputer/scheduling/')
 formated_date=current_utc_date.strftime('%Y%m%d')

@@ -7,10 +7,12 @@ from influxdb import InfluxDBClient
 db = {
     'host': 'localhost',
     'port': 8086,
-    'dbname': 'trinity_ct',
+    'dbname': 'dbSM',
+    #'dbname': 'trinity_ct',
     #'dbname': 'mydb1',
-    'user': "mpotts32",
+    #'user': "mpotts32",
     #'user': "egazda",
+    'user': "admin",
     'password': 'Ttys@210',
     #'password': "CTmonitor"
 }
@@ -25,7 +27,7 @@ def write_db_entry(entry):
     client = set_client()
     #print("switch database: " + db['dbname'])
     client.switch_database(db['dbname'])
-    #print("Write points: {0}".format(entry))
+    print("Write points: {0}".format(entry))
     client.write_points(entry)
 
 '''def create_ct_status_entry(entry, points):

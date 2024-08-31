@@ -10,7 +10,9 @@ remote_port=22                 # SSH port on the remote server
 local_port=2222                # Local port for the SSH tunnel
 
 # Configuration for file transfer
-local_file="/home/mpotts32/obs_prgm/rcLogs"
+# local_file="/home/mpotts32/obs_prgm/rcLogs" # phys43199
+local_file="/data/TrinityLabComputer/obs_prgm/rcLogs" # cos4a-10345
+
 remote_path="/home/trinity/Programs/Trinity/control_software/fcutils/test/LOGS/rc.log"
 
 # Create an SSH tunnel to the remote server through the jump host
@@ -21,7 +23,11 @@ remote_path="/home/trinity/Programs/Trinity/control_software/fcutils/test/LOGS/r
 # sleep 2
 
 # Copy the file using scp through the SSH tunnel
-scp -i ~/.ssh/trinitySite "$remote_user@$remote_server:$remote_path" "$local_file"
+scp -i $HOME/.ssh/ctcpu "$remote_user@$remote_server:$remote_path" "$local_file"
+# sleep 2
+
+# Copy the file using scp through the SSH tunnel
+scp -i $HOME/.ssh/ctcpu "$remote_user@$remote_server:$remote_path" "$local_file"
 
 # Close the SSH tunnel
 #kill "$tunnel_pid"

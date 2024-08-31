@@ -2,7 +2,7 @@
 
 # Set variables
 set SERVER_IP "172.16.17.74"
-set PWD "/home/mpotts32/control_comp"
+set PWD "/data/TrinityLabComputer/control_comp/"
 
 # Function to check if the SSH connection is open
 proc check_ssh_connection {} {

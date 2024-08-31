@@ -14,6 +14,8 @@ import time
 import sys
 from datetime import datetime, timedelta
 from pypdf import PdfWriter
+import pandas as pd
+import numpy as np
 
 def run_ssh(command):
     # Run the command and capture its output
@@ -36,16 +38,22 @@ def run_ssh(command):
 
 
 # Sends Emails
-def send_email(date,attachment_path=None):
+def send_email(date,data,expt,attachment_path=None):
     # SMTP server details
     # Email configuration
     sender_email = 'sstepanoff3@gatech.edu'
     receiver_email = 'TrinityObservations@groups.gatech.edu'
+    #receiver_email = 'sstepanoff3@gatech.edu'
     # Set the subject and body of the email
     subject = f'Trinity Data Summary {date}'
     #subject = 'TEST'
     body = f"""
     The Trinity Demonstrator Data Summary for {date}
+    Total Observing time: {"{:.1f}".format(data[0])} out of {expt[0]} hours
+    
+    Sources:
+    NGC: {"{:.1f}".format(data[1])} out of {expt[1]} hours
+    TXS: {"{:.1f}".format(data[2])} out of {expt[2]} hours
 
     """
 
@@ -74,6 +82,28 @@ def send_email(date,attachment_path=None):
 
     # Close the connection
     smtp_server.quit()
+    
+    
+def getDataTimes(date):
+    command = f'./getDataTimes.sh'  # Replace with your desired command
+    run_ssh(command)
+    date = str(date).replace("-", "") 
+    df = pd.read_csv(f"/data/TrinityLabComputer/DataSummary/Otherfiles/dataTotal_{date}.csv")
+    df['minutes'] = df['minutes']/60.0
+    #print(df)
+    a=df['minutes'].to_numpy()
+    #print(a)
+
+    date = str(date).replace("-", "") 
+    command = f'python3 /data/TrinityLabComputer/DataSummary/scripts/expectedDataTimes.py -y {date[:4]} -m {date[4:6]} -d {date[6:]}'  # Replace with your desired command
+    run_ssh(command)
+    df2 = pd.read_csv(f"/data/TrinityLabComputer/DataSummary/Otherfiles/ExpectedNightlyTimes.csv")
+    #print(df2)
+    b=df2['minutes'].to_numpy()
+    #print(b)
+    
+    return a, b
+    
 
 
 def get_most_recent_file(folder_path):
@@ -105,11 +135,17 @@ def compare_file_date_with_current(file_path):
     file_size = file_size / 1024  # convert bytes to megabytes
 
     # Compare dates and file size
-    if file_modification_date == current_date and file_size > 30:
+    if file_modification_date == current_date and file_size > 0.1:
         return file_modification_date.strftime('%Y%m%d') + ".pdf"
     else:
         logging.info('File size too small or none at all')
         return False
+
+def make_database_plots(date):
+    date = date.strftime('%Y%m%d')
+    command = f'python3 /data/TrinityLabComputer/DataSummary/scripts/smwx_plots.py -d {date}'  # Replace with your desired command
+    run_ssh(command)     
+    time.sleep(3)   
 
 def merge_pdf(data,path):
 
@@ -119,15 +155,24 @@ def merge_pdf(data,path):
   yesterday = current_date #- timedelta(days=1)
 
   formatted_date = yesterday.strftime('%Y%m%d')
-  pdfs = [f'{path}scheduling/schedule_pdf/schedule_{formatted_date}.pdf',data]
+  
+  make_database_plots(current_date)
+  #pdfs = [f'{path}scheduling/schedule_pdf/schedule_{formatted_date}.pdf',f'/data/TrinityLabComputer/DataSummary/Otherfiles/TScans_{formatted_date}.pdf',f'/data/TrinityLabComputer/DataSummary/Otherfiles/output{formatted_date}.pdf']
+
+  pdfs = [f'{path}scheduling/schedule_pdf/schedule_{formatted_date}.pdf',data,f'/data/TrinityLabComputer/DataSummary/Otherfiles/output{formatted_date}.pdf',f'/data/TrinityLabComputer/DataSummary/Otherfiles/TScans_{formatted_date}.pdf']
 
   merger = PdfWriter()  
   for pdf in pdfs:
       merger.append(pdf)
-  name = f"DataSummary_{formatted_date}.pdf"
+  name = f"/data/TrinityLabComputer/DataSummary/EmailedDataSummary/DataSummary_{formatted_date}.pdf"
   merger.write(name)
   merger.close()
   return name
+
+
+
+
+
 
 # The command you want to run
 system_path = "/data/TrinityLabComputer/"
@@ -136,9 +181,12 @@ system_path = "/data/TrinityLabComputer/"
 logging.basicConfig(filename=f'{system_path}/DataSummary/email.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-os.chdir(system_path+"/DataSummary/SummaryFiles/")
+os.chdir(system_path+"/DataSummary/scripts/")
 
 command = f'./getDataSummary.sh'  # Replace with your desired command
+run_ssh(command)
+
+command = f'./getTScanFiles.sh'  # Replace with your desired command
 run_ssh(command)
 
 folder_path = system_path + "DataSummary/SummaryFiles/"
@@ -150,9 +198,10 @@ if most_recent_file:
     if todays_file != False:
         current_date = datetime.now().date()
         datasum_path = folder_path + todays_file
-        data_sum_final=merge_pdf(datasum_path,system_path)
-        attachment_path = folder_path + data_sum_final
-        send_email(current_date,attachment_path)
+        attachment_path=merge_pdf(datasum_path,system_path)
+        
+        dataTimesArr,expectedTimesArr=getDataTimes(current_date)
+        send_email(current_date,dataTimesArr,expectedTimesArr,attachment_path)
         logging.info("The most recent file was modified today.")
         os.remove(attachment_path)
     else:

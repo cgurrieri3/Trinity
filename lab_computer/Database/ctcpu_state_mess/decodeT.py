@@ -27,19 +27,26 @@ def composeDict2(measurement2, metric3, CompNum, value3, stateMess, message):
 	retDict["time"] = decodeTimeStamp(message)
 	retDict["fields"] = {}
 	for CompNum, value3 in enumerate(stateMess):
+		value3 = float(value3)
 		retDict["fields"][CompNum+1] = value3
+	#print(retDict)
 	return(retDict)
 
 def decodeStatesOfModules(message):
     #print(f'triggere rate before {message[1]}')
     #TrigerRate = int.from_bytes(message[6:8], "big")
     h_size =  2 # gets size of the bits string
+    #print(message)
     message_partial = message[1]
+    #print(bin(message_partial)[2:])
+    #print('hey')
     ModulesStatus = (bin(message_partial)[2:]).zfill(h_size)[::-1] # converts bytes to hex, then to bits
     #print(NLCTS)
     # assigns each bits to dictionary
+
     for ix, x in enumerate(ModulesStatus):
-        di = composeDict2('Modules_Status', 'on/off', ix, x, ModulesStatus, message)
+        x = int(x)
+        di = composeDict2('Modules_Status', 'num', ix, x, ModulesStatus, message)
     return(di)
     
 
@@ -68,18 +75,22 @@ def decodeMUSICPWR(message):
     #print(MUSICPWR)
     # assigns each bits to dictionary
     for ix, x in enumerate(MUSICPWR):
-        di = composeDict2('MUSIC_Power', 'on/off', ix, x, MUSICPWR, message)
+        x = int(x)
+        di = composeDict2('MUSIC_Power', 'num', ix, x, MUSICPWR, message)
     return(di)
 
 
 def decodeHVStatus(message):
+    #print('hey')
 # status on/off for each siab
     h_size = 8
     message_partial = message[5]
     HVStatus = (bin(message_partial)[2:]).zfill(h_size)[::-1]
     #print(HVStatus)
     for ix, x in enumerate(HVStatus):
-        di = composeDict2('HV_Status', 'on/off', ix+16, x, HVStatus, message)
+        #print(ix)
+
+        di = composeDict2('HV_Status', 'num', ix, x, HVStatus, message)
     return(di)
 
 def decodeASADCurrent(message):

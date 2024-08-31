@@ -10,7 +10,9 @@ if {[llength $argv] ==0} {
 
 # SSH into PDU
 proc spawn_ssh {} {
-    spawn ssh -o ConnectTimeout=5 -c aes128-cbc $::user@$::IP
+
+    #spawn ssh -o ConnectTimeout=5 -c aes128-cbc $::user@$::IP
+    spawn ssh -o HostKeyAlgorithms=+ssh-rsa -c aes128-cbc $::user@$::IP
     expect {
 	"password: " {
 	    send "$::pass\r"
@@ -61,7 +63,7 @@ proc spawn_ssh {} {
 }
 
 # Read login info from file
-set fh [open /home/mpotts32/control_comp/pass.txt]
+set fh [open /data/TrinityLabComputer/control_comp/pass.txt]
 gets $fh user
 gets $fh pass
 close $fh

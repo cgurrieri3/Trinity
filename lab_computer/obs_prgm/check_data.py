@@ -7,7 +7,7 @@ import communicate as lets
 
 def lab_directory():
 	# Set the working directory
-	directory = os.path.expanduser("~/control_comp")
+	directory = os.path.expanduser("/data/TrinityLabComputer/control_comp")
 	os.chdir(directory)
 
 def run_ssh(command):
@@ -119,6 +119,6 @@ def check_files_external(intial_files):
 
 #run_get_file_info()
 
-#print(check_files_internal(29,39))
+#print(check_files_internal(4,39))
 
 #print(check_files_external(8))

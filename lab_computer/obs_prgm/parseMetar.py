@@ -36,7 +36,10 @@ def main():
     codes = [milfordCode, beaverCode, cedarCode]
     raws = []
     for code in codes:
-        raws.append(getMetarData(code))
+        try:
+            raws.append(getMetarData(code))
+        except:
+            texts.append('No connection available')
     texts = []
     for raw in raws:
         if raw.text == '':

@@ -14,7 +14,7 @@ from targetMethods import *
 
 #Creating list of days of interest:
 dayList = []
-startday = dt.datetime(2024, 1, 1, 0, 0, 0)
+startday = dt.datetime(2023, 11, 1, 0, 0, 0)
 endday = dt.datetime(2024, 3, 31, 0, 0, 0)
 numDays = (endday-startday).days
 for i in range(numDays):

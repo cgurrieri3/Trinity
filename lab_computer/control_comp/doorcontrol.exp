@@ -7,7 +7,7 @@ if {[llength $argv] ==0} {
 }
 
 # Read in the IP address, username, and password from the file
-set file "/home/mpotts32/control_comp/login_info.txt"
+set file "/data/TrinityLabComputer/control_comp/login_info.txt"
 set fh [open $file r]
 gets $fh ip
 gets $fh user
@@ -24,7 +24,11 @@ if {$dt == ""} { # if argument isn't provided use the default of 12 seconds
 }
 
 # Connect to the remote computer using SSH
-spawn ssh $user@$ip
+#spawn ssh $user@$ip
+set labuser $env(USER)
+spawn ssh -i /home/$labuser/.ssh/cntlcpu $user@$ip
+
+
 
 # Wait for the password prompt and send the password
 #expect "password:"

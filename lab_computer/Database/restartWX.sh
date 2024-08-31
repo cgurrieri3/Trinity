@@ -4,8 +4,8 @@
 pkill -f influxdb_load_cont.py
 
 # Run the second command
-output="/home/mpotts32/Database/output.log"
-exec "$(type -p nohup)" /home/mpotts32/Database/influxdb_load_cont.py "${@}" > "$output" 2>&1 &
+output="/data/TrinityLabComputer/Database/weather_db/influxdb_load_cont.log"
+exec "$(type -p nohup)" /data/TrinityLabComputer/Database/weather_db/influxdb_load_cont.py "${@}" > "$output" 2>&1 &
 
 
 exit 0

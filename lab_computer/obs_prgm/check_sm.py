@@ -1,10 +1,13 @@
 from influxdb import InfluxDBClient
 from datetime import datetime,timedelta
 import time
+import traceback
 import communicate as lets
 
 
 def accepted_values_16(meas, uc_t, simp_t, hv_s, siab_c, music_p):
+	acpt_low = 0
+	acpt_hi = 0
 	if meas == "UC_temps":
 		acpt_low = uc_t * 0 + -10
 		acpt_hi = uc_t * 1.3
@@ -14,11 +17,11 @@ def accepted_values_16(meas, uc_t, simp_t, hv_s, siab_c, music_p):
 		acpt_hi = simp_t*1.3
 
 	elif meas == 'HV_Status':
-		acpt_low = hv_s * 1
+		acpt_low = hv_s * 0
 		acpt_hi = hv_s *1
 	elif meas == "SIABcurrent":
 		acpt_low = siab_c * .8
-		acpt_hi = siab_c * 1.2
+		acpt_hi = siab_c * 2.5
 	elif meas == "MUSIC_Power":
 		acpt_low = music_p *1
 		acpt_hi = music_p *1
@@ -32,11 +35,15 @@ def dp16(ldp,meas,siab_c, simp_t, uc_t, music_p,hv_s):
 	low,hi=accepted_values_16(meas, uc_t, simp_t, hv_s,siab_c,music_p)
 	checked = []
 	index = list(range(1, 17))
-	
+	#print(meas)
+	#print(low)
+	#print(hi)
 
 	for i in index:
-		
-		value=float(ldp[f'{i}'])
+		#print(ldp)
+		#value = float(ldp.get(i, 0))
+		value = float(ldp[str(i)])
+		#print(f'Value: {value}')
 		if value == low and value == hi:
 			
 			checked.append(1)
@@ -47,21 +54,23 @@ def dp16(ldp,meas,siab_c, simp_t, uc_t, music_p,hv_s):
 		else:
 			
 			checked.append(0)
-	#if meas == 'SIABcurrent' or meas == 'HV_Status' or meas == 'MUSIC_Power' or meas =:
-	total=sum(checked)
-	if total == 16:
-		
-		return 1
-	else:
-		lets.communicate(f'Conditions not matched {meas}')
-		
-		return 0
+	if meas == 'SIABcurrent' or meas == 'HV_Status' or meas == 'MUSIC_Power' or meas == 'SiPM_temps' or meas == 'UC_temps':
+		total=sum(checked)
+		#print(f'{meas}:{total}')
+		if total == 16:
+			
+			return 1
+		else:
+			lets.communicate(f'Conditions not matched {meas}')
+			
+			return 0
+	
 			
 def accepted_values_1(meas, asad,tb_c, trigger_rate):
-	
+	#print(asad)
 	if meas == "ASADCurrent":
-		acpt_low = asad * 0.9
-		acpt_hi = asad * 1.3
+		acpt_low = asad * 0.8
+		acpt_hi = asad * 1.4
 	elif meas == "TBCurrent":
 		acpt_low = tb_c * 0.9
 		acpt_hi = tb_c * 1.1
@@ -74,9 +83,12 @@ def accepted_values_1(meas, asad,tb_c, trigger_rate):
 def dp1(ldp,meas,asad,tb_c,trigger_rate):
 	low,hi=accepted_values_1(meas, asad,tb_c,trigger_rate)
 	
-	
-		
-	value=float(ldp['value1'])
+	#print(low)
+	#print(hi)
+	#print(ldp)
+	value = float(ldp.get('value1', 0))
+
+	#print('value',value)
 	if value == low and value == hi:
 		
 		return 1
@@ -85,7 +97,6 @@ def dp1(ldp,meas,asad,tb_c,trigger_rate):
 		
 		return 1
 	else:
-		
 		lets.communicate(f'Conditions not matched {meas}')
 		
 		return 0
@@ -93,6 +104,8 @@ def dp1(ldp,meas,asad,tb_c,trigger_rate):
 def accepted_values_4(meas, hv_c,hv):
 	#print(asad)
 	#print(meas)
+	acpt_low = 0
+	acpt_hi = 0
 	if meas == "HV":
 		acpt_low = hv * 0.95
 		acpt_hi = hv * 1.05
@@ -111,8 +124,11 @@ def dp4(ldp,meas,hv_c,hv):
 	
 
 	for i in index:
-		
-		value=float(ldp[f'{i}'])
+		# try:
+		# 	value = float(ldp.get(i, 0))
+		#except:
+		value = float(ldp[str(i)])
+		#print(value)
 		if value == low and value == hi:
 			
 			checked.append(1)
@@ -125,27 +141,35 @@ def dp4(ldp,meas,hv_c,hv):
 			checked.append(0)
 	#if meas == 'SIABcurrent' or meas == 'HV_Status' or meas == 'MUSIC_Power' or meas =:
 	total=sum(checked)
-	if total == 4:
+	#print(f'{meas}{total}')
+	if total == 4 and meas != 'Module_Status':
 		#print(f'Conditions matched {meas}')
 		return 1
-	else:
+	elif meas != 'Modules_Status':
+		#print('hey')
 		lets.communicate(f'Conditions not matched {meas}')
 		
 		return -100
+	elif meas == 'Modules_Status':
+		#print(meas)
+		raise DontWorry("Not HV or Current moving on")
+
+
 
 def dp8(ldp,meas,total):
 
 	index = list(range(1,9))
 	s = 0
 	for i in index:
-		value = float(ldp[f'{i}'])
+		value = float(ldp.get(i, 0))
+		#value = float(ldp[str(i)])
 		s = value + s
-	
+		#print(s)
+	#print(meas)
 	if s > 0:
 		return 1
-	else:
+	elif meas == 'Module_Status':
 		lets.communicate(f'Conditions not matched {meas}')
-		
 		return 0
 
 def get_time_sm(client):
@@ -164,9 +188,10 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 	# Local host lines for access
 	host = 'localhost'
 	port = 8086
-	username = 'mpotts32'
+	#username = 'mpotts32'
+	username = 'admin'
 	password = 'Ttys@210'
-	database = 'trinity_ct' # Database for independent measurements for each day, need to change the measurent line in cre_df_list()
+	database = 'dbSM' # Database for independent measurements for each day, need to change the measurent line in cre_df_list()
     #database = 'Trinity1'
 
     # Initialize the InfluxDB client and write the points in batches
@@ -182,6 +207,7 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 	for measurement in measurements:
 		query = f"SELECT * FROM {measurement} ORDER BY time DESC LIMIT 1"
 		result = client.query(query)
+		#print(result)
 		points = list(result.get_points())
 		
 		for data in points:
@@ -191,6 +217,7 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 		
 		if points:
 			last_data_point = points[0]
+			#print(last_data_point)
 			try:
 				lets.log_file(f"Last data point for measurement '{measurement}': {last_data_point['1']}")
 
@@ -203,14 +230,22 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 				except Exception as e:
 					#print(e)
 					try:
-
-						#print(f"Last data point for measurement '{measurement}': {last_data_point['8']}")
-						matched_status=dp8(last_data_point,measurement,module)
-						#print(matched_conditions)
-					except:
+						#print(e)
+						#print('hey')
+						# Print the full traceback
+						#traceback.print_exc()
+						# Optionally, you can also print the error message only
+						#print("Error:", str(e))
 						#print(f"Last data point for measurement '{measurement}': {last_data_point['4']}")
 						match_status = dp4(last_data_point,measurement,hv_c, hv)
+						#print(match_status)
+						
+					except:
 						matched_conditions.append(match_status)
+						#print(f"Last data point for measurement '{measurement}': {last_data_point['8']}")
+						#print('hey')
+						matched_status=dp8(last_data_point,measurement,module)
+						#print(matched_conditions)
 						
 
 						#print(matched_conditions)
@@ -243,3 +278,6 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 
 		# lets.communicate('Check statemessages something is wrong')	
 		return 0
+
+#query_last_SM(270, 17, 17, 1, 0, 4, 42,170,320,0,4)
+#query_last_SM(180, 17, 17, 1, 0, 4, 42,1219,240,1,4)

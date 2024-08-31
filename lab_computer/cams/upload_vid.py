@@ -47,7 +47,7 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 #   https://developers.google.com/youtube/v3/guides/authentication
 # For more information about the client_secrets.json file format, see:
 #   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-CLIENT_SECRETS_FILE = "/home/mpotts32/cams/client_secrets.json"
+CLIENT_SECRETS_FILE = "/data/TrinityLabComputer/cams/client_secrets.json"
 
 # This OAuth 2.0 access scope 
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube"
