@@ -14,7 +14,7 @@
 200001FFFF24000000
 50
 # Configure the Trigger Board and Sleeping for 5 seconds
-3005060502040F51C3
+3005060502640F51C3
 5
 # Initialize the CoBo and Sleeping for 30 seconds
 400300000000000000
