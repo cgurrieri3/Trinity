@@ -62,7 +62,7 @@ double DetectorAltitude[] = { 0, 1, 2, 3};
 Int_t NumSites = 3; //number of trinity sites
 
 // Trigger Timing information
-Int_t iTrigWin = 4; // index 5 means all PEs are counted regardless of time
+Int_t iTrigWin = 5; // index 5 means all PEs are counted regardless of time
 double TriggerWindow[] = {30.00, 60.00, 150.00, 300.00, 1500.00}; // ns
  
 //obtained from 3e4 GeV gamma rays
@@ -108,28 +108,32 @@ double parPEF3[5][5] = {{ 3.41281e-05, 0.911229, 1.30399e-05, 1.24591, 0.032254}
 Double_t dMinEnu = 8.5;
 Double_t dMaxEnu = 9.5;
 Double_t dST = 10; //km max height of shower tip above ground;
-Double_t yMin = 1;
-Double_t yMax = 60;
-Double_t yDelta = 1;
-Double_t MaxElevation = 10; //elevation angle (determines path through Earth;
-Double_t DeltaAngle = 0.1; //steps in azimuth and elevation 
-Double_t DeltaAngleAz = 0.3; //steps in azimuth  
+Double_t yMin = 10;
+Double_t yMax = 250;
+Double_t yDelta = 10;
+Double_t MaxElevation = 16; //elevation angle (determines path through Earth)
+Double_t dMaxAzimuthSky = 9; //max limit for azimuth evaluation 
+Double_t DeltaAngleAz = 0.1; //steps in azimuth in the camera FOV
+Double_t DeltaAngleSky = 0.1; //this is the step size in elevation and azimuth in the sky to calculate the acceptance for a limited FOV telescope. Make sure it is smaller than then FOV of the camera  
 Double_t nuIndex = 2; //power law index of the neutrino spectrum the minus sign is added later
-Double_t dMaxCherenkovAzimuthAngle = 40.0; //maximum azimuth angle for cherenkov 
-Double_t dMaxFluorescenceDistance = 100;
+Double_t dMaxCherenkovAzimuthAngle = 20.0; //maximum azimuth angle for cherenkov 
+Double_t dMaxFluorescenceDistance = 50;
 
 //next three parameters are key to the instrument
 //plus the telescop height above ground which can be selected above
-Double_t tanFoV = tan(5/180.*pi); //Field of view of telescope above the horizon
-Double_t dFoVBelow = 5/180.*pi; //Field of view of telescope  below horizon 
+Double_t tanFoV = tan(2/180.*pi); //Field of view of telescope above the horizon
+Double_t dFoVBelow = 3/180.*pi; //Field of view of telescope  below horizon 
 Double_t dMinLength = 0.3; //mimnimum length a shower has to have in the camera, in degrees. This is a conservative estimate because it assumes that the shower starts at a distance l from the detector, which is not necessarily tru for showers with shallow elevation angles.
-Double_t dMinimumNumberPhotoelectrons = 20; 
+Double_t dMinimumNumberPhotoelectrons = 20;  //this is pe per sqm mirror 
 
-Int_t iMirrorSize = 1;
+Int_t iMirrorSize = 0;
 Double_t dMirrorA[] = {1.0, 5.0, 10.0, 100.0}; //m^2 
 //Double_t dThreshold[] = {8*3, 19*3, 22*3, 120*3}; //pe //three fold coincidence. 
 //Double_t dThreshold[] = {10*2, 22*2, 24*2, 155*2}; //pe //two fold coincidence
 Double_t dThreshold[] = {10*2, 22*2, 24*2, 155*2}; //pe //two fold coincidence
+
+Double_t hFOV = 5.; // in degrees
+
 
 Bool_t bFluorescence = kFALSE;
 Bool_t bCombined = kFALSE;
@@ -143,15 +147,6 @@ TH1D *hTriggeredAzimuthAngles;
 Double_t latitude;
 Double_t tStep;
 Double_t MaxAzimuth;
-
-// for limiting the horizontal FOV
-Bool_t limFOV = kFALSE;
-Double_t dCenOffset = 0.;
-Double_t hFOV = 360.; // in degrees
-Double_t halfHFOV = (hFOV/2.) * (pi/180.);// in radians
-
-// Point source or difuse studies
-Bool_t bPointSources = kFALSE;
 
 string Hold()
 {
@@ -501,12 +496,12 @@ Prob *= Ptau;
 return Prob;  
 }
 
-Double_t PDecayFluorescence(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth, Bool_t limFOV, Double_t dCenOffset)
+Double_t PDecayFluorescence(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth, Bool_t blimFOV, Double_t dAzimuth, Double_t hFOV)
 {
   //cout<<endl<<"elevation: "<<elevation<<" azimuth: "<<azimuth<<" distance: "<<y<<endl;
   elevation = elevation/180*pi; //elevation angle (determines path through Earth;
   azimuth = azimuth/180.*pi;  //azimuth angle
-  dCenOffset = dCenOffset/180.*pi; //azimuth walk
+  dAzimuth = dAzimuth/180.*pi; //azimuth walk
 
   Double_t l = y; //Distance from detector to where the tau comes out detector is always at z=0
 
@@ -698,27 +693,28 @@ Double_t PDecayFluorescence(Double_t Etau, Double_t y, Double_t elevation, Doubl
   //----------------------------------------------------
   // Take into account to the horizontal FoV of the telescope. Is the shower fully
   // contained in the horizontal FoV? If not then return 0
-  if (limFOV){
+  if (blimFOV){
     
     // Using the law of sines we calculate the trajectory length of the tau that is in the 
-    // limited FOV. Accounts for movement along the Tau emergence anulus, i.e. if dCenOffset 
+    // limited FOV. Accounts for movement along the Tau emergence anulus, i.e. if dAzimuth 
     // is zero then we are in the center of the horizontal FoV.
     Double_t hDistInFOV = 0;
-    Double_t eta0 = pi - (halfHFOV-abs(dCenOffset)) - abs(azimuth);
-    Double_t eta1 = pi - (halfHFOV+abs(dCenOffset)) - abs(azimuth);
+    Double_t halfHFOV = (hFOV/2.) * (pi/180.);// in radians
+    Double_t eta0 = pi - (halfHFOV-abs(dAzimuth)) - (abs(azimuth) + abs(dAzimuth));
+    Double_t eta1 = pi - (halfHFOV+abs(dAzimuth)) - (abs(azimuth) - abs(dAzimuth));
     if (eta0 <= 0 || eta1 <= 0){
       hDistInFOV = std::numeric_limits<double>::infinity(); // shower is fully contained in hFOV; this distance is infinity now
     }else{
-      if (azimuth != 0 && dCenOffset==0) // single angle, tau emerges at dCenOffset = 0
+      if (azimuth != 0 && dAzimuth==0) // single angle, tau emerges at dAzimuth = 0
 	hDistInFOV = l*sin(halfHFOV)/sin(eta0);
-      if (azimuth > 0 && dCenOffset > 0) // positive azimuth and an positive azimuthal walk
-	hDistInFOV = l*sin(halfHFOV-dCenOffset)/sin(eta0);
-      if (azimuth < 0 && dCenOffset > 0) // negative azimuth and an positive azimuthal walk
-	hDistInFOV = l*sin(halfHFOV+dCenOffset)/sin(eta1);
-      if (azimuth > 0 && dCenOffset < 0)// positive azimuth and an negative azimuthal walk
-	hDistInFOV = l*sin(halfHFOV+abs(dCenOffset))/sin(eta1);
-      if (azimuth < 0 && dCenOffset < 0 )// negative azimuth and an negative azimuthal walk
-	hDistInFOV = l*sin(halfHFOV-abs(dCenOffset))/sin(eta0);
+      if (azimuth > 0 && dAzimuth > 0) // positive azimuth and an positive azimuthal walk
+	hDistInFOV = l*sin(halfHFOV-dAzimuth)/sin(eta0);
+      if (azimuth < 0 && dAzimuth > 0) // negative azimuth and an positive azimuthal walk
+	hDistInFOV = l*sin(halfHFOV+dAzimuth)/sin(eta1);
+      if (azimuth > 0 && dAzimuth < 0)// positive azimuth and an negative azimuthal walk
+	hDistInFOV = l*sin(halfHFOV+abs(dAzimuth))/sin(eta1);
+      if (azimuth < 0 && dAzimuth < 0 )// negative azimuth and an negative azimuthal walk
+	hDistInFOV = l*sin(halfHFOV-abs(dAzimuth))/sin(eta0);
       if (azimuth == 0) // special condition tragectory points to the telescope  
 	hDistInFOV = l;
     }
@@ -751,11 +747,11 @@ return ProbTauDecay;
 
 
 
-Double_t PDecay(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth, Bool_t limFOV, Double_t dCenOffset)
+Double_t PDecay(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth, Bool_t blimFOV, Double_t dAzimuth, Double_t hFOV)
 {
   elevation = elevation/180*pi; //elevation angle (determines path through Earth;
   azimuth = azimuth/180.*pi;  //azimuth angle
-  dCenOffset = dCenOffset/180.*pi; //azimuth walk
+  dAzimuth = dAzimuth/180.*pi; //azimuth angle seen from telescope to shower
 
   Double_t l = y; //Distance between the detector and the point where the tau emerges from the ground. The detector is always at z=0
   //Distance between telescope and horizon
@@ -844,8 +840,8 @@ Double_t PDecay(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth,
   
   while(dd<dem)
    {
-  //move along trajectory and find spot where MaxCherenkovAngle condition is
-  //fullfilled
+  //move back along trajectory from the point of latest possible decay and find spot 
+  //where for the first time we see enough photoelectrons in the telescope
   Double_t dDistanceToWhereTauStarts = sqrt(d*d+dd*dd);
   fPE->FixParameter(0,dDistanceToWhereTauStarts); //Distance to where the tau starts shower
    //get new azimuth
@@ -869,7 +865,7 @@ Double_t PDecay(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth,
    //get PE for new azimuth
      //double az = asin(d/dDistanceToWhereTauStarts); //azimuth for that distance
    if(fPE->Eval(az)*Etau*0.5<dMinimumNumberPhotoelectrons)
-       dd++;
+       dd++; //increasing dd by 1km
      else
       break;
 
@@ -883,7 +879,7 @@ Double_t PDecay(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth,
   if(dd>dem) // the shower cannot be seen by the telescope because the cherenkov cone does not illuminate the telescope anywhere along the track
    return 0;
 
-  //dd below is used as the distence between the plane perp. to the trajectory
+  //dd below is used as the distance between the plane perp. to the trajectory
   //and the tip of the shower so lets subtract the length of the shower and the
   //5 km again
   if(dd<dShwrLgth+5)
@@ -939,12 +935,12 @@ Double_t PDecay(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth,
   //If not we quit.
   if(dMaxDist<dShwrLgth)
    return 0;
+
   //make sure the shower does not develop past the point where more than 90% of the
   //taus have decayed
   Double_t DecayLength = Etau * c * DecayTime / Mtau;
   Double_t d90PctDecayLength = -log(0.1)*DecayLength;
   //cout<<"90% of taus decayed after: "<<d90PctDecayLength<<endl;
-
   if(d90PctDecayLength+dShwrLgth<dMaxDist)
     dMaxDist = d90PctDecayLength+dShwrLgth;
 
@@ -966,32 +962,34 @@ Double_t PDecay(Double_t Etau, Double_t y, Double_t elevation, Double_t azimuth,
   Double_t dLength = acos(costheta)*180/pi;
   //cout<<"size of shower in degrees: "<<dLength<<" cos of angle:  "<<costheta<<endl;
 
-
   if(dLength<dMinLength) //shower image is too short
    return 0;
 
   //----------------------------------------------------
-  // Take into account to the horizontal FoV of the telescope. Is the shower fully
-  // contained in the horizontal FoV? If not then return 0
-  if (limFOV){
+  // Take into account the horizontal FoV of the telescope. 
+  // return 0 if the shower is not fully contained in the horizontal FoV
+  if (blimFOV){
 
     // Using the law of sines we calculate the trajectory length of the tau that is in the 
-    // limited FOV. Accounts for movement along the Tau emergence anulus, i.e. if dCenOffset 
+    // limited FOV. Accounts for movement along the Tau emergence anulus, i.e. if dAzimuth 
     // is zero then we are in the center of the horizontal FoV.
     Double_t hDistInFOV = 0;
-    Double_t eta0 = pi - (halfHFOV-abs(dCenOffset)) - abs(azimuth);
-    Double_t eta1 = pi - (halfHFOV+abs(dCenOffset)) - abs(azimuth);
+    Double_t halfHFOV = (hFOV/2.) * (pi/180.);// in radians
+    //Double_t eta0 = pi - (halfHFOV-abs(dAzimuth)) - abs(azimuth);
+    //Double_t eta1 = pi - (halfHFOV+abs(dAzimuth)) - abs(azimuth);
+    Double_t eta0 = pi - (halfHFOV-abs(dAzimuth)) - (abs(azimuth) + abs(dAzimuth));
+    Double_t eta1 = pi - (halfHFOV+abs(dAzimuth)) - (abs(azimuth) - abs(dAzimuth));
 
-    if (azimuth != 0 && dCenOffset==0) // single angle, tau emerges at dCenOffset = 0
+    if (azimuth != 0 && dAzimuth==0) // single angle, tau emerges at dAzimuth = 0
       hDistInFOV = l*sin(halfHFOV)/sin(eta0);
-    if (azimuth > 0 && dCenOffset > 0) // positive azimuth and an positive azimuthal walk
-      hDistInFOV = l*sin(halfHFOV-dCenOffset)/sin(eta0);
-    if (azimuth < 0 && dCenOffset > 0) // negative azimuth and an positive azimuthal walk
-      hDistInFOV = l*sin(halfHFOV+dCenOffset)/sin(eta1);
-    if (azimuth > 0 && dCenOffset < 0)// positive azimuth and an negative azimuthal walk
-      hDistInFOV = l*sin(halfHFOV+abs(dCenOffset))/sin(eta1);
-    if (azimuth < 0 && dCenOffset < 0 )// negative azimuth and an negative azimuthal walk
-      hDistInFOV = l*sin(halfHFOV-abs(dCenOffset))/sin(eta0);
+    if (azimuth > 0 && dAzimuth > 0) // positive azimuth and an positive azimuthal walk
+      hDistInFOV = l*sin(halfHFOV-dAzimuth)/sin(eta0);
+    if (azimuth < 0 && dAzimuth > 0) // negative azimuth and an positive azimuthal walk
+      hDistInFOV = l*sin(halfHFOV+dAzimuth)/sin(eta1);
+    if (azimuth > 0 && dAzimuth < 0)// positive azimuth and an negative azimuthal walk
+      hDistInFOV = l*sin(halfHFOV+abs(dAzimuth))/sin(eta1);
+    if (azimuth < 0 && dAzimuth < 0 )// negative azimuth and an negative azimuthal walk
+      hDistInFOV = l*sin(halfHFOV-abs(dAzimuth))/sin(eta0);
     if (azimuth == 0) // special condition tragectory points to the telescope  
       hDistInFOV = l;
     
@@ -1270,7 +1268,7 @@ Double_t CalculateAcceptance(Double_t dMinEnu, Double_t dMaxEnu,TGraph *grDiffAc
   Double_t dConversion=yDelta*2*pi; //multiply area of cell taking into account that we have a 360 degree FoV
   dConversion*=1e10; //from km2 to cm2
   //solid angle
-  dConversion*=DeltaAngleAz/180.*pi*DeltaAngle/180.*pi; //multiply area of solidangle cell
+  dConversion*=DeltaAngleAz/180.*pi*DeltaAngleSky/180.*pi; //multiply area of solidangle cell
   
   //time Do that in the sensitivity calculation. Acceptance is calculated
   //without the observing time
@@ -1294,7 +1292,7 @@ Double_t CalculateAcceptance(Double_t dMinEnu, Double_t dMaxEnu,TGraph *grDiffAc
       if( bFluorescence || (bCombined && y<dMaxFluorescenceDistance) ) // so we can make full use of fluoresence events
 	MaxAzimuth = 180;
       
-      Double_t elevation=DeltaAngle*0.5;    
+      Double_t elevation=DeltaAngleSky*0.5;    
       while(elevation<MaxElevation) //loop over elevation
 	{
 	  Double_t dWeightForTriggeredAzimuth = sin(elevation/180.*pi)*y;
@@ -1330,9 +1328,9 @@ Double_t CalculateAcceptance(Double_t dMinEnu, Double_t dMaxEnu,TGraph *grDiffAc
 		      Double_t dPCherenkov = 0.0;
 		      //cout<<bFluorescence<<" "<<bCombined<<"  "<<y<<"<"<<dMaxFluorescenceDistance<<endl;
 		      if( bFluorescence || (bCombined && y<dMaxFluorescenceDistance) )
-			dPFluorescence = PDecayFluorescence(hTau->GetBinCenter(i+1),y,elevation,azimuth,limFOV,dCenOffset);
+			dPFluorescence = PDecayFluorescence(hTau->GetBinCenter(i+1),y,elevation,azimuth,kFALSE,0,0);
 		      if( (!bFluorescence || bCombined) && azimuth<dMaxCherenkovAzimuthAngle  )
-			dPCherenkov = PDecay(hTau->GetBinCenter(i+1),y,elevation,azimuth,limFOV,dCenOffset);
+			dPCherenkov = PDecay(hTau->GetBinCenter(i+1),y,elevation,azimuth,kFALSE,0,0);
 		      
 		      if(bCombined)
 			dP = dPFluorescence > dPCherenkov ? dPFluorescence : dPCherenkov;
@@ -1358,13 +1356,13 @@ Double_t CalculateAcceptance(Double_t dMinEnu, Double_t dMaxEnu,TGraph *grDiffAc
 	      //Add absorption in the atmosphere between shower and observer
 	      //Go over target area and calculate acceptance angle for each dA. Integrate over energy spectrum of taus coming out of the earth at that point. multiplied with detection efficiency(absorption).
 	    }//finished looping over all azimuth angles
-	  elevation+=DeltaAngle;    
+	  elevation+=DeltaAngleSky;    
 	  //cout<<azimuth<<"  "<<dAcceptance<<endl;
-	  //multiply with dOmega  DeltaAngle*DeltaAngle
+	  //multiply with dOmega  DeltaAngleSky*DeltaAngleSky
         }//finished looping over all elevation angles
-      //dAcceptance*=yDelta*DeltaAngle/180*pi*y; //multiply area of cell
-      //dAcceptance*=DeltaAngle/180*pi*DeltaAngle/180*pi; //multiply area of solidangle cell
-      dAcceptance*=y; //multiply with area of cell (note that the yDelta*DeltaAngle/180*pi is included in dConversion
+      //dAcceptance*=yDelta*DeltaAngleSky/180*pi*y; //multiply area of cell
+      //dAcceptance*=DeltaAngleSky/180*pi*DeltaAngleSky/180*pi; //multiply area of solidangle cell
+      dAcceptance*=y; //multiply with area of cell (note that the yDelta*DeltaAngleSky/180*pi is included in dConversion
       dIntegratedAcceptance+=dAcceptance;
       
       grDiffAcceptance->SetPoint(p,y,dAcceptance*dConversion); 
@@ -1384,7 +1382,7 @@ void CalculateAcceptanceVsLowerFoV(TH1D *hTau)
   bCombined = kFALSE;
 
   MaxElevation = 10; //elevation angle (determines path through Earth; 
-  DeltaAngle = 0.05; //steps in azimuth and elevation 
+  DeltaAngleSky = 0.05; //steps in azimuth and elevation 
   yMin = 0;
   yDelta = 5; 
 
@@ -1487,7 +1485,7 @@ void CalculateAcceptanceVsUpperFoV(TH1D *hTau)
   bCombined = kFALSE;
 
   MaxElevation = 10; //elevation angle (determines path through Earth; 
-  DeltaAngle = 0.05; //steps in azimuth and elevation 
+  DeltaAngleSky = 0.05; //steps in azimuth and elevation 
   yMin = 0;
   yDelta = 5; 
 
@@ -1588,7 +1586,7 @@ void CalculateAcceptanceVsEnergy(TH1D *hTau)
   bCombined = kFALSE;
   
   MaxElevation = 10; //elevation angle (determines path through Earth; 
-  DeltaAngle = 0.05; //steps in azimuth and elevation 
+  DeltaAngleSky = 0.05; //steps in azimuth and elevation 
   yMin = 0;
   yDelta = 5; 
 
@@ -1687,7 +1685,7 @@ void CalculateAcceptanceVsImageLength(TH1D *hTau)
   bCombined = kFALSE;
 
   MaxElevation = 10; //elevation angle (determines path through Earth; 
-  DeltaAngle = 0.05; //steps in azimuth and elevation 
+  DeltaAngleSky = 0.05; //steps in azimuth and elevation 
   yMin = 0;
   yDelta = 5; 
 
@@ -1784,7 +1782,7 @@ void CalculateAcceptanceVsTelescopeHeight(TH1D *hTau)
   bCombined = kFALSE;
 
   MaxElevation = 10; //elevation angle (determines path through Earth; 
-  DeltaAngle = 0.05; //steps in azimuth and elevation 
+  DeltaAngleSky = 0.05; //steps in azimuth and elevation 
   yMin = 0;
   yDelta = 5; 
 
@@ -1880,7 +1878,7 @@ void CalculateAcceptanceVsTriggerWindow(TH1D *hTau)
   bCombined = kFALSE;
 
   MaxElevation = 10; //elevation angle (determines path through Earth; 
-  DeltaAngle = 0.05; //steps in azimuth and elevation 
+  DeltaAngleSky = 0.05; //steps in azimuth and elevation 
   yMin = 0;
   yDelta = 5; 
 
@@ -1980,7 +1978,7 @@ void CalculateAcceptanceVsThreshold(TH1D *hTau)
   bCombined = kFALSE;
 
   MaxElevation = 10; //elevation angle (determines path through Earth; 
-  DeltaAngle = 0.05; //steps in azimuth and elevation 
+  DeltaAngleSky = 0.05; //steps in azimuth and elevation 
   yMin = 0;
   yDelta = 5; 
 
@@ -2092,7 +2090,7 @@ void CalculateIntegralSensitivity(TH1D *hTau)
           yMax = 100;
           yDelta = 5;
           MaxElevation = 10; //elevation angle (determines path through Earth;
-          DeltaAngle = 0.3; //steps in azimuth and elevation 
+          DeltaAngleSky = 0.3; //steps in azimuth and elevation 
        }
     else
        {
@@ -2100,7 +2098,7 @@ void CalculateIntegralSensitivity(TH1D *hTau)
           yMax = 400;
           yDelta = 10;
           MaxElevation = 10; //elevation angle (determines path through Earth;
-          DeltaAngle = 0.3; //steps in azimuth and elevation 
+          DeltaAngleSky = 0.3; //steps in azimuth and elevation 
        }
 
 
@@ -2170,7 +2168,7 @@ void CalculateDifferentialSensitivity(TH1D *hTau)
     yMax = 500; //500
     yDelta = 5; //5
     MaxElevation = 40; //elevation angle (determines path through Earth;
-    DeltaAngle = 0.05; //steps in azimuth and elevation 
+    DeltaAngleSky = 0.05; //steps in azimuth and elevation 
 
     iConfig = 2; //telescope altitude
   
@@ -2322,70 +2320,75 @@ void CalculateDifferentialSensitivity(TH1D *hTau)
 //
 //
 
-void GetAcceptanceInFOV(Double_t dMinEnu, Double_t dMaxEnu, TH1D *hTau, TH2F *skymapSingleAngle1, Double_t hFOV)
-{	
+
+//This function calculates the acceptance for point sources 
+void GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Double_t dMaxEnu, TH1D *hTau, Double_t hFOV)
+{
+
+  TH2F *skyAcceptance = new TH2F("skyAcceptance","Integral Point Source Acceptance", 360/DeltaAngleSky+1, -180-DeltaAngleSky/2., 180+DeltaAngleSky/2., 180/DeltaAngleSky+1, -90-DeltaAngleSky/2., 90+DeltaAngleSky/2.); //histo for single angle acceptance plot
+  skyAcceptance->GetXaxis()->SetTitle("Azimuth Angle [degrees]");
+  skyAcceptance->GetYaxis()->SetTitle("Elevation Angle [degrees]");
+  skyAcceptance->GetZaxis()->SetTitle("Effective Area [cm^{2}]");
+
+  TH1F *hAcceptanceVsDistance = new TH1F("hAcceptanceVsDistance","Acceptance vs. Distance from the telescope",(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsDistance->GetXaxis()->SetTitle("Distance from telescope [km]");
+  hAcceptanceVsDistance->GetZaxis()->SetTitle("Effective Area [cm^{2}]");
+
+	
   // Set To all time parameterization
   fPE = new TF1("fPE",myPEfunction,0,40,2);
   
   //set the proper values for the energy
   dMinEnu = pow(10,dMinEnu);
   dMaxEnu = pow(10,dMaxEnu);
-  
-  Double_t dDeltaTelescopeAzimuth = DeltaAngleAz;
-  Double_t dConversion = yDelta*dDeltaTelescopeAzimuth*pi/180.0; //multiply area of cell taking into account that we have a 360 degree FoV
-  //cout << yDelta << "," << dDeltaTelescopeAzimuth << "," << dConversion <<endl;
+  Double_t dConversion = yDelta*DeltaAngleAz*pi/180.0; //multiply area of cell taking into account that we have a 360 degree FoV
   dConversion *= 1e10; //from km2 to cm2
-  //~ dConversion*=DeltaAngleAz/180.*pi*DeltaAngle/180.*pi;
-  Double_t dDeltaAcceptance = 0;
-  Double_t dP = 0;
-  Double_t dPFluorescence = 0.0;
-  Double_t dPCherenkov = 0.0;
-  Double_t elevation = 0.; 
-  Double_t azimuth = 0.;
-  Double_t dEarth;
-  Double_t y = yMin;
   
-  while(y < yMax) //looping over distance from telescope w/ incrememnts of yDelta
+  Double_t dDeltaAcceptance = 0;
+
+  //looping over distance from telescope w/ incrememnts of yDelta
+  Double_t y = yMin;
+  while(y < yMax)
     {	
       
       if( bFluorescence || (bCombined && y<dMaxFluorescenceDistance) )
        	MaxAzimuth = 180.0;
-      
-      for(int elv = 0; elv <= (int)(MaxElevation / DeltaAngle); elv++) //looping over elevation w/ steps of DeltaAngle
-	{
- 	  elevation = elv * DeltaAngle;
+     else
+        MaxAzimuth = dMaxAzimuthSky;
 
-	  if (bPointSources)
-	    MaxAzimuth = 0.; // Disables the azimuth for loop in Get Angle acceptance functions
-	  for(int azi = -1*(MaxAzimuth/DeltaAngleAz); azi <= (int)(MaxAzimuth / DeltaAngleAz); azi++) //looping over azimuth w/ steps of DeltaAngleAz (-180 to 180)
+      //looping over elevation w/ steps of DeltaAngleSky
+      for(int elv = 0; elv <= (int)(MaxElevation / DeltaAngleSky); elv++)
+	{
+ 	  Double_t elevation = elv * DeltaAngleSky;
+	  
+          //looping over azimuth w/ steps of DeltaAngleAz (-180 to 180)
+	  for(int azi = -1*(MaxAzimuth/DeltaAngleSky); azi <= (int)(MaxAzimuth / DeltaAngleSky); azi++)
 	    {
-	      azimuth = azi * DeltaAngleAz;
+	      Double_t azimuth = azi * DeltaAngleSky;
 	      
-	      dEarth = DistanceThroughEarth(y, elevation, azimuth);
+	      Double_t dEarth = DistanceThroughEarth(y, elevation, azimuth);
 	      GetTauDistribution(hTau,dEarth,dMinEnu,dMaxEnu); //tau distribution is calculated
 	      
-	      for (double dAzi= 0; dAzi <= (hFOV/2/DeltaAngleAz); dAzi++) //looping over azimuth in FoV in steps of DeltaAngleAz
+              //looping over azimuth in FoV in steps of DeltaAngleAz. That is
+              //an offset of the shower from the center of the camera.
+	      for (int iFoVazi= 0; iFoVazi <= (hFOV/2/DeltaAngleAz); iFoVazi++) 
 		{
-		  dCenOffset = dAzi * DeltaAngleAz;
-
-		  if (bPointSources){
-		    azimuth = dCenOffset;
-		  }
 		  
+		  Double_t dAzimuthFoV = iFoVazi * DeltaAngleAz;
 		  dDeltaAcceptance = 0;
-		  dP = 0;
+		  Double_t dP = 0;
 		  
 		  for(int i=0;i<hTau->GetNbinsX();i++)
 		    {
 		      if(hTau->GetBinContent(i+1)>0)
 			{
-			  dPFluorescence = 0.0;
-			  dPCherenkov = 0.0;
+			  Double_t dPFluorescence = 0.0;
+			  Double_t dPCherenkov = 0.0;
 			  
 			  if( bFluorescence || (bCombined && y<dMaxFluorescenceDistance) )
-			    dPFluorescence = PDecayFluorescence(hTau->GetBinCenter(i+1),y,elevation,azimuth,limFOV,dCenOffset);
-			  if( (!bFluorescence || bCombined) && abs(azimuth)<dMaxCherenkovAzimuthAngle  )
-			    dPCherenkov = PDecay(hTau->GetBinCenter(i+1),y,elevation,azimuth,limFOV,dCenOffset);
+			    dPFluorescence = PDecayFluorescence(hTau->GetBinCenter(i+1),y,elevation,azimuth,kTRUE,dAzimuthFoV,hFOV);
+			  if( (!bFluorescence || bCombined) )
+			    dPCherenkov = PDecay(hTau->GetBinCenter(i+1),y,elevation,azimuth,kTRUE,dAzimuthFoV,hFOV);
 			  if(bCombined)
 			    dP = dPFluorescence > dPCherenkov ? dPFluorescence : dPCherenkov;
 			  else if(bFluorescence)
@@ -2397,92 +2400,138 @@ void GetAcceptanceInFOV(Double_t dMinEnu, Double_t dMaxEnu, TH1D *hTau, TH2F *sk
 			}
 		    }
 		  //cout<<"dDeltaAcceptance "<<dDeltaAcceptance<<endl;
-		  if(dDeltaAcceptance<1e-10 && y>50) //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events which can be seen from the back
-		    continue;
-		  //the acceptances are loaded into the histogram with conversion factors applied
-		  cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<< ""<< ", dCenOffset: "<< dCenOffset << ", dDeltaAcceptance: " << dDeltaAcceptance <<endl;
+
+
+		  //Get out of the while loop if we do not get any more acceptance. 
+		  //The >50 is to make sure we do not miss fluorescence events which can be seen from the back
+                  //if(dDeltaAcceptance<1e-10 && y>50)
+		  //   continue;
+
+                  //apply the conversion and geometry factors to the acceptance
+		  dDeltaAcceptance*=sin(elevation/180.*pi)*y*dConversion;
 		  
-		  if (dCenOffset == 0)
+                  //the acceptances are loaded into the histogram with conversion factors applied
+		  cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<< ""<< ", dAzimuthFoV: "<< dAzimuthFoV << ", dDeltaAcceptance: " << dDeltaAcceptance <<" cm^2 "<<endl;
+
+
+                  //Fill the instanteneous acceptance into the skymap
+                  //Here we need to pay attention to fill in the right azimuth
+                  //angle because PDecay and PDecayFluorescence have azimuth as
+                  //as an angle to the line drawn between the telescope and where the tau comes out.
+                  //It only references the sky with dAzimuthFoV=0 
+                  if (dAzimuthFoV == 0)
 		    {// single angle
-		      if (azimuth != 0)
-			skymapSingleAngle1->Fill(azimuth, (-1 * elevation), dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
-		      skymapSingleAngle1->Fill(-1*azimuth, (-1 * elevation), dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
+		       if (azimuth != 0)
+		          skyAcceptance->Fill(azimuth, (-1 * elevation), dDeltaAcceptance);
+		       skyAcceptance->Fill(-1*azimuth, (-1 * elevation), dDeltaAcceptance);
 		    }
-		  else if (dCenOffset != 0 && azimuth == 0)
+
+                  //2. case when the neutrino source is in the camera center 
+                  //but the shower is not viewed in the camera center
+		  else if (dAzimuthFoV != 0 && azimuth == 0)
 		    {// no tau azimuth
-		      skymapSingleAngle1->Fill(-1 * dCenOffset, (-1 * elevation), (dDeltaAcceptance)*sin(elevation/180.*pi)*y*dConversion);
-		      skymapSingleAngle1->Fill(dCenOffset, (-1 * elevation), (dDeltaAcceptance)*sin(elevation/180.*pi)*y*dConversion);
+		      skyAcceptance->Fill(-1 * dAzimuthFoV, (-1 * elevation),dDeltaAcceptance);
+		      skyAcceptance->Fill(dAzimuthFoV, (-1 * elevation),dDeltaAcceptance);
 		    }
-		  else if (dCenOffset > 0 && azimuth < 0)
+
+                   //3. case when the neutrino source is left of the camera center
+                   //and the shower is not viewed in the camera center 
+		  else if (dAzimuthFoV > 0 && azimuth < 0)
 		    {// gamma2 and gamma 4 triangle
-		      skymapSingleAngle1->Fill(-1*(abs(azimuth)+dCenOffset), (-1 * elevation),  dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
-		      skymapSingleAngle1->Fill((abs(azimuth)+dCenOffset), (-1 * elevation),  dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
+		      skyAcceptance->Fill(-1*(abs(azimuth)+dAzimuthFoV), (-1 * elevation),dDeltaAcceptance);
+		      skyAcceptance->Fill((abs(azimuth)+dAzimuthFoV), (-1 * elevation),dDeltaAcceptance);
 		    }
-		  else if (dCenOffset > 0 && azimuth > 0)
+
+                  //4. case when the neutrino source is right of the camera center
+                  //and the shower is not viewed in the camera center
+		  else if (dAzimuthFoV > 0 && azimuth > 0)
 		    { // gamma1 triangle
-		      if (bPointSources){
-			skymapSingleAngle1->Fill(dCenOffset, (-1 * elevation),  dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
-		      skymapSingleAngle1->Fill(-1*(dCenOffset), (-1 * elevation),  dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
-		      }else{
-		      skymapSingleAngle1->Fill(azimuth-dCenOffset, (-1 * elevation),  dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
-		      skymapSingleAngle1->Fill(-1*(azimuth-dCenOffset), (-1 * elevation),  dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
-		      }
+		      skyAcceptance->Fill(azimuth-dAzimuthFoV, (-1 * elevation),dDeltaAcceptance);
+		      skyAcceptance->Fill(-1*(azimuth-dAzimuthFoV), (-1 * elevation),dDeltaAcceptance);
 		    }
+
+                  hAcceptanceVsDistance->Fill(y,dDeltaAcceptance);
+                  
 		}
 	    }
 	}
       cout<<"Tau emergence distance: "<<y<<endl;
       y += yDelta; //distance from telescope counter increased by yDelta
     }
+
+  TCanvas *cPointSourceAcceptance = new TCanvas("cPointSourceAcceptance","Point Source Integral Effective Area",1700,800);
+ cPointSourceAcceptance->Divide(2,1);
+ cPointSourceAcceptance->cd(1);
+ skyAcceptance->Draw("COLZ");
+ cPointSourceAcceptance->cd(2);
+ hAcceptanceVsDistance->Draw("L");
+ //Save the acceptance into a file
+ TString Filename;
+ Filename.Form("PointSourceAcceptance_FoV%0.1fdeg_Index%0.1f_Emin%0.1f_Emax%0.1f.root",hFOV,nuIndex,log10(dMinEnu),log10(dMaxEnu));
+ TFile *f = new TFile(Filename.Data(),"RECREATE");
+ f->WriteObject(hAcceptanceVsDistance,"hAcceptanceVsDistance");
+ f->WriteObject(skyAcceptance,"skyAcceptance");
+ f->Close();
 }
 
-void GetAcceptanceSingleAngle(Double_t dMinEnu, Double_t dMaxEnu, TH1D *hTau, TH2F *skymapSingleAngle1)
+void GetAcceptanceSingleAngle(Double_t dMinEnu, Double_t dMaxEnu, TH1D *hTau)
 {
+
+  TH2F *skyAcceptance = new TH2F("skyAcceptance","Integral Point Source Acceptance for 360 degree FoV", 360/DeltaAngleSky+1, -180-DeltaAngleSky/2., 180+DeltaAngleSky/2., 180/DeltaAngleSky+1, -90-DeltaAngleSky/2., 90+DeltaAngleSky/2.); //histo for single angle acceptance plot
+  skyAcceptance->GetXaxis()->SetTitle("Azimuth Angle [degrees]");
+  skyAcceptance->GetYaxis()->SetTitle("Elevation Angle [degrees]");
+  skyAcceptance->GetZaxis()->SetTitle("Effective Area [cm^{2}]");
+
+  TH1F *hAcceptanceVsDistance = new TH1F("hAcceptanceVsDistance","Acceptance vs. Distance from the telescope",(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsDistance->GetXaxis()->SetTitle("Distance from telescope [km]");
+  hAcceptanceVsDistance->GetYaxis()->SetTitle("Effective Area [cm^{2}]");
+
+  // Set the PE parametric function
+  fPE = new TF1("fPE",myPEfunction,0,40,2);
+  
   //set the proper values for the energy
   dMinEnu = pow(10,dMinEnu);
   dMaxEnu = pow(10,dMaxEnu);
   
-  Double_t dDeltaTelescopeAzimuth = DeltaAngleAz;
-  Double_t dConversion = yDelta*dDeltaTelescopeAzimuth*pi/180.0; //multiply area of cell taking into account that we have a 360 degree FoV
+  Double_t dConversion = yDelta*DeltaAngleAz*pi/180.0; //multiply area of cell taking into account that we have a 360 degree FoV
   dConversion *= 1e10; //from km2 to cm2
-  //~ dConversion*=DeltaAngleAz/180.*pi*DeltaAngle/180.*pi;
-  Double_t dDeltaAcceptance = 0;
-  Double_t dP = 0;
-  Double_t dPFluorescence = 0.0;
-  Double_t dPCherenkov = 0.0;
-  Double_t elevation = 0.; 
-  Double_t azimuth = 0.;
-  Double_t dEarth;
+
+
   Double_t y = yMin;
-  
-  while(y < yMax) //looping over distance from telescope w/ incrememnts of yDelta
+  //looping over distance from telescope w/ incrememnts of yDelta
+  while(y < yMax) 
     {	
       if( bFluorescence || (bCombined && y<dMaxFluorescenceDistance) )
 	MaxAzimuth = 180.0;
-      if (bPointSources)
-	MaxAzimuth = 0.;
-      for(int elv = 0; elv <= (int)(MaxElevation / DeltaAngle); elv++) //looping over elevation w/ steps of DeltaAngle
+      else
+        MaxAzimuth = dMaxAzimuthSky;
+
+
+      //looping over elevation w/ steps of DeltaAngleSky
+      for(int elv = 0; elv <= (int)(MaxElevation / DeltaAngleSky); elv++) 
 	{
-	  elevation = elv * DeltaAngle;
+	  Double_t elevation = elv * DeltaAngleSky;
 	  
 	  for(int azi = 0; azi <= (int)(MaxAzimuth / DeltaAngleAz); azi++) //looping over azimuth w/ steps of DeltaAngleAz
 	    {
-	      azimuth = azi * DeltaAngleAz;
-	      dEarth = DistanceThroughEarth(y, elevation, azimuth);
+	      Double_t azimuth = azi * DeltaAngleAz;
+
+	      Double_t dEarth = DistanceThroughEarth(y, elevation, azimuth);
 	      GetTauDistribution(hTau,dEarth,dMinEnu,dMaxEnu); //tau distribution is calculated
-	      dDeltaAcceptance = 0;
-	      dP = 0;
+
+	      Double_t dDeltaAcceptance = 0;
+	      Double_t dP = 0;
 	      for(int i=0;i<hTau->GetNbinsX();i++)
 		{
 		  if(hTau->GetBinContent(i+1)>0)
 		    {
-		      dPFluorescence = 0.0;
-		      dPCherenkov = 0.0;
+		      Double_t dPFluorescence = 0.0;
+		      Double_t dPCherenkov = 0.0;
 		      
 		      if( bFluorescence || (bCombined && y<dMaxFluorescenceDistance) )
-			dPFluorescence = PDecayFluorescence(hTau->GetBinCenter(i+1),y,elevation,azimuth,limFOV,dCenOffset);
-		      if( (!bFluorescence || bCombined) && azimuth<dMaxCherenkovAzimuthAngle  )
-			dPCherenkov = PDecay(hTau->GetBinCenter(i+1),y,elevation,azimuth,limFOV,dCenOffset);
+			dPFluorescence = PDecayFluorescence(hTau->GetBinCenter(i+1),y,elevation,azimuth,kFALSE,0,0);
+		      if( (!bFluorescence || bCombined) )
+			dPCherenkov = PDecay(hTau->GetBinCenter(i+1),y,elevation,azimuth,kFALSE,0,0);
 		      
 		      if(bCombined)
 			dP = dPFluorescence > dPCherenkov ? dPFluorescence : dPCherenkov;
@@ -2495,75 +2544,72 @@ void GetAcceptanceSingleAngle(Double_t dMinEnu, Double_t dMaxEnu, TH1D *hTau, TH
 		    }
 		}
 	      // cout<<"dDeltaAcceptance "<<dDeltaAcceptance<<endl;
-	      if(dDeltaAcceptance<1e-10 && y>50) //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
+	      if(dDeltaAcceptance<1e-10 && y>50){ //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
 		break;
-	      cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<<", dDeltaAcceptance: " << dDeltaAcceptance <<endl;
+	      }
+
+              //apply the conversion and geometry factors to the acceptance
+	      dDeltaAcceptance*=sin(elevation/180.*pi)*y*dConversion;
+
+	      cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<< ", dDeltaAcceptance: " << dDeltaAcceptance <<" cm^2"<<endl;
 	      //the acceptances are loaded into the histogram with conversion factors applied
 	      if(azimuth != 0.0)
-		skymapSingleAngle1->Fill(azimuth, (-1 * elevation), dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion); 
-	      skymapSingleAngle1->Fill((-1 * azimuth), (-1 * elevation), dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion);
-	      //~ cout<<dDeltaAcceptance*sin(elevation/180.*pi)*y*dConversion<<endl;
+		skyAcceptance->Fill(azimuth, (-1 * elevation), dDeltaAcceptance); 
+	      skyAcceptance->Fill((-1 * azimuth), (-1 * elevation), dDeltaAcceptance);
+
+              hAcceptanceVsDistance->Fill(y,dDeltaAcceptance);
+              
 	    }
 	}
       cout<<"Tau emergence distance: "<<y<<endl;
       y += yDelta; //distance from telescope counter increased by yDelta
     }
+  TCanvas *cPointSourceAcceptance = new TCanvas("cPointSourceAcceptance","Point Source Integral Effective Area For 360 deg FoV",1700,800);
+ cPointSourceAcceptance->Divide(2,1);
+ cPointSourceAcceptance->cd(1);
+ skyAcceptance->Draw("COLZ");
+ cPointSourceAcceptance->cd(2);
+ hAcceptanceVsDistance->Draw("L");
+ //Save the acceptance into a file
+ TString Filename;
+ Filename.Form("PointSourceAcceptance_FoV360deg_Index%0.1f_Emin%0.1f_Emax%0.1f.root",nuIndex,log10(dMinEnu),log10(dMaxEnu));
+ TFile *f = new TFile(Filename.Data(),"RECREATE");
+ f->WriteObject(hAcceptanceVsDistance,"hAcceptanceVsDistance");
+ f->WriteObject(skyAcceptance,"skyAcceptance");
+ f->Close();
 }
 
 void PlotAcceptanceSkymaps(TH1D *hTau)
 {
-  // Set the PE parametric function
-  fPE = new TF1("fPE",myPEfunction,0,40,2);
-
-  latitude = 38.52028; //lat of frisco peak, aautah
-  tStep = 2.5; //10 min step in degrees
-  yMin = 5; //min distance from telescope where tau comes out of the ground in km
-  yMax = 500;
-  DeltaAngleAz = 0.1; //azimuth angle step
-  DeltaAngle = 0.1; //elevation angle step
-  MaxAzimuth = 180.; //max azi angle
-  MaxElevation = 40; //max elv angle 
-  bCombined = kTRUE; //both flor and cher events considered
+  TString FilenamePointSourceAcceptanceLimitedFoV("PointSourceAcceptance_FoV6.0deg_Index2.0_Emin6.0_Emax10.0.root");
+  TString FilenamePointSourceAcceptance360FoV("PointSourceAcceptance_FoV360deg_Index2.0_Emin6.0_Emax10.0.root");
+  Bool_t blimFOV = kFALSE;
   Double_t logEmin = 6; //min energy log
   Double_t logEmax = 10; //max energy log
-  Double_t LST = 0;
-  Double_t degconv = pi/180.0;
+  nuIndex = 2.0;
+  //up to here all parameters must match what is in the filename
+
+  //let place and point the telescope in azimuth
+  latitude = 38.52028; //lat of frisco peak, utah
+  Double_t teleDirection = -75.; // Telescope direction relative to north (NofW)
+  //Double_t teleDirection = -110; // Demonstartor point azimuth
+ 
+  tStep = 2.5; //10 min step in degrees
   //Double_t Enaught = 1e8; //GeV
   //Double_t Fnaught = 6.694e-23; //GeV^-1 cm^-2 s^-1
-  Double_t Enaught = 1e3; //GeV
-  Double_t Fnaught = 15e-14; //GeV^-1 cm^-2 s^-1
-  nuIndex = 3.2;
+  //Best Case for NGC1068 (2022, https://arxiv.org/abs/2211.09972)
+  //Double_t Enaught = 1e3; // GeV (1 TeV)
+  //Double_t Fnaught = 10.5e-14; // GeV^-1 cm^-2 s^-1
+  //nuIndex = 3.0;
+  //Flux for TXS0506+056 (9.5 year best fit, https://arxiv.org/abs/1807.08794)
+  Double_t Enaught = 1e5; // GeV (100 TeV)
+  Double_t Fnaught = 0.8e-17; // GeV^-1 cm^-2 s^-1
   Double_t normInverse = (pow(pow(10, logEmin), (1 - nuIndex)) - pow(pow(10, logEmax), (1 - nuIndex))) / (nuIndex - 1); // integral of E^-nuIndex from Emin to Emax to correct for the normalization in the GetTauDistibution function
   //~ normInverse = 1.0;
   //~ multNorm = kFALSE;
-  
-  //values from differential sensitivity calculations
-  yDelta = 5.0; //5
-  iConfig = 2; //telescope altitude
-  Double_t dFoV = 2;  //test 0, 1, 2, 10
-  tanFoV = tan(dFoV/180.*pi);
-  dFoVBelow =  3/180.*pi; 
-  iMirrorSize = 0;
-  dMinimumNumberPhotoelectrons = dThreshold[iMirrorSize]/dMirrorA[iMirrorSize]; 
-  dMinLength = 0.3;
 
-  // Setting Value for the FOV input value
-  // if it is less then 360 degrees we are limiting horizontal FOV
-  hFOV = 5; // in degrees
-  halfHFOV = (hFOV/2.) * (pi/180.);// in radians
-  Double_t teleDirection = -84.; // Telescope direction relative to north
-  if (hFOV < 360){
-    limFOV = kTRUE;
-      }else{
-    limFOV = kFALSE;
-  }
-
-  // Setting if you are looking at disfuse or point sources
-  bPointSources = kFALSE; 
-  
-  // TGraph *a = new TGraph();
-  // cout<<CalculateAcceptance(logEmin, logEmax, a, hTau)<<endl;
-  // return;
+  Double_t LST = 0;
+  Double_t degconv = pi/180.0;
   
   //new canvas for the horizontal skymaps, markers and labels for galactic landmarks
   int nMarks = 11;
@@ -2687,12 +2733,11 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   }
   
   //2D histograms for various skymaps + histogram to store number of neutrino events
-  TH2F *skymapSingleAngle = new TH2F("skymapSingleAngle","Acceptance Skymap of Single Azimuth Angle", 3601, -180.05, 180.05, 1801, -90.05, 90.05); //histo for single angle acceptance plot
   TH2F *skymapFull360Sweep = new TH2F("skymapFull360Sweep","Acceptance Skymap of 360 Degree Airshower Azimuth Sweep", 3601, -180.05, 180.05, 1801, -90.05, 90.05);
   TH2F *skymapFullProjection = new TH2F("skymapFullProjection","360 FoV Projection In Galactic Coordinates Over 1 Year of Exposure", 361, -180.05, 180.05, 181, -90.05, 90.05); //galactic
   TH2F *skymapProjSuperGal = new TH2F("skymapProjSuperGal","360 FoV Projection In Supergalactic Coordinates Over 1 Year of Exposure", 361, -180.05, 180.05, 181, -90.05, 90.05); //supergal
   TH2F *skymapProjEq = new TH2F("skymapProjEq","360 FoV Projection In Equatorial Coordinates Over 1 Year of Exposure", 361, -180.05, 180.05, 181, -90.05, 90.05); //equatorial
-  TH2F *skymapInstantConverage = new TH2F("skymapInstantConverage","Instantaneous Sky Coverage In Equatorial Coordinates", 361, -180.05, 180.05, 181, -90.05, 90.05); //histogram for instant sky coverage
+  TH2F *skymapInstantConverage = new TH2F("skymapInstantConverage","Instantanious Sky Coverage In Equatorial Coordinates", 361, -180.05, 180.05, 181, -90.05, 90.05); //histogram for instant sky coverage
   TH2F *nuevents = (TH2F*)skymapProjEq->Clone("nuevents");
   TH2F *TT = (TH2F*)skymapFull360Sweep->Clone("TT");
   TH2F *skymapTimeExp = new TH2F("skymapTimeExp","Souce Exposure Times", 361, -180.05, 180.05, 181, -90.05, 90.05);
@@ -2700,46 +2745,29 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   TH2F *sensEqI = (TH2F*)sensEq->Clone("sensint");
   
   //histogram formatting
-  skymapSingleAngle->GetXaxis()->SetTitle("Azimuth Angle [degrees]");
-  skymapSingleAngle->GetYaxis()->SetTitle("Elevation Angle [degrees]");
   //~ skymapSingleAngle->GetZaxis()->SetTitle("Acceptance [cm^2]");
   skymapFull360Sweep->GetXaxis()->SetTitle("Azimuth Angle [degrees]");
   skymapFull360Sweep->GetYaxis()->SetTitle("Elevation Angle [degrees]");
   //~ skymapFull360Sweep->GetZaxis()->SetTitle("Acceptance [cm^2]");
   skyC->Divide(2,1);
 
-  if (limFOV){
+
+  TH2F *skymapSingleAngle = 0;
+  if (blimFOV){
     //open 5 degree fov file
-    //TFile *fileDe = TFile::Open("skymap5degree.root");
-    //TH2F *skymapSingleAngle = (TH2F*)fileDe->Get("skymapSingleAngle");
-    
-    //getting the acceptance in a restricted FOV
-    GetAcceptanceInFOV(logEmin, logEmax, hTau, skymapSingleAngle, hFOV);
-
-    skymapFull360Sweep = (TH2F*)skymapSingleAngle->Clone("skymapSingleAngle");
-    skymapFull360Sweep->SetTitle("Acceptance Skymap of 360 Degree Airshower Azimuth Sweep");
-
-    // //intergrating over elevations angles
-    // for(int yBins = 1; yBins <= skymapSingleAngle->GetNbinsY(); yBins++)
-    //   {
-    // 	Double_t comboBin = 0;
-    // 	for(int xBins = 1; xBins <= skymapSingleAngle->GetNbinsX(); xBins++)
-    // 	  comboBin += skymapSingleAngle->GetBinContent(xBins, yBins);
-    // 	for(int xBins = 1; xBins <= skymapSingleAngle->GetNbinsX(); xBins++)
-    // 	  {
-    // 	    if (skymapSingleAngle->GetBinContent(xBins,yBins) > 0)
-    // 	      {
-    // 		skymapFull360Sweep->SetBinContent(xBins, yBins, comboBin);
-    // 	      }
-    // 	  }
-    //   }
+    TFile *fileDe = TFile::Open(FilenamePointSourceAcceptanceLimitedFoV.Data());
+    skymapSingleAngle = (TH2F*)fileDe->Get("skyAcceptance");
+    //projecting the single angle of acceptance over a 360 degree FoV
+    for(int yBins = 1; yBins <= skymapSingleAngle->GetNbinsY(); yBins++)
+      {
+	for(int xBins = 250; xBins <= (skymapSingleAngle->GetNbinsX()-250); xBins++){
+	  skymapFull360Sweep->SetBinContent(xBins, yBins, skymapSingleAngle->GetBinContent(xBins,yBins));
+   	}
+    }
   }else{
     //open single angle file for 360 degree fov
-    //TFile *fileDe = TFile::Open("singleangle.root");
-    //TH2F *skymapSingleAngle = (TH2F*)fileDe->Get("skymapSingleAngle");
-    
-    //getting the single angle acceptance according to the variables above 
-    GetAcceptanceSingleAngle(logEmin, logEmax, hTau, skymapSingleAngle);
+    TFile *fileDe = TFile::Open(FilenamePointSourceAcceptance360FoV.Data());
+    skymapSingleAngle = (TH2F*)fileDe->Get("skyAcceptance");
     
     //projecting the single angle of acceptance over a 360 degree FoV
     for(int yBins = 1; yBins <= skymapSingleAngle->GetNbinsY(); yBins++)
@@ -2754,15 +2782,24 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   
   Double_t vFov = 0;
   
+
   for(int i = 1; i <= skymapFull360Sweep->GetNbinsY(); i++)
     {
       if(skymapFull360Sweep->GetBinContent(1801, i) > 0) {
   	vFov += 0.1;
-  	cout<<skymapFull360Sweep->GetBinContent(1801, i)<<endl;
+  	//cout<<skymapFull360Sweep->GetBinContent(1801, i)<< " " << vFov<<endl;
       }
     }
-  //~ return;
-  
+  //~return;
+  Double_t hFov = 0;
+  for(int i = 1; i <= skymapFull360Sweep->GetNbinsX(); i++)
+    {
+      if(skymapFull360Sweep->GetBinContent(i, 900) > 0) {
+  	hFov += 0.1;
+  	//cout<<skymapFull360Sweep->GetBinContent(i, 900)<< " " << hFov<<endl;
+      }
+    }
+  //~return;
   skyC->cd(1);
   gPad->SetLogz(1);
   gPad->SetRightMargin(0.15);
@@ -2772,10 +2809,7 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   gPad->SetLogz(1);
   gPad->SetRightMargin(0.15);
   skymapFull360Sweep->Draw("COLZ"); //plot 360 sweep skymap
-  //~ return;
-  ifstream in;
-  in.open("1yrmod.txt"); //open ephem file
-  //~ return;
+  //return;
   for(int r = -180; r <= 180; r++) { //filling the instant sky converage histogram
     for(int d = -90; d <= 90; d++) {
       Double_t az = (atan2(sin((LST - r) * degconv), cos((LST - r) * degconv) * sin(latitude * degconv) - tan(d * degconv) * cos(latitude * degconv)) * 180 / pi) - 180;
@@ -2799,12 +2833,14 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
       //~ az = az + 360.0;
       int xBin = (int)((az + 180.1 + teleDirection) * 10);
       int yBin = (int)((alt + 90.1) * 10);
-      //cout <<"xBin: "<<xBin<<" yBin: "<<yBin<<" r: "<<r<<" d: "<<d<<endl;
+      cout <<"xBin: "<<xBin<<" yBin: "<<yBin<<" r: "<<r<<" d: "<<d<<"  "<<skymapFull360Sweep->GetBinContent(xBin, yBin)<<endl;
       skymapInstantConverage->Fill((-1 * r), d, skymapFull360Sweep->GetBinContent(xBin, yBin));
     }
   }
 
-  //skymapInstantConverage->Draw("colz");
+  TCanvas *test3 = new TCanvas("test3","test3",1500,750);
+  test3->cd(1);
+  skymapInstantConverage->Draw("colz");
   
   TCanvas *skyProjInstantEq = new TCanvas("skyProjInstantEq","Instant Skymap Coverage (Equatorial Coordinates)",1500,750); //canvas for instant converage skymap
   TPad *padI = (TPad*)pad1->Clone("padI");
@@ -2920,7 +2956,7 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   //~ gStyle->SetPalette(52);
   //~ return;//testing
   
-  //~ return;
+  //~return;
   
   //~ TFile *f1 = new TFile("s360_2.2.root","RECREATE");
   //~ skymapFull360Sweep->Write();
@@ -2935,6 +2971,12 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   Double_t totalT = 0, totalAcc = 0, maxT = 0, minT = 999999;
   int maxDay = -1, minDay = -1, noObsdays = 0;
   //calculations for the time evolution of the horizontal skymaps over various coordinate systems
+  ifstream in;
+  in.open("1yrmod.txt"); //open ephem file
+  //in.open("3yrmod.txt");
+  //in.open("5yrmod.txt");
+  //in.open("10yrmod.txt");
+  //~ return;
   if (in.is_open())
     {
       Double_t setTimeSun, riseTimeSun, riseTimeMoon, setTimeMoon, phaseMoon, deltaT = -1, tStepAdjusted; 
@@ -3036,7 +3078,8 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
 	    {
 	      for(int xBins = 1; xBins <= TT->GetNbinsX(); xBins++)
 		{
-		  TT->SetBinContent(xBins, yBins, tStepAdjusted * (24.0 / 360.0));
+		  if (skymapFull360Sweep->GetBinContent(xBins,yBins) > 0)
+		    TT->SetBinContent(xBins, yBins, tStepAdjusted * (24.0 / 360.0));
 		}
 	    }
 	  
@@ -3076,7 +3119,8 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
 		    !(nestBoth && ( (LST > riseTimeMoon && LST < 360.) || (LST > 0 && LST < setTimeMoon) ) ) ) 
 		  { 
 		    skymapProjEq->Fill((-1 * r), d, skymapFull360Sweep->GetBinContent(xBin, yBin) * tStepAdjusted * 240.0); //240 sec = 1 degree of RA
-		    skymapTimeExp->Fill((-1 * r), d, TT->GetBinContent(xBin, yBin));
+		    if (TT->GetBinContent(xBin,yBin) > 0)
+		      skymapTimeExp->Fill((-1 * r), d, TT->GetBinContent(xBin, yBin));
 		    //~ nuevents->Fill((-1 * r), d, skymapFull360Sweep->GetBinContent(xBin, yBin) * tStepAdjusted * 240 * normInverse * Fnaught / pow(Enaught, -nuIndex));
 		  } 
 	      }
@@ -3087,6 +3131,11 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
 	  }
 	}
       
+      TCanvas *test1 = new TCanvas("test1","test1",1500,750);
+      test1->cd(1);
+      skymapProjEq->Draw("colz");
+      //return;
+
       TCanvas *test = new TCanvas("test","test",1500,750);
       test->Divide(2,1);
       test->cd(1);
@@ -3127,6 +3176,10 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
 	  for(int j = 1; j <= skymapProjEq->GetNbinsY(); j++)
 	    nuevents->SetBinContent(i, j, skymapProjEq->GetBinContent(i, j) * normInverse * Fnaught / pow(Enaught, -nuIndex));
 	}
+
+      TCanvas *test2 = new TCanvas("test2","test2",1500,750);
+      test2->cd(1);
+      nuevents->Draw("colz");
       
       for(int xBins = 1; xBins <= skymapProjEq->GetNbinsX(); xBins++)
 	{
@@ -3162,12 +3215,13 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   cout<<"Number of days where no observation was possible: "<<noObsdays<<endl;
   
   cout<<"Vertical FoV of telescope (deg): "<<vFov<<endl;
-  cout<<"Horizontal FoV of telescope (deg): "<<hFOV<<endl;
-  cout<<"Area of FoV: "<<(vFov * hFOV) * (pi * pi) / (180. * 180.)<<" sr"<<endl;
-  cout<<"Rate of gamma-ray bursts observed per day: "<<((vFov * hFOV) * (pi * pi) / (180. * 180.)) / (4. * pi)<<endl;
-  cout<<"Rate of gamma-ray bursts observed per year: "<<((vFov * hFOV) * (pi * pi) / (180. * 180.)) / (4. * pi) * 365.25<<endl;
-  cout<<"Rate of gamma-ray bursts observed per day with duty cycle: "<<((vFov * hFOV) * (pi * pi) / (180. * 180.)) / (4. * pi) * totalT / (365.25 * 360.)<<endl;
-  cout<<"Rate of gamma-ray bursts observed per year with duty cycle: "<<((vFov * hFOV) * (pi * pi) / (180. * 180.)) / (4. * pi) * 365.25 * totalT / (365.25 * 360.)<<endl;
+  cout<<"Horizontal FoV of telescope (deg): "<< hFov<<endl;
+  cout<<"Area of FoV: "<<(vFov * hFov) * (pi * pi) / (180. * 180.)<<" sr"<<endl;
+  cout<<"Pointing Direction of Telescope (deg): "<< 360. + teleDirection <<endl; 
+  cout<<"Rate of gamma-ray bursts observed per day: "<<((vFov * hFov) * (pi * pi) / (180. * 180.)) / (4. * pi)<<endl;
+  cout<<"Rate of gamma-ray bursts observed per year: "<<((vFov * hFov) * (pi * hFov) / (180. * 180.)) / (4. * pi) * 365.25<<endl;
+  cout<<"Rate of gamma-ray bursts observed per day with duty cycle: "<<((vFov * hFov) * (pi * pi) / (180. * 180.)) / (4. * pi) * totalT / (365.25 * 360.)<<endl;
+  cout<<"Rate of gamma-ray bursts observed per year with duty cycle: "<<((vFov * hFov) * (pi * pi) / (180. * 180.)) / (4. * pi) * 365.25 * totalT / (365.25 * 360.)<<endl;
   
   
   //initializing and formatting graphical elements for the galactic coordinate skymap
@@ -3646,17 +3700,21 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   sensEq->SetContour(nb);
   sensEqI->SetContour(nb);
   
-  
-  TFile *f = new TFile("eq.root","RECREATE");
+  TString Filename;
+  Filename.Form("eq_teleDir%0.1f.root",teleDirection);
+  TFile *f = new TFile(Filename.Data(),"RECREATE");
   skymapProjEq->Write();
   f->Close();
-  TFile *ff = new TFile("gal.root","RECREATE");
+  Filename.Form("gal_teleDir%0.1f.root",teleDirection);
+  TFile *ff = new TFile(Filename.Data(),"RECREATE");
   skymapFullProjection->Write();
   ff->Close();
-  TFile *fff = new TFile("supgal.root","RECREATE");
+  Filename.Form("supgal_teleDir%0.1f.root",teleDirection);
+  TFile *fff = new TFile(Filename.Data(),"RECREATE");
   skymapProjSuperGal->Write();
   fff->Close();
-  TFile *ffff = new TFile("insteq.root","RECREATE");
+  Filename.Form("insteq_teleDir%0.1f.root",teleDirection);
+  TFile *ffff = new TFile(Filename.Data(),"RECREATE");
   skyProjInstantEq->Write();
   ffff->Close();
   
@@ -3709,18 +3767,20 @@ void PlotAcceptanceSkymaps(TH1D *hTau)
   cout<<"TA Hotspot Events: "<<nuevents->GetBinContent((int)(-133.503 + 181), (int)(43.1166 + 91))<<endl;
   cout<<"NGC 1068 Events: "<<nuevents->GetBinContent((int)(-40.6698 + 181), (int)(-0.0132913 + 91))<<endl;
   
+  cout<<"Sensitivity Max Bin: "<<skymapProjEq->GetMaximumBin()<<", Sensitivity Max: "<<1/skymapProjEq->GetBinContent(skymapProjEq->GetMaximumBin())<<endl;
+  
   //~ int nPoints = 5;
   Double_t srcRA[nPoints];
   Double_t srcDec[nPoints];
   
-  srcDec[0] = -4;
-  srcDec[1] = 45;
+  srcDec[0] = -0.013;
+  srcDec[1] = 5.69315;
   srcDec[2] = -53;
   srcDec[3] = -29;
   srcDec[4] = 20;
   
-  srcRA[0] = -84; 
-  srcRA[1] = -28;
+  srcRA[0] = 40.6698; 
+  srcRA[1] = 77.3581;
   srcRA[2] = 111;
   srcRA[3] = -107;
   srcRA[4] = -64;
@@ -3855,7 +3915,6 @@ int main (int argc, char **argv) {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   //Sensitivity calculation starts here
-  bFluorescence = kFALSE;
   
   //CalculateAcceptanceVsImageLength(hTau);
   
@@ -3874,7 +3933,85 @@ int main (int argc, char **argv) {
   //CalculateIntegralSensitivity(hTau);
   //CalculateDifferentialSensitivity(hTau);
   //
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+
+//////////////////////////////////////////
+//
+//  Calculate the Point Source Acceptance
+//
+/*
+//You can change the three values below to coarser values to determine the
+//useful range in Azimuth and elevation. Do not forget to switch them back
+DeltaAngleAz = 0.1; //steps in azimuth in the camera FOV; default 0.1
+DeltaAngleSky = 0.1; //this is the step size in elevation and azimuth in the sky to calculate the acceptance for a limited FOV telescope. Make sure it is smaller than then FOV of the camera. Default value is 0.1.  
+yDelta = 20;
+
+
+//The maximum aximuth angle we want to simulate taus coming
+//adjust this and the elevation angle that you only simulate
+//phasespace with non-zero acceptance
+dMaxAzimuthSky = 7; 
+MaxElevation = 13;
+yMax = 250; //[km] how far away from the telescope we expect taus to emerge
+
+//vertical camera configuration
+tanFoV = tan(2/180.*pi); //Field of view of telescope above the horizon
+dFoVBelow = 3/180.*pi; //Field of view of telescope  below horizon 
+dMinLength = 0.3; //mimnimum length a shower has to have in the camera, in degrees. This is a conservative estimate because it assumes that the shower starts at a distance l from the detector, which is not necessarily tru for showers with shallow elevation angles.
+hFOV = 6; //horizontal field of view
+
+dMinimumNumberPhotoelectrons = 100;  //this is minimum pe per sqm mirror needed for trigger/analysis
+
+//set both to false to simulate Cherenkov only
+bFluorescence = kFALSE;
+bCombined = kFALSE;
+
+//the source spectrum
+Double_t logEmin = 6; //min energy log
+Double_t logEmax = 10; //max energy log
+nuIndex = 2;
+
+GetPointSourceAcceptanceInFOV(logEmin, logEmax, hTau, hFOV);
+
+*/
+//////////////////////////////////////////
+//
+//  Calculate the Point Source Acceptance for 360 deg FoV
+//
+/*
+//You can change the three values below to coarser values to determine the
+//useful range in Azimuth and elevation. Do not forget to switch them back
+DeltaAngleSky = 0.1; //this is the step size in elevation and azimuth in the sky to calculate the acceptance for a limited FOV telescope. Make sure it is smaller than then FOV of the camera. Default value is 0.1.  
+yDelta = 10;
+
+
+//The maximum aximuth angle we want to simulate taus coming
+//adjust this and the elevation angle that you only simulate
+//phasespace with non-zero acceptance
+dMaxAzimuthSky = 7; 
+MaxElevation = 13;
+yMax = 250; //[km] how far away from the telescope we expect taus to emerge
+
+//vertical camera configuration
+tanFoV = tan(2/180.*pi); //Field of view of telescope above the horizon
+dFoVBelow = 3/180.*pi; //Field of view of telescope  below horizon 
+dMinLength = 0.3; //mimnimum length a shower has to have in the camera, in degrees. This is a conservative estimate because it assumes that the shower starts at a distance l from the detector, which is not necessarily tru for showers with shallow elevation angles.
+
+dMinimumNumberPhotoelectrons = 100;  //this is minimum pe per sqm mirror needed for trigger/analysis
+
+//set both to false to simulate Cherenkov only
+bFluorescence = kFALSE;
+bCombined = kFALSE;
+
+//the source spectrum
+Double_t logEmin = 6; //min energy log
+Double_t logEmax = 10; //max energy log
+nuIndex = 2;
+
+GetAcceptanceSingleAngle(logEmin, logEmax, hTau);
+*/
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Skyplots start here
   //
   PlotAcceptanceSkymaps(hTau);
@@ -3895,7 +4032,7 @@ int main (int argc, char **argv) {
   yMax = 5.1;
   yDelta = 5;
   MaxElevation = 30;
-  DeltaAngle = 0.05;
+  DeltaAngleSky = 0.05;
   dMaxCherenkovAzimuthAngle = 30;
   dMinEnu = 5.5;
   dMaxEnu = 6.5;

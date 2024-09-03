@@ -59,6 +59,7 @@
 #define CMD_UPDATE_MUSIC_CONFIG		0x23
 #define CMD_SET_BIAS_VOLTAGE		0x24
 #define CMD_SET_TRG_THRESHOLD		0x25
+#define CMD_SET_TRG_THRESHOLD_CH	0x26
 
 #define CMD_PING_SIAB				0x30
 
@@ -106,4 +107,5 @@ bool Read_Music_Config(std::string ConfigCSV, int *address, int *value);
 void Set_Bias_Voltage(int i, int file, __u32 command, std::string &response);
 void Process_CMD(int file, std::vector<uint32_t>& vCMD, std::string &response);
 void Set_Trigger_Threshold(int i, int file, __u32 command, std::string &response);
+void Set_Ch_Trigger_Threshold(int i, int file, __u32 command, std::string &response);
 #endif

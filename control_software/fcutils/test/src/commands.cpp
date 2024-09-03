@@ -752,6 +752,72 @@ void Set_Bias_Voltage(int i, int file, __u32 command, std::string &response)
     response += temp;
 }
 
+void Set_Ch_Trigger_Threshold(int i,  int file, __u32 command, std::string &response)
+{
+    int status = 0;
+    std::string filename = "/home/trinity/Programs/Trinity/control_software/siab/DV_Th_Offset.csv";
+    std::ifstream DiscriminatorOffset(filename);
+
+    if(!DiscriminatorOffset.is_open()){
+        status = -60;           // this is just to make sure error code for file opening failure is different from other error codes.
+        std::cout << "Can not open Discriminator Offsets file." << std::endl;
+    }else{
+        int fail_ctr = 0;
+        int startline = i*16;
+        unsigned short BV_value[16] = {0};
+        std::string BV_str;
+        //Reading the 16 Discriminator Offsets value for the SIAB pointed by i
+        getline(DiscriminatorOffset,BV_str);
+        for(int j=0; j<startline; j++)
+        {
+            getline(DiscriminatorOffset,BV_str);
+        }
+        for(int k=startline; k<startline+16; k++)
+        {
+            getline(DiscriminatorOffset,BV_str);
+            BV_value[k-startline] = stoi(BV_str);
+            //cout<<std::dec<<BV_value[j]<<endl;
+        }
+        DiscriminatorOffset.close();
+
+        std::cout << std::endl << "Setting trigger threshold for SIAB# " << i << " Channel# "<< j <<std::endl;
+
+        __u32 CMD_Packet = 0;
+        __u8 music_ID = ((command >> 20));
+		__u8 ch_ID = ((command>>16) & 0x0F);
+        __u16 glob_threshold_value = (command & 0xFFFF);
+        __u16 ch_threshold_value = 0;
+        //cout<<threshold_value + BV_value[i]<<endl;
+        //cout<<threshold_value + BV_value[i+1]<<endl;
+        std::string response_fake;    // this is being passed, so the Write_to_Music_Register function does not complain, but we are not using it.
+        if(music_ID == 1){
+            ch_threshold_value = glob_threshold_value + BV_value[ch_ID];
+            ch_threshold_value = ((ch_threshold_value << 3) | 0xF007);
+            CMD_Packet = ((0x15 << 24) | (((0x01 << 6) | (ch_ID+8)) << 16) | ch_threshold_value);
+            std::cout << std::hex << CMD_Packet << std::endl;
+            if(!Write_to_Music_Register(file, CMD_Packet, response_fake))
+                fail_ctr++;
+            usleep(10000);
+        }else if(music_ID == 2){
+           ch_threshold_value = glob_threshold_value + BV_value[ch_ID+8];
+           ch_threshold_value = ((ch_threshold_value << 3) | 0xF007);
+           CMD_Packet = ((0x15 << 24) | (((0x02 << 6) | (ch_ID+8)) << 16) | ch_threshold_value);
+           std::cout << std::hex << CMD_Packet << std::endl;
+           if(!Write_to_Music_Register(file, CMD_Packet, response_fake))
+               fail_ctr++;
+           usleep(10000);
+        }else{
+            std::cout << "An error occured. Could not understand the Music IDs." << std::endl;
+        }
+        std::cout << "Finished Setting trigger threshold for SIAB# " << i << std::endl;
+        if(fail_ctr != 0)
+            std::cout << "Trigger threshold setup failed for " << fail_ctr << " channels on above SIAB." << std::endl;
+        status = -fail_ctr;
+    }
+    auto temp = fcutils::string::int_to_hex(status);
+    response += temp;
+}
+
 void Set_Trigger_Threshold(int i, int file, __u32 command, std::string &response)
 {
     int status = 0;
@@ -954,6 +1020,9 @@ void Process_CMD(int file, std::vector<uint32_t>& vCMD, std::string &response)
                     case CMD_SET_TRG_THRESHOLD:
                         Set_Trigger_Threshold(i, file, CMD_Packet, temp_response);
                         break;
+					case CMD_SET_TRG_THRESHOLD_CH:
+						Set_Ch_Trigger_Threshold(i,file,CMD_Packet,temp_response);
+						break;
                     default:
                         break;
                 }
