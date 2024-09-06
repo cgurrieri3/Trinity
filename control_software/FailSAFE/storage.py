@@ -14,8 +14,8 @@ def send_email(reason):
     port = 465  # For starttls
     smtp_server = "smtp.gmail.com"
     sender_email = "sofiastepanoff22@gmail.com"
-    receiver_email = "sofiastepanoff@gatech.edu"
-    #receiver_email = "TrinityObservations@groups.gatech.edu"
+    #receiver_email = "sofiastepanoff@gatech.edu"
+    receiver_email = "TrinityObservations@groups.gatech.edu"
     password = 'jjxqrdecssjizosh'
     
     # Set the subject and body of the email
