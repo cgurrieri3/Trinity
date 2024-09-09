@@ -28,13 +28,32 @@ OutPutOpt     = -o
 	@echo "Done"
 
 
-EXE = TrinityPerformanceCalculations
+EXE = TrinityPerformanceCalculationsNew
 
 all: ${EXE}
 
-TrinityPerformanceCalculations: TrinityPerformanceCalculations.o
+TrinityPerformanceCalculationsNew: TrinitySimUtilities.o TrinityPerformanceCalculationsNew.o
 	$(LD)  $(LDFLAGS) $^ $(OutPutOpt) $@
+
 
 clean:
 	@rm -f *.o *.a *.so *~ core $(EXE)
+
+.SUFFIXES: .o
+
+
+depend:
+	$(DEPEND)
+
+Makefile.depend:
+	$(DEPEND)
+
+DEPEND=echo > Makefile.depend0 &&\
+	makedepend -s "\#DEPEND LIST DONT DELETE" -- $(INCLUDEFLAGS) \
+		-Y --  *.cpp *.c \
+		-f Makefile.depend0 > /dev/null 2>&1 &&\
+	sed "s/^[a-zA-Z0-9]*\///" Makefile.depend0 > Makefile.depend &&\
+	rm -f Makefile.depend0
+
+include Makefile.depend
 
