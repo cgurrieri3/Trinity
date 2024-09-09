@@ -1002,7 +1002,7 @@ void Do_Trigger_Scan_SF(std::string& msg)
 // Raise threshold on all  pixels not scanned, record the threshold and 
 // rate. Once completed, switch to different pixel.
 
-void Do_Trigger_Scan_SF_PBP(std::string& msg)
+/*void Do_Trigger_Scan_SF_PBP(std::string& msg)
 {
 	printf("\n--------------- Starting Single Focus Trigger Scan ---------------\n");
 	// msg contains 7-bytes.
@@ -1117,7 +1117,7 @@ void Do_Trigger_Scan_SF_PBP(std::string& msg)
 
 	printf("-------------------------------------------------\n");
 	printf("-------------------------------------------------\n\n");
-}
+}*/
 
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
