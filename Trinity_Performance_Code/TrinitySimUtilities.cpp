@@ -24,15 +24,16 @@ TrinitySimUtilities::TrinitySimUtilities()
   dHalfEnergyBinWidth = 0.5;
   dMinEnu = 6;
   dMaxEnu = 10;
+  nuIndex = 2; //power law index of the neutrino spectrum the minus sign is added later
+
   dST = 10; //km max height of shower tip above ground;
   yMin = 10;
   yMax = 250;
   yDelta = 20;
-  MaxElevation = 10; //elevation angle (determines path through Earth)
-  dMaxAzimuthSky = 3; //max limit for azimuth evaluation 
+  MaxElevation = 15; //elevation angle (determines path through Earth)
+  dMaxAzimuthSky = 10; //max limit for azimuth evaluation 
   DeltaAngleAz = 0.1; //steps in azimuth in the camera FOV
   DeltaAngleSky = 0.1; //this is the step size in elevation and azimuth in the sky to calculate the acceptance for a limited FOV telescope. Make sure it is smaller than then FOV of the camera  
-  nuIndex = 2; //power law index of the neutrino spectrum the minus sign is added later
   dMaxCherenkovAzimuthAngle = 20.0; //maximum azimuth angle for cherenkov 
   dMaxFluorescenceDistance = 70;
 
@@ -43,7 +44,7 @@ TrinitySimUtilities::TrinitySimUtilities()
   dFoVBelow = 3/180.*pi; //Field of view of telescope  below horizon 
   hFOV = 5.; // in degrees
   dMinLength = 0.3; //mimnimum length a shower has to have in the camera, in degrees. This is a conservative estimate because it assumes that the shower starts at a distance l from the detector, which is not necessarily tru for showers with shallow elevation angles.
-  dMinimumNumberPhotoelectrons = 20;  //this is pe per sqm mirror 
+  dMinimumNumberPhotoelectrons = 10;  //this is pe per sqm mirror 4.8 for full trinity at threshold use 100pe/mirror effective area for analysis threshold 
 
   bFluorescence = kFALSE;
   bCombined = kFALSE;
@@ -137,7 +138,7 @@ if(bFluorescence)
 cout<<"Only Fluorescence is taken into account"<<endl<<endl;
 
 cout<<"Elevation is scanned from the horizon down to -"<<MaxElevation<<" degrees below the horizon"<<endl;
-cout<<"Largest azimuth angle of emerging tau: "<<dMaxAzimuthSky<<" degrees"<<endl; 
+cout<<"Largest azimuth angle of emerging tau: "<<dMaxAzimuthSky<<" degrees (only used for point source acceptance with limited FoV telescopes)"<<endl; 
 cout<<"Azimuth and elevation scan step size: "<<DeltaAngleSky<<" degrees"<<endl; 
 cout<<"Camera FoV scan step size: "<<DeltaAngleAz<<" degrees"<<endl;
 cout<<"For 360deg FoV and diffuse flux sensitivities, the azimuth is scanned to the maximum Cherenkov angle: "<<dMaxCherenkovAzimuthAngle<<" degrees"<<endl<<endl; 
@@ -154,8 +155,8 @@ void TrinitySimUtilities::ConfigureDemonstrator()
   yMin = 10;
   yMax = 250;
   yDelta = 10;
-  MaxElevation = 13; //elevation angle (determines path through Earth)
-  dMaxAzimuthSky = 20; //max limit for azimuth evaluation 
+  MaxElevation = 11; //elevation angle (determines path through Earth)
+  dMaxAzimuthSky = 6; //max limit for azimuth evaluation 
   DeltaAngleAz = 0.1; //steps in azimuth in the camera FOV
   DeltaAngleSky = 0.1; //this is the step size in elevation and azimuth in the sky to calculate the acceptance for a limited FOV telescope. Make sure it is smaller than then FOV of the camera  
   dMaxCherenkovAzimuthAngle = 20.0; //maximum azimuth angle for cherenkov 
@@ -1265,6 +1266,26 @@ cout<<i+1<<"  "<<hTau->GetBinCenter(i+1)  <<" taus cont: "<<hTau->GetBinContent(
 Double_t TrinitySimUtilities::GetDiffuseAcceptanceLimitedFoV(Double_t dMinEnu, Double_t dMaxEnu,TGraph *grDiffAcceptance)
 {
   cout<<"Running GetDiffuseAcceptanceLimitedFoV from "<<dMinEnu<<" to "<<dMaxEnu<<" in log10(E/GeV)"<<endl; 
+  TH2F *skyAcceptance = new TH2F("skyAcceptance","Diffuse Flux Acceptance", 360/DeltaAngleSky+1, -180,180, 180/DeltaAngleSky, -90, 90); //histo for single angle acceptance plot
+  skyAcceptance->GetXaxis()->SetTitle("azimuth angle [degrees]");
+  skyAcceptance->GetYaxis()->SetTitle("elevation angle [degrees]");
+  skyAcceptance->GetZaxis()->SetTitle("effective area [cm^{2} sr]");
+
+  TH1F *hAcceptanceVsDistance = new TH1F("hAcceptanceVsDistance","Diffuse Flux Acceptance vs. Distance from the telescope",(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsDistance->GetXaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsDistance->GetZaxis()->SetTitle("effective area [cm^{2}]");
+
+  TH2F *hAcceptanceVsAzimuthAndDistance = new TH2F("hAzimuthVsDistance","Diffuse FLux Acceptance vs. Azimuth and Distance",(int)(180/DeltaAngleSky)+1,0,180,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsAzimuthAndDistance->GetXaxis()->SetTitle("azimuth (viewing angle) [degrees]");
+  hAcceptanceVsAzimuthAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsAzimuthAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2} sr]");
+	
+  TH2F *hAcceptanceVsElevationAndDistance = new TH2F("hElevationVsDistance","Diffuse Flux Acceptance vs. Elevation and Distance",
+                            (int)(MaxElevation / DeltaAngleSky),-1*MaxElevation,0,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsElevationAndDistance->GetXaxis()->SetTitle("elevation [degrees]");
+  hAcceptanceVsElevationAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsElevationAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2} sr]");
+
   if (iTrigWin==5){
     cout<<"///// Time Window: All time" <<endl;
     fPE = new TF1("fPE",this,&TrinitySimUtilities::myPEfunction,0,40,2);
@@ -1356,24 +1377,32 @@ Double_t TrinitySimUtilities::GetDiffuseAcceptanceLimitedFoV(Double_t dMinEnu, D
 		         }
                    }//iFoVazi
 	         }//iSign
-	         if(dDeltaAcceptance<1e-10 && y>dMaxFluorescenceDistance) //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
-                  {
-                     cout<<"Breaking after "<<AbsAzimuth<<" azimuth"<<endl;
-		      break;
-                  }
-	      
-	         dAcceptance+=dDeltaAcceptance*sin(elevation/180.*pi); //projection of area cell to trajectory
+                 dDeltaAcceptance*=sin(elevation/180.*pi); //projection of area cell to trajectory
+                 //multiply with area of cell (note that the yDelta*DeltaAngleSky/180*pi is included in dConversion
+                 dDeltaAcceptance*=y;
+
+                 hAcceptanceVsAzimuthAndDistance->Fill(AbsAzimuth,y,dDeltaAcceptance);
+                 hAcceptanceVsElevationAndDistance->Fill(-1*elevation,y,dDeltaAcceptance);
+	         skyAcceptance->Fill(AbsAzimuth,-1*elevation,dDeltaAcceptance);
+                 hAcceptanceVsDistance->Fill(y,dDeltaAcceptance);
+
+	         dAcceptance+=dDeltaAcceptance; 
 	          //   cout<<"distance "<<y<<" prob"<<dDeltaAcceptance<<" elevation  "<<elevation<<endl;
 	         AbsAzimuth+=DeltaAngleSky;
 	         if(AbsAzimuth>=MaxAzimuth && y>dMaxFluorescenceDistance)
                       cout<<"The "<<MaxAzimuth<<" degree maximum azimuth angle dMaxCherenkovAzimuthAngle has been reached. Consider making it bigger using SetMaximumShowerViewingAngle(Double_t maxangle)."<<endl; 
+
+	         if(dDeltaAcceptance<1e-3 && y>dMaxFluorescenceDistance) //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
+                  {
+                     cout<<"Breaking after "<<AbsAzimuth<<" azimuth"<<endl;
+		      break;
+                  }
 	      
 	    }//finished looping over all azimuth angles
 	  elevation+=DeltaAngleSky;    
 	  //cout<<azimuth<<"  "<<dAcceptance<<endl;
 	  //multiply with dOmega  DeltaAngleSky*DeltaAngleSky
         }//finished looping over all elevation angles
-      dAcceptance*=y; //multiply with area of cell (note that the yDelta*DeltaAngleSky/180*pi is included in dConversion
       dIntegratedAcceptance+=dAcceptance;
       
       grDiffAcceptance->SetPoint(p,y,dAcceptance*dConversion); 
@@ -1384,6 +1413,35 @@ Double_t TrinitySimUtilities::GetDiffuseAcceptanceLimitedFoV(Double_t dMinEnu, D
       if(dAcceptance<1e-10 && y>dMaxFluorescenceDistance) //no sense to increase in distance if we can't see any showers now
 	break;
     }//end looping over distances
+
+
+  TCanvas *cAcceptance = new TCanvas("cPointSourceAcceptance","Diffuse Flux Acceptance Limited Field of View",1700,800);
+  cAcceptance->Divide(2,2);
+  cAcceptance->cd(1);
+  skyAcceptance->Scale(dConversion);
+  skyAcceptance->Draw("COLZ");
+  cAcceptance->cd(2);
+  hAcceptanceVsDistance->Scale(dConversion);
+  hAcceptanceVsDistance->Draw("L");
+  cAcceptance->cd(3);
+  hAcceptanceVsElevationAndDistance->Scale(dConversion); 
+  hAcceptanceVsElevationAndDistance->Draw("COLZ"); 
+  cAcceptance->cd(4);
+  hAcceptanceVsAzimuthAndDistance->Scale(dConversion); 
+  hAcceptanceVsAzimuthAndDistance->Draw("COLZ"); 
+  cAcceptance->Modified();
+  cAcceptance->Update();
+  //Save the acceptance into a file
+  TString Filename;
+  Filename.Form("DiffuseFluxAcceptance_FoV%0.1fdeg_Index%0.1f_Emin%0.1f_Emax%0.1f.root",hFOV,nuIndex,log10(dMinEnu),log10(dMaxEnu));
+  TFile *f = new TFile(Filename.Data(),"RECREATE");
+  f->WriteObject(hAcceptanceVsDistance,"hAcceptanceVsDistance");
+  f->WriteObject(skyAcceptance,"skyAcceptance");
+  f->WriteObject(hAcceptanceVsAzimuthAndDistance,"hAcceptanceVsAzimuthAndDistance");
+  f->WriteObject(hAcceptanceVsElevationAndDistance,"hAcceptanceVsElevationAndDistance");
+  f->Close();
+
+
   return (dIntegratedAcceptance*dConversion);
 }
 
@@ -1395,6 +1453,26 @@ Double_t TrinitySimUtilities::GetDiffuseAcceptanceLimitedFoV(Double_t dMinEnu, D
 Double_t TrinitySimUtilities::GetDiffuseAcceptance(Double_t dMinEnu, Double_t dMaxEnu,TGraph *grDiffAcceptance)
 {
  cout<<"Running GetDiffuseAcceptance for 360 deg horizontal FoV from "<<dMinEnu<<" to "<<dMaxEnu<<" in log10(E/GeV)"<<endl; 
+
+  TH2F *skyAcceptance = new TH2F("skyAcceptance","Diffuse Flux Acceptance", 360/DeltaAngleSky+1, -180,180, 180/DeltaAngleSky, -90, 90); //histo for single angle acceptance plot
+  skyAcceptance->GetXaxis()->SetTitle("azimuth angle [degrees]");
+  skyAcceptance->GetYaxis()->SetTitle("elevation angle [degrees]");
+  skyAcceptance->GetZaxis()->SetTitle("effective area [cm^{2} sr]");
+
+  TH1F *hAcceptanceVsDistance = new TH1F("hAcceptanceVsDistance","Diffuse Flux Acceptance vs. Distance from the telescope",(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsDistance->GetXaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsDistance->GetZaxis()->SetTitle("effective area [cm^{2}]");
+
+  TH2F *hAcceptanceVsAzimuthAndDistance = new TH2F("hAzimuthVsDistance","Diffuse FLux Acceptance vs. Azimuth and Distance",(int)(180/DeltaAngleSky)+1,0,180,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsAzimuthAndDistance->GetXaxis()->SetTitle("azimuth (viewing angle) [degrees]");
+  hAcceptanceVsAzimuthAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsAzimuthAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2} sr]");
+	
+  TH2F *hAcceptanceVsElevationAndDistance = new TH2F("hElevationVsDistance","Diffuse Flux Acceptance vs. Elevation and Distance",
+                            (int)(MaxElevation / DeltaAngleSky),-1*MaxElevation,0,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsElevationAndDistance->GetXaxis()->SetTitle("elevation [degrees]");
+  hAcceptanceVsElevationAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsElevationAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2} sr]");
 
   if (iTrigWin==5){
     cout<<"///// Time Window: All time" <<endl;
@@ -1484,20 +1562,35 @@ Double_t TrinitySimUtilities::GetDiffuseAcceptance(Double_t dMinEnu, Double_t dM
 		  //if(hTau->GetBinContent(i+1)*dP>0 )
 		  //cout<<hTau->GetBinCenter(i+1)<<"  "<<hTau->GetBinContent(i+1)<<" y:  "<<y<<"  el: "<<elevation<<" az: "<<azimuth<<" dp: "<<dP<<" dDeltaAccept: "<<dDeltaAcceptance<<" prod: "<<hTau->GetBinContent(i+1)*dP<<endl;
 		}
-	      if(dDeltaAcceptance<1e-10 && y>dMaxFluorescenceDistance) //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
-                {
-                  cout<<"Breaking after "<<azimuth<<" azimuth"<<endl;
-		   break;
-		}
-	      
-	      dAcceptance+=dDeltaAcceptance*sin(elevation/180.*pi); //projection of area cell to trajectory
-	      //cout<<"distance "<<y<<" prob"<<dDeltaAcceptance<<" elevation  "<<elevation<<endl;
-	      azimuth+=DeltaAngleSky;
-	      if(azimuth>=MaxAzimuth && y>dMaxFluorescenceDistance)
-                   cout<<"The "<<MaxAzimuth<<" degree maximum azimuth angle dMaxCherenkovAzimuthAngle has been reached. Consider making it bigger using SetMaximumShowerViewingAngle(Double_t maxangle)."<<endl; 
+
+
+	         dDeltaAcceptance*=sin(elevation/180.*pi)*y; //projection of area cell to trajectory
+       	         dAcceptance+=dDeltaAcceptance;
+
+                 //if(dDeltaAcceptance>1e-3)
+		 //   cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<< ""<<", dDeltaAcceptance: " << dDeltaAcceptance <<" cm^2 "<<endl;
+
+                 hAcceptanceVsAzimuthAndDistance->Fill(azimuth,y,dDeltaAcceptance);
+                 hAcceptanceVsElevationAndDistance->Fill(-1*elevation,y,dDeltaAcceptance);
+                 hAcceptanceVsDistance->Fill(y,dDeltaAcceptance);
+	         skyAcceptance->Fill(azimuth,-1*elevation,dDeltaAcceptance);
+
+
+	         if(dDeltaAcceptance<1e-10 && y>dMaxFluorescenceDistance) //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
+                   {
+                     cout<<"Breaking after "<<azimuth<<" azimuth"<<endl;
+		     break;
+		    }
+	          //cout<<"distance "<<y<<" prob"<<dDeltaAcceptance<<" elevation  "<<elevation<<endl;
+	          
+	          azimuth+=DeltaAngleSky;
+
+	          if(azimuth>=MaxAzimuth && y>dMaxFluorescenceDistance)
+                       cout<<"The "<<MaxAzimuth<<" degree maximum azimuth angle dMaxCherenkovAzimuthAngle has been reached. Consider making it bigger using SetMaximumShowerViewingAngle(Double_t maxangle)."<<endl; 
 	      //Add absorption in the atmosphere between shower and observer
 	      //Go over target area and calculate acceptance angle for each dA. Integrate over energy spectrum of taus coming out of the earth at that point. multiplied with detection efficiency(absorption).
 	    }//finished looping over all azimuth angles
+
 	  elevation+=DeltaAngleSky;    
 	  //cout<<azimuth<<"  "<<elevation<<" "<<dAcceptance<<endl;
 	  //multiply with dOmega  DeltaAngleSky*DeltaAngleSky
@@ -1505,7 +1598,6 @@ Double_t TrinitySimUtilities::GetDiffuseAcceptance(Double_t dMinEnu, Double_t dM
        //cout<<"finished looping over all elevation angles"<<endl;
       //dAcceptance*=yDelta*DeltaAngleSky/180*pi*y; //multiply area of cell
       //dAcceptance*=DeltaAngleSky/180*pi*DeltaAngleSky/180*pi; //multiply area of solidangle cell
-      dAcceptance*=y; //multiply with area of cell (note that the yDelta*DeltaAngleSky/180*pi is included in dConversion
       dIntegratedAcceptance+=dAcceptance;
       
       grDiffAcceptance->SetPoint(p,y,dAcceptance*dConversion); 
@@ -1516,6 +1608,38 @@ Double_t TrinitySimUtilities::GetDiffuseAcceptance(Double_t dMinEnu, Double_t dM
       if(dAcceptance<1e-10 && y>dMaxFluorescenceDistance) //no sense to increase in distance if we can't see any showers now
 	break;
     }//end looping over distances
+
+
+
+  TCanvas *cAcceptance = new TCanvas("cPointSourceAcceptance","Diffuse Flux Acceptance 360 deg FoV",1700,800);
+  cAcceptance->Divide(2,2);
+  cAcceptance->cd(1);
+  skyAcceptance->Scale(dConversion);
+  skyAcceptance->Draw("COLZ");
+  cAcceptance->cd(2);
+  hAcceptanceVsDistance->Scale(dConversion);
+  hAcceptanceVsDistance->Draw("L");
+  cAcceptance->cd(3);
+  hAcceptanceVsElevationAndDistance->Scale(dConversion); 
+  hAcceptanceVsElevationAndDistance->Draw("COLZ"); 
+  cAcceptance->cd(4);
+  hAcceptanceVsAzimuthAndDistance->Scale(dConversion); 
+  hAcceptanceVsAzimuthAndDistance->Draw("COLZ"); 
+  cAcceptance->Modified();
+  cAcceptance->Update();
+  //Save the acceptance into a file
+  TString Filename;
+  Filename.Form("DiffuseFluxAcceptance_FoV360deg_Index%0.1f_Emin%0.1f_Emax%0.1f.root",nuIndex,log10(dMinEnu),log10(dMaxEnu));
+  TFile *f = new TFile(Filename.Data(),"RECREATE");
+  f->WriteObject(hAcceptanceVsDistance,"hAcceptanceVsDistance");
+  f->WriteObject(skyAcceptance,"skyAcceptance");
+  f->WriteObject(hAcceptanceVsAzimuthAndDistance,"hAcceptanceVsAzimuthAndDistance");
+  f->WriteObject(hAcceptanceVsElevationAndDistance,"hAcceptanceVsElevationAndDistance");
+  f->Close();
+
+
+
+
   return (dIntegratedAcceptance*dConversion);
 }
 
@@ -1528,6 +1652,7 @@ Double_t TrinitySimUtilities::GetDiffuseAcceptance(Double_t dMinEnu, Double_t dM
 void TrinitySimUtilities::CalculateIntegralSensitivity()
 {
 
+  cout<<"Calculate the integral sensitivity to diffuse fluxes"<<endl;
   TGraph *grSensitivity = new TGraph();
 
   TGraph *grDiffAcceptance = new TGraph();
@@ -1575,14 +1700,24 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Doubl
 {
   cout<<"Running GetPointSourceAcceptanceInFOV for limited FoV from "<<dMinEnu<<" to "<<dMaxEnu<<"log10(E/GeV)"<<endl;
   TH2F *skyAcceptance = new TH2F("skyAcceptance","Integral Point Source Acceptance", 360/DeltaAngleSky+1, -180-DeltaAngleSky/2., 180+DeltaAngleSky/2., 180/DeltaAngleSky+1, -90-DeltaAngleSky/2., 90+DeltaAngleSky/2.); //histo for single angle acceptance plot
-  skyAcceptance->GetXaxis()->SetTitle("Azimuth Angle [degrees]");
-  skyAcceptance->GetYaxis()->SetTitle("Elevation Angle [degrees]");
-  skyAcceptance->GetZaxis()->SetTitle("Effective Area [cm^{2}]");
+  skyAcceptance->GetXaxis()->SetTitle("azimuth angle [degrees]");
+  skyAcceptance->GetYaxis()->SetTitle("elevation angle [degrees]");
+  skyAcceptance->GetZaxis()->SetTitle("effective area [cm^{2}]");
 
   TH1F *hAcceptanceVsDistance = new TH1F("hAcceptanceVsDistance","Acceptance vs. Distance from the telescope",(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
-  hAcceptanceVsDistance->GetXaxis()->SetTitle("Distance from telescope [km]");
-  hAcceptanceVsDistance->GetZaxis()->SetTitle("Effective Area [cm^{2}]");
+  hAcceptanceVsDistance->GetXaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsDistance->GetZaxis()->SetTitle("effective area [cm^{2}]");
 
+  TH2F *hAcceptanceVsAzimuthAndDistance = new TH2F("hAzimuthVsDistance","Point Source Acceptance vs. Azimuth and Distance",(int)(360/DeltaAngleAz)+1,-180,180,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsAzimuthAndDistance->GetXaxis()->SetTitle("azimuth (viewing angle) [degrees]");
+  hAcceptanceVsAzimuthAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsAzimuthAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2}]");
+	
+  TH2F *hAcceptanceVsElevationAndDistance = new TH2F("hElevationVsDistance","Point Source Acceptance vs. Elevation and Distance",
+                            (int)(MaxElevation / DeltaAngleSky)+1,-1*MaxElevation-0.5*DeltaAngleSky,0.5*DeltaAngleSky,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsElevationAndDistance->GetXaxis()->SetTitle("elevation [degrees]");
+  hAcceptanceVsElevationAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsElevationAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2}]");
 	
   // Set To all time parameterization
   fPE = new TF1("fPE",this,&TrinitySimUtilities::myPEfunction,0,40,2);
@@ -1608,12 +1743,12 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Doubl
         MaxAzimuth = dMaxAzimuthSky;
 
       //looping over elevation w/ steps of DeltaAngleSky
-      for(int elv = 0; elv <= (int)(MaxElevation / DeltaAngleSky); elv++)
+      for(int elv = 1; elv <= (int)(MaxElevation / DeltaAngleSky); elv++)
 	{
  	  Double_t elevation = elv * DeltaAngleSky;
 	  
           //looping over azimuth w/ steps of DeltaAngleSky (-180 to 180)
-	  for(int azi = -1*(MaxAzimuth/DeltaAngleAz); azi <= (int)(MaxAzimuth / DeltaAngleAz); azi++)
+	  for(int azi = (int)(-1*(MaxAzimuth/DeltaAngleAz)); azi <= (int)(MaxAzimuth / DeltaAngleAz); azi++)
 	    {
 	      Double_t azimuth = azi * DeltaAngleAz;
 	      
@@ -1622,7 +1757,7 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Doubl
 	      
               //looping over azimuth in FoV in steps of DeltaAngleAz. That is
               //an offset of the shower from the center of the camera.
-	      for (int iFoVazi= 0; iFoVazi <= (hFOV/2/DeltaAngleAz); iFoVazi++) 
+	      for (int iFoVazi= 0; iFoVazi <= (int)(hFOV/2/DeltaAngleAz); iFoVazi++) 
 		{
 		  
 		  Double_t dAzimuthFoV = iFoVazi * DeltaAngleAz;
@@ -1662,7 +1797,13 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Doubl
 		  dDeltaAcceptance*=sin(elevation/180.*pi)*y*dConversion;
 		  
                   //the acceptances are loaded into the histogram with conversion factors applied
-		  cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<< ""<< ", dAzimuthFoV: "<< dAzimuthFoV << ", dDeltaAcceptance: " << dDeltaAcceptance <<" cm^2 "<<endl;
+                  if(dDeltaAcceptance>1e-3)
+		    cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<< ""<< ", dAzimuthFoV: "<< dAzimuthFoV << ", dDeltaAcceptance: " << dDeltaAcceptance <<" cm^2 "<<endl;
+                  
+                  hAcceptanceVsAzimuthAndDistance->Fill(azimuth,y,dDeltaAcceptance);
+                  hAcceptanceVsElevationAndDistance->Fill(-1*elevation,y,dDeltaAcceptance);
+ 
+                  hAcceptanceVsDistance->Fill(y,dDeltaAcceptance);
 
 
                   //Fill the instanteneous acceptance into the skymap
@@ -1699,7 +1840,6 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Doubl
                   else
                     cout<<"We should never be here in GetPointSourceAcceptanceInFOV"<<endl;
 
-                  hAcceptanceVsDistance->Fill(y,dDeltaAcceptance);
                   
 		}
 	    }
@@ -1708,12 +1848,16 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Doubl
       y += yDelta; //distance from telescope counter increased by yDelta
     }
 
-  TCanvas *cPointSourceAcceptance = new TCanvas("cPointSourceAcceptance","Point Source Integral Effective Area",1700,800);
- cPointSourceAcceptance->Divide(2,1);
+  TCanvas *cPointSourceAcceptance = new TCanvas("cPointSourceAcceptance","Point Source Acceptance Limited Field of View",1700,800);
+ cPointSourceAcceptance->Divide(2,2);
  cPointSourceAcceptance->cd(1);
  skyAcceptance->Draw("COLZ");
  cPointSourceAcceptance->cd(2);
  hAcceptanceVsDistance->Draw("L");
+ cPointSourceAcceptance->cd(3);
+ hAcceptanceVsElevationAndDistance->Draw("COLZ"); 
+ cPointSourceAcceptance->cd(4);
+ hAcceptanceVsAzimuthAndDistance->Draw("COLZ"); 
  cPointSourceAcceptance->Modified();
  cPointSourceAcceptance->Update();
  //Save the acceptance into a file
@@ -1722,6 +1866,8 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceInFOV(Double_t dMinEnu, Doubl
  TFile *f = new TFile(Filename.Data(),"RECREATE");
  f->WriteObject(hAcceptanceVsDistance,"hAcceptanceVsDistance");
  f->WriteObject(skyAcceptance,"skyAcceptance");
+ f->WriteObject(hAcceptanceVsAzimuthAndDistance,"hAcceptanceVsAzimuthAndDistance");
+ f->WriteObject(hAcceptanceVsElevationAndDistance,"hAcceptanceVsElevationAndDistance");
  f->Close();
  return skyAcceptance;
 }
@@ -1741,6 +1887,18 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceSingleAngle(Double_t dMinEnu,
   TH1F *hAcceptanceVsDistance = new TH1F("hAcceptanceVsDistance","Acceptance vs. Distance from the telescope",(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
   hAcceptanceVsDistance->GetXaxis()->SetTitle("Distance from telescope [km]");
   hAcceptanceVsDistance->GetYaxis()->SetTitle("Effective Area [cm^{2}]");
+  
+  TH2F *hAcceptanceVsAzimuthAndDistance = new TH2F("hAzimuthVsDistance","Point Source Acceptance vs. Azimuth and Distance",(int)(180/DeltaAngleAz)+2,-0.5*DeltaAngleAz,180+0.5*DeltaAngleAz,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsAzimuthAndDistance->GetXaxis()->SetTitle("azimuth (viewing angle) [degrees]");
+  hAcceptanceVsAzimuthAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsAzimuthAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2}]");
+	
+  TH2F *hAcceptanceVsElevationAndDistance = new TH2F("hElevationVsDistance","Point Source Acceptance vs. Elevation and Distance",
+                            (int)(MaxElevation / DeltaAngleSky)+1,-1*MaxElevation-0.5*DeltaAngleSky,0.5*DeltaAngleSky,(yMax-yMin)/yDelta+1,yMin-yDelta/2.,yMax+yDelta/2);
+  hAcceptanceVsElevationAndDistance->GetXaxis()->SetTitle("elevation [degrees]");
+  hAcceptanceVsElevationAndDistance->GetYaxis()->SetTitle("distance from telescope [km]");
+  hAcceptanceVsElevationAndDistance->GetZaxis()->SetTitle("acceptance [cm^{2}]");
+	
 
   // Set the PE parametric function
   fPE = new TF1("fPE",this,&TrinitySimUtilities::myPEfunction,0,40,2);
@@ -1765,7 +1923,7 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceSingleAngle(Double_t dMinEnu,
 
 
       //looping over elevation w/ steps of DeltaAngleSky
-      for(int elv = 0; elv <= (int)(MaxElevation / DeltaAngleSky); elv++) 
+      for(int elv = 1; elv <= (int)(MaxElevation / DeltaAngleSky); elv++) 
 	{
 	  Double_t elevation = elv * DeltaAngleSky;
 	  
@@ -1801,15 +1959,10 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceSingleAngle(Double_t dMinEnu,
 		    }
 		}
 	      // cout<<"dDeltaAcceptance "<<dDeltaAcceptance<<endl;
-	      if(dDeltaAcceptance<1e-10 && y>dMaxFluorescenceDistance){ //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
-                 {
-                     cout<<"Breaking after "<<azimuth<<" azimuth"<<endl;
-		     break;
-                 }
-	      }
+	      dDeltaAcceptance*=sin(elevation/180.*pi)*y*dConversion;
+
 
               //apply the conversion and geometry factors to the acceptance
-	      dDeltaAcceptance*=sin(elevation/180.*pi)*y*dConversion;
 
 	      cout<<"Y: "<<y<<", Elevation: "<<elevation <<", Azimuth: " << azimuth<< ", dDeltaAcceptance: " << dDeltaAcceptance <<" cm^2"<<endl;
 	      //the acceptances are loaded into the histogram with conversion factors applied
@@ -1818,18 +1971,30 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceSingleAngle(Double_t dMinEnu,
 	      skyAcceptance->Fill((-1 * azimuth), (-1 * elevation), dDeltaAcceptance);
 
               hAcceptanceVsDistance->Fill(y,dDeltaAcceptance);
+              hAcceptanceVsAzimuthAndDistance->Fill(azimuth,y,dDeltaAcceptance);
+              hAcceptanceVsElevationAndDistance->Fill(-1*elevation,y,dDeltaAcceptance);
+
+	      if(dDeltaAcceptance<1 && y>dMaxFluorescenceDistance)
+                { //won't get any more acceptance. The >60 is to make sure we do not miss fluorescence events whic can be seen from the back
+                     cout<<"Breaking after "<<azimuth<<" azimuth"<<endl;
+		     break;
+                }
               
 	    }
 	}
       cout<<"Tau emergence distance: "<<y<<endl;
       y += yDelta; //distance from telescope counter increased by yDelta
     }
-  TCanvas *cPointSourceAcceptance = new TCanvas("cPointSourceAcceptance","Point Source Integral Effective Area For 360 deg FoV",1700,800);
-  cPointSourceAcceptance->Divide(2,1);
+  TCanvas *cPointSourceAcceptance = new TCanvas("cPointSourceAcceptance","Point Source Acceptance For 360 deg FoV",1700,800);
+  cPointSourceAcceptance->Divide(2,2);
   cPointSourceAcceptance->cd(1);
   skyAcceptance->Draw("COLZ");
   cPointSourceAcceptance->cd(2);
   hAcceptanceVsDistance->Draw("L");
+  cPointSourceAcceptance->cd(3);
+  hAcceptanceVsElevationAndDistance->Draw("COLZ"); 
+  cPointSourceAcceptance->cd(4);
+  hAcceptanceVsAzimuthAndDistance->Draw("COLZ"); 
   cPointSourceAcceptance->Modified();
   cPointSourceAcceptance->Update();
   //Save the acceptance into a file
@@ -1838,6 +2003,8 @@ TH2F* TrinitySimUtilities::GetPointSourceAcceptanceSingleAngle(Double_t dMinEnu,
   TFile *f = new TFile(Filename.Data(),"RECREATE");
   f->WriteObject(hAcceptanceVsDistance,"hAcceptanceVsDistance");
   f->WriteObject(skyAcceptance,"skyAcceptance");
+  f->WriteObject(hAcceptanceVsAzimuthAndDistance,"hAcceptanceVsAzimuthAndDistance");
+  f->WriteObject(hAcceptanceVsElevationAndDistance,"hAcceptanceVsElevationAndDistance");
   f->Close();
   return skyAcceptance;
 }
@@ -2003,6 +2170,7 @@ void TrinitySimUtilities::CalculatePointSourceDifferentialSensitivity()
 //
 void TrinitySimUtilities::CalculateDiffuseFluxDifferentialSensitivity()
 {
+    cout<<"Calculating the differential sensitivity for diffuse flux for 10 years and 20% duty cycle"<<endl;
 
     //exposure
     Double_t dExposure=10*365*24*3600*0.20; //exposure time 10 years in seconds with 20% duty cycle
@@ -2054,6 +2222,7 @@ void TrinitySimUtilities::CalculateDiffuseFluxDifferentialSensitivity()
                 {
                     dnuFnu = 3 * 2.44 / dAcceptance / dExposure / log(10) / (2*dHalfEnergyBinWidth) * pow(10,dLogE); //2.44 is from Feldman Cousin 90% confidence upper limit
                     cout<<"NuCommunity Definition: "<<dnuFnu<<" acceptance at center energy: "<<dAcceptance<<endl;
+                    cout<<"Energy "<<dLogE-dHalfEnergyBinWidth<<" to "<<dLogE+dHalfEnergyBinWidth<<" acceptance:  "<<dAcceptance<<" nuFnu: "<<dnuFnu<<" for power law with index -"<<nuIndex<<endl;
                 }
                else
                 {

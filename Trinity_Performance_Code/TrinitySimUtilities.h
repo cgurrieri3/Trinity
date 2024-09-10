@@ -205,7 +205,9 @@ class TrinitySimUtilities {
   Double_t dMaxEnu;
   Double_t dLogEnergyStep; //was 1
   Double_t dHalfEnergyBinWidth; //in log was 1/2
+  Double_t nuIndex; //power law index of the neutrino spectrum the minus sign is added later
   Double_t dST; //km max height of shower tip above ground;
+
   Double_t yMin;
   Double_t yMax;
   Double_t yDelta;
@@ -213,7 +215,6 @@ class TrinitySimUtilities {
   Double_t dMaxAzimuthSky; //max limit for azimuth evaluation 
   Double_t DeltaAngleAz; //steps in azimuth in the camera FOV
   Double_t DeltaAngleSky; //this is the step size in elevation and azimuth in the sky to calculate the acceptance for a limited FOV telescope. Make sure it is smaller than then FOV of the camera  
-  Double_t nuIndex; //power law index of the neutrino spectrum the minus sign is added later
   Double_t dMaxCherenkovAzimuthAngle; //maximum azimuth angle for cherenkov 
   Double_t dMaxFluorescenceDistance;
 
