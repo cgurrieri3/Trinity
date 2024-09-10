@@ -120,6 +120,7 @@
 #define Enable_Trigger_Types				0x103C
 #define Enable_Triggering					0x1040
 #define Disc_Deadtime						0x1044
+#define Internal_Trigger_Simple				0x1048
 
 // ########## Local Event Data Buffer ################## //
 #define Event_Number						0x1080

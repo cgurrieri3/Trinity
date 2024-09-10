@@ -15,6 +15,7 @@
 #define CMD_SAVE			0x0C
 #define CMD_CLEAR_COUNTERS	0x0D
 #define CMD_SAVE_COUNTERS	0x0E
+#define CMD_CONFIG_SIMPLE	0x0F
 
 static board_access_t access_board;
 
@@ -32,6 +33,7 @@ void Init_TB(board_access_t *access_board, uint32_t* cmd_array);
 int  Program_TB(board_access_t *access_board, uint32_t* cmd_array);
 void Prepare_TB(uint32_t* cmd_array);
 void Config_TB(uint32_t* cmd_array);
+void Config_TB_Simple(uint32_t* cmd_array);
 int  Read_Address(uint32_t* cmd_array);
 int  Write_Address(uint32_t* cmd_array);
 void Start_Trigger(uint32_t* cmd_array);

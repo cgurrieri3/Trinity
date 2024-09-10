@@ -270,6 +270,91 @@ void Config_TB(uint32_t* cmd_array)
 	printf("---------- Finished Configuring TB ------------\n\n");
 }
 
+void Config_TB_Simple(uint32_t* cmd_array)
+{
+	printf("---------- Starting to Configure TB -----------\n");
+
+	int trigger_type = (cmd_array[1] & 0x1F);
+	int Bifocal_En   = ((trigger_type & 0x01)>0);
+	int DiscTest_En  = ((trigger_type & 0x02)>0);
+	int Internal_En  = ((trigger_type & 0x04)>0);
+	int External_En  = ((trigger_type & 0x08)>0);
+	int GPS_En = ((trigger_type & 0x10)>0);
+
+	int ctr_integ_code = (cmd_array[2] & 0xFF);
+	int Disc_Stretch_Length_code = (cmd_array[3] & 0xFF);
+	int Disc_Test_Prescale_Value = (cmd_array[4] & 0xFF);
+	int HLED_Delay   = (cmd_array[5] & 0xFF);
+
+	int Disc_Dt_code = ((cmd_array[6] >> 4) & 0x0F);
+	int Int_Trig_rate_code = (cmd_array[6] & 0x0F);
+	int Int_Trig_led_mode  = ((cmd_array[7] & 0xC0)>0);
+	int Ext_Trig_led_mode  = ((cmd_array[7] & 0x30)>0);
+	int GPS_Trig_led_mode  = ((cmd_array[7] & 0x0C)>0);
+	int Enable_Busy_mode   = (cmd_array[7] & 0x03);
+
+	printf("Trigger type: %d\n", trigger_type);
+	printf("Bifocal Trigger Flag: %d\n", Bifocal_En);
+	printf("Disc Test Trigger Flag: %d\n", DiscTest_En);
+	printf("Internal Trigger Flag: %d\n", Internal_En);
+	printf("External Trigger Flag: %d\n", External_En);
+	printf("GPS Trigger Flag: %d\n", GPS_En);
+	printf("Channel Counter Integration Period Code: %d\n", ctr_integ_code);
+	printf("Disc Test Trigger Prescale Value: %d\n", Disc_Test_Prescale_Value);
+	printf("Discriminator Strech Length Code: %d\n", Disc_Stretch_Length_code);
+	printf("HLED_Delay: %d ns\n", HLED_Delay*10);
+	printf("Disc_Dt_code: %d\n", Disc_Dt_code);
+	printf("Int_Trig_rate_code: %d\n", Int_Trig_rate_code);
+	printf("Int_Trig_led_mode: %d\n", Int_Trig_led_mode);
+	printf("Ext_Trig_led_mode: %d\n", Ext_Trig_led_mode);
+	printf("GPS_Trig_led_mode: %d\n", GPS_Trig_led_mode);
+	printf("Enable Busy mode: %d\n", Enable_Busy_mode);
+
+	write_32bit(Rate_Counter_Period, counter_period_list[ctr_integ_code]);
+	write_32bit(Clear_Counters, First_Bit_True);
+	write_32bit(Disc_Deadtime, disc_deadtime_list[Disc_Dt_code]);
+
+	if(Bifocal_En == 1){
+		En_BF_Trig(Disc_Stretch_Length_code);
+	}
+
+	if(DiscTest_En == 1){
+		En_Test_Trig(Disc_Stretch_Length_code, Disc_Test_Prescale_Value);
+	}
+	else{
+		write_32bit(Disc_Test_Trigger_Prescale, 0);
+	}
+
+	if(Internal_En == 1){
+		En_Int_Trig(Int_Trig_rate_code, Int_Trig_led_mode);
+		write_32bit(Internal_Trigger_Simple,All_Bits_High);
+	}
+	else{
+		write_32bit(Internal_Trigger_Prescale, All_Bits_Low);
+		write_32bit(Internal_Trigger_Mode, All_Bits_Low);
+	}
+
+	if(External_En == 1){
+		En_Ext_Trig(Ext_Trig_led_mode);
+	}
+	else{
+		write_32bit(External_Trigger_Mode, All_Bits_Low);
+	}
+
+	if(GPS_En == 1){
+		En_GPS_Trig(Ext_Trig_led_mode);
+	}
+	else{
+		write_32bit(GPS_Trigger_Mode, All_Bits_Low);
+	}
+
+	write_32bit(Enable_Busy, Enable_Busy_mode);
+	write_32bit(LED_Delay, HLED_Delay);
+	write_32bit(Enable_Trigger_Types, trigger_type);
+
+	printf("---------- Finished Configuring TB ------------\n\n");
+}
+
 int Read_Address(uint32_t* cmd_array)
 {
 	printf("---------- Reading a Register -----------------\n");
@@ -663,6 +748,9 @@ board_access_t Process_CMD(uint32_t* cmd_array, char *response, board_access_t a
 			break;
 		case CMD_SAVE_COUNTERS:
 			Save_All_Counters(cmd_array);
+			break;
+		case CMD_CONFIG_SIMPLE:
+			Config_TB_Simple(cmd_array):
 			break;
 		default:
 			break;
