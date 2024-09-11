@@ -113,7 +113,8 @@ else
 cout<<"FoV above the horizon: "<<atan(tanFoV)*180/pi<<" degrees"<<endl; 
 cout<<"FoV below the horizon: "<<dFoVBelow*180./pi<<" degrees"<<endl; 
 cout<<"The minimum shower length: "<<dMinLength<<" degrees"<<endl; 
-cout<<"The minimum number of photoelectrons per sqr meter mirror: "<<dMinimumNumberPhotoelectrons<<" photoelectrons"<<endl<<endl;
+cout<<"The minimum number of photoelectrons per sqr meter mirror: "<<dMinimumNumberPhotoelectrons<<" photoelectrons"<<endl;
+cout<<"Total mirror area = number of photoelectrons in the shower / minimum number of photoelectrons per sqr meter mirror = 1e4/ "<<dMinimumNumberPhotoelectrons<<" = "<<1e4/dMinimumNumberPhotoelectrons<<" sq meters"<<endl;
 
 cout<<"Exposure time for point source sensitivity: "<<dExposureHours<<" hours"<<endl;
 cout<<"Neutrino energy step size on log scale: "<<dLogEnergyStep<<" [ ] "<<endl;
@@ -918,7 +919,7 @@ Double_t TrinitySimUtilities::PDecay(Double_t Etau, Double_t y, Double_t elevati
     dd -= (dShwrLgth+5);
   
   
-  //maximum length of trajectory above horizon befor track leaves atmosphere (dST above ground)
+  //maximum length of trajectory above horizon before track leaves atmosphere (dST above ground)
   Double_t phi = elevation + asin( REarth/sqrt(REarth*REarth+(l-v)*(l-v)) );
   
   Double_t alpha = asin( sin(phi) * sqrt(REarth*REarth+(l-v)*(l-v)) / (REarth+dST)  );
@@ -2039,6 +2040,8 @@ void TrinitySimUtilities::CalculatePointSourceDifferentialSensitivity()
     cAcceptance->Draw();
     cAcceptance->SetLogy();
     cAcceptance->SetLogx();
+    
+    
   
 
     //Move in steps from lowest to highest energy
@@ -2149,7 +2152,10 @@ void TrinitySimUtilities::CalculatePointSourceDifferentialSensitivity()
   TString Filename;
   Double_t dhorizontalFOV = blimFOV ? hFOV : 360; 
      
-  Filename.Form("DifferentialSensitivityPointSourcesTrinity_NuTauSim_%ikmAboveGround_%0.0fPEperSqrmMirror_%0.1fdeghorizontalFOV_%0.1fdegUpperFoV_%0.1fdegLowerFoV_%0.1fdegMinShowerLength_%0.1fns.root",iConfig,dMinimumNumberPhotoelectrons,dhorizontalFOV,atan(tanFoV)/pi*180,dFoVBelow/pi*180.,dMinLength,TriggerWindow[iTrigWin]);
+ SaveCanvas(cDiffSensitivity, "DiffSensitivity");
+SaveCanvas(cAcceptance, "Acceptance");
+
+Filename.Form("DifferentialSensitivityPointSourcesTrinity_NuTauSim_%ikmAboveGround_%0.0fPEperSqrmMirror_%0.1fdeghorizontalFOV_%0.1fdegUpperFoV_%0.1fdegLowerFoV_%0.1fdegMinShowerLength_%0.1fns.root",iConfig,dMinimumNumberPhotoelectrons,dhorizontalFOV,atan(tanFoV)/pi*180,dFoVBelow/pi*180.,dMinLength,TriggerWindow[iTrigWin]);
   cDiffSensitivity->SaveAs(Filename.Data());
   Filename.Form("EffectiveAreaTrinityPointSources_NuTauSim_%ikmAboveGround_%0.0fPEperSqrmMirror_%0.1fdeghorizontalFOV_%0.1fdegUpperFoV_%0.1fdegLowerFoV_%0.1fdegMinShowerLength_%0.1fns.root",iConfig,dMinimumNumberPhotoelectrons,dhorizontalFOV,atan(tanFoV)*180/pi,dFoVBelow/pi*180.,dMinLength,TriggerWindow[iTrigWin]);
   cAcceptance->SaveAs(Filename.Data());
@@ -2160,6 +2166,8 @@ void TrinitySimUtilities::CalculatePointSourceDifferentialSensitivity()
      {
        cout<<dE[i]<<"  "<<dF[i]<<endl;;
      }
+     
+  
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -2300,5 +2308,51 @@ void TrinitySimUtilities::CalculateDiffuseFluxDifferentialSensitivity()
        cout<<dE[i]<<"  "<<dF[i]<<endl;;
      }
 
+}
+
+// Function to get the current date and time as a formatted string
+std::string TrinitySimUtilities::getCurrentDateTime() {
+    time_t now = time(0);
+    struct tm tstruct;
+    char buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tstruct);
+    return std::string(buf);
+}
+
+// Function to create a directory if it doesn't exist
+void TrinitySimUtilities::createDirectory(const std::string& path) {
+    if (gSystem->AccessPathName(path.c_str())) { // Check if directory exists
+        gSystem->mkdir(path.c_str(), true);      // Create directory (with parents)
+        std::cout << "Created directory: " << path << std::endl;
+    } else {
+        std::cout << "Directory already exists: " << path << std::endl;
+    }
+}
+
+// Method to set the folder path based on current date and time
+void TrinitySimUtilities::SetOutputFolder() {
+    // Get the current date and time for the folder name
+    std::string timestamp = getCurrentDateTime();
+    outputFolder = "output_" + timestamp;
+
+    // Create the folder
+    createDirectory(outputFolder);
+    
+    std::cout << "Output folder created: " << outputFolder << std::endl;
+}
+
+// Getter for the output folder path
+std::string TrinitySimUtilities::GetOutputFolder() const {
+    return outputFolder;
+}
+
+// Method to save a canvas to the output folder
+void TrinitySimUtilities::SaveCanvas(TCanvas* canvas, const std::string& canvasName) {
+    std::string filePath_pdf = outputFolder + "/" + canvasName + ".pdf";
+    canvas->SaveAs(filePath_pdf.c_str());
+    std::string filePath_root = outputFolder + "/" + canvasName + ".root";
+    canvas->SaveAs(filePath_root.c_str());
+    std::cout << "Canvas saved to: " << outputFolder << std::endl;
 }
 

@@ -25,11 +25,18 @@
 #include <fstream>
 #include <string>
 
+//#include <ctime>
+#include <TSystem.h>
+#include <sys/stat.h>
+//#include <filesystem> // Requires C++17
 
 
 using namespace std;
 
 class TrinitySimUtilities {
+
+ private:
+    std::string outputFolder;
 
  public:
  
@@ -81,9 +88,9 @@ class TrinitySimUtilities {
  void SetMaximumDistanceForFluorescence(Double_t maxdist){ dMaxFluorescenceDistance = maxdist;}; //km
 
   //next three parameters are key to the instrument
-  //plus the telescop height above ground which can be selected above
+  //plus the telescope height above ground which can be selected above
  void SetTelescopeFoVAboveHorizon( Double_t above ){ tanFoV = tan(above/180.*pi);}; //deg Field of view of telescope above the horizon
- void SetTelescopeFoVBelowHorizon( Double_t below ){ dFoVBelow = below;}; //deg Field of view of telescope  below horizon 
+ void SetTelescopeFoVBelowHorizon( Double_t below ){ dFoVBelow = below;}; //rad Field of view of telescope  below horizon 
  void SetMinimumShowerLength( Double_t minlength ){ dMinLength = minlength;}; //deg mimnimum length a shower has to have in the camera, in degrees. 
  void SetMinimumNumberPhotoelectrons( Double_t minpe ){ dMinimumNumberPhotoelectrons = minpe;};  //this is pe per sqm mirror 
 
@@ -98,6 +105,17 @@ class TrinitySimUtilities {
  void SetTriggerWindow( Int_t window ){ iTrigWin = window; }; //5 mins all photons are counted Size of the trigger window to collect photons {30.00, 60.00, 150.00, 300.00, 1500.00} 
 
  void ConfigureForDemonstrator();
+ 
+ // Method to set the output folder path
+ std::string getCurrentDateTime();
+ void createDirectory(const std::string& path);
+ void SetOutputFolder();
+
+ // Getter for folder path
+ std::string GetOutputFolder() const;
+
+ // Method to save a canvas to the output folder
+ void SaveCanvas(TCanvas* canvas, const std::string& canvasName);
 
  protected:
 
