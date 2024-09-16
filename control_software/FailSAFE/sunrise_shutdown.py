@@ -1,9 +1,46 @@
 import subprocess
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 logging.basicConfig(filename='/home/trinity/control_software/FailSAFE/sunriseCheck.log', level=logging.INFO,format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+
+def send_email(reason):
+    port = 465  # For starttls
+    smtp_server = "smtp.gmail.com"
+    sender_email = "sofiastepanoff22@gmail.com"
+    receiver_email = "sofiastepanoff@gatech.edu"
+    #receiver_email = "TrinityObservations@groups.gatech.edu"
+    password = 'jjxqrdecssjizosh'
+    
+    # Set the subject and body of the email
+    subject = 'Sunrise Fail Safe Script has failed'
+    body = f"""
+    The CTCPU has {reason}
+
+    """
+
+    em = EmailMessage()
+    em['From'] = sender_email
+    em['To'] = receiver_email
+    em['Subject'] = subject
+    em.set_content(body)
+
+
+    context = ssl.create_default_context()
+    #server.starttls(context=context)
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
+        server.ehlo()
+        
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, em.as_string())
+        server.close()
+        #print('successfully sent the mail')
+        log_file('Successfully sent email ')
+
+
+
 
 def is_telesceope_safe():
 	# Read thesunrise from the text file
@@ -17,14 +54,17 @@ def is_telesceope_safe():
 	current_time = datetime.now()
 
 	# Compare the two datetime objects
-	if current_time < sunrise:
+	if sunrise - timedelta(minutes=5) < current_time < sunrise + timedelta(minutes=5):
+		print("The sunrise from the file is around now")
+		return False
+	elif current_time < sunrise:
 		print("The sunrise from the file is in the future.")
 		return True
 	elif current_time > sunrise:
 		print("The sunrise from the file is in the past.")
-		return False
+		return True
 	else:
-		print("Thesunrise from the file is the same as the current time.")
+		print("Something else happened")
 		return False
 
 
@@ -66,50 +106,29 @@ def shut_down_magna():
         print("Error running Python script")
         print("Error Output:\n", stderr)
 
-def LastNlines(fname, N):
-    # opening file using with() method
-    # so that file get closed
-    # after completing work
-    save_lines = ''
-    with open(fname) as file:
-         
-        # loop to read iterate 
-        # last n lines and print it
+
+try:
+	while True:
+		
+		if is_telesceope_safe() == False:
+			logging.info("Passed Sunrise ")
+			logging.info('Shutting Down Camera ')
+			run_shut_down_ct()
+			logging.info('CTM complete. Powering Down MagnaPS ')
+			shut_down_magna()
+			logging.info('Shutdown Complete ')
+      sleep(400)
+      True
         
-        for line in (file.readlines() [-N:]):
-            #print(line, end ='')
-            save_lines = save_lines + line
-    return save_lines
+
+		# enable this if you want status checks on wether there is an internet connection
+		else:
+			logging.info("Before Sunrise ")
+      sleep(400)
+      True
 
 
-
-def check_rc_log():
-    try:
-      log=LastNlines("/home/trinity/Programs/Trinity/control_software/fcutils/test/LOGS/rc.log",30)
-      run=log.find("Starting the run#")
-      stopped= log.find("Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt")
-      if run == -1 and stopped > -1:
-          return 0
-      else:
-          return 1
-    except:
-      logging.info("Error in checking rc log shutting down")
-      return 1   
-
-
-if is_telesceope_safe() == False:
-    logging.info("Passed Sunrise ")
-    check=check_rc_log()
-    if check == 1:
-        logging.info('Shutting Down Camera ')
-        run_shut_down_ct()
-        logging.info('CTM complete. Powering Down MagnaPS ')
-        shut_down_magna()
-        logging.info('Shutdown Complete ')
-        
-    else:
-        logging.info('CT Camera not operating ')
-
-# enable this if you want status checks on wether there is an internet connection
-else:
-    logging.info("Before Sunrise ")
+except:
+	logging.info("Script failed sending email")
+	send_email("sunrise script has failed")
+	

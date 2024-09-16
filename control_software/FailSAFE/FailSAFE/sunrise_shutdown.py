@@ -6,26 +6,29 @@ import logging
 logging.basicConfig(filename='/home/trinity/control_software/FailSAFE/sunriseCheck.log', level=logging.INFO,format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 def is_telesceope_safe():
-	# Read thesunrise from the text file
-	with open('/home/trinity/control_software/FailSAFE/sunrise.txt', 'r') as file:
-		sunrise_str = file.read().strip()
+    # Read thesunrise from the text file
+    with open('/home/trinity/control_software/FailSAFE/sunrise.txt', 'r') as file:
+        sunrise_str = file.read().strip()
 
-	# Parse the sunrise string into a datetime object
-	sunrise = datetime.strptime(sunrise_str, '%Y-%m-%d %H:%M:%S')
+    # Parse the sunrise string into a datetime object
+    sunrise = datetime.strptime(sunrise_str, '%Y-%m-%d %H:%M:%S')
 
-	# Get the current time
-	current_time = datetime.now()
+    # Get the current time
+    current_time = datetime.now()
 
-	# Compare the two datetime objects
-	if current_time < sunrise:
-		print("The sunrise from the file is in the future.")
-		return True
-	elif current_time > sunrise:
-		print("The sunrise from the file is in the past.")
-		return False
-	else:
-		print("Thesunrise from the file is the same as the current time.")
-		return False
+    # Compare the two datetime objects
+    if current_time < sunrise < current_time + timedelta(minutes=5):
+        print("The sunrise from the file is around now")
+        return False
+    elif current_time < sunrise:
+        print("The sunrise from the file is in the future.")
+        return True
+    elif current_time > sunrise:
+        print("The sunrise from the file is in the past.")
+        return True
+    else:
+        print("Something else happened")
+        return False
 
 
 def run_shut_down_ct():
@@ -65,36 +68,6 @@ def shut_down_magna():
     else:
         print("Error running Python script")
         print("Error Output:\n", stderr)
-
-def LastNlines(fname, N):
-    # opening file using with() method
-    # so that file get closed
-    # after completing work
-    save_lines = ''
-    with open(fname) as file:
-         
-        # loop to read iterate 
-        # last n lines and print it
-        
-        for line in (file.readlines() [-N:]):
-            #print(line, end ='')
-            save_lines = save_lines + line
-    return save_lines
-
-
-
-def check_rc_log():
-    try:
-      log=LastNlines("/home/trinity/Programs/Trinity/control_software/fcutils/test/LOGS/rc.log",30)
-      run=log.find("Starting the run#")
-      stopped= log.find("Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt")
-      if run == -1 and stopped > -1:
-          return 0
-      else:
-          return 1
-    except:
-      logging.info("Error in checking rc log shutting down")
-      return 1   
 
 
 if is_telesceope_safe() == False:

@@ -141,7 +141,7 @@ int Program_TB(board_access_t *access_board, uint32_t* cmd_array)
 	board_t *board = NULL;
 	static int fallback_flag = 0;
 	static char bitfile_name[255];
-	char bitfile_str[] = "April_1st_Version.bit";
+	char bitfile_str[] = "/home/trinity/Programs/Trinity/control_software/tb/mesaflash/topethernethostmot2.bit";
 	strncpy(bitfile_name, bitfile_str, sizeof(bitfile_name));
 	board = anyio_get_dev(access_board);
 	if(board == NULL)
@@ -243,6 +243,7 @@ void Config_TB(uint32_t* cmd_array)
 
 	if(Internal_En == 1){
 		En_Int_Trig(Int_Trig_rate_code, Int_Trig_led_mode);
+		write_32bit(Internal_Trigger_Simple,All_Bits_Low);
 	}
 	else{
 		write_32bit(Internal_Trigger_Prescale, All_Bits_Low);
@@ -750,7 +751,7 @@ board_access_t Process_CMD(uint32_t* cmd_array, char *response, board_access_t a
 			Save_All_Counters(cmd_array);
 			break;
 		case CMD_CONFIG_SIMPLE:
-			Config_TB_Simple(cmd_array):
+			Config_TB_Simple(cmd_array);
 			break;
 		default:
 			break;

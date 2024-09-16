@@ -78,8 +78,8 @@ int write_32bit(u16 address, u32 data)
 int main(int argc, char *argv[]) {
 
 	int ret = 0;
-	int program_flag = 0;
-	char bitfile_str[] = "April_1st_Version.bit";
+	int program_flag = 1;
+	char bitfile_str[] = "topethernethostmot2.bit";
 	strncpy(bitfile_name, bitfile_str, sizeof(bitfile_name));
 
 	u32 NofEvents[1] = {0};

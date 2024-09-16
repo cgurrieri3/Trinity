@@ -9772,3 +9772,1130 @@ ModuleNotFoundError: No module named 'ephem'
 2024-09-09 16:40:01 - CT Camera not operating 
 2024-09-09 16:50:02 - Passed Sunrise 
 2024-09-09 16:50:02 - CT Camera not operating 
+2024-09-09 20:01:01 - Added sunrise_time: 2024-09-10 12:21:48 
+2024-09-10 10:00:01 - Before Sunrise 
+2024-09-10 10:10:01 - Before Sunrise 
+2024-09-10 10:20:01 - Before Sunrise 
+2024-09-10 10:30:01 - Before Sunrise 
+2024-09-10 10:40:01 - Before Sunrise 
+2024-09-10 10:50:01 - Before Sunrise 
+2024-09-10 11:00:01 - Before Sunrise 
+2024-09-10 11:10:01 - Before Sunrise 
+2024-09-10 11:20:01 - Before Sunrise 
+2024-09-10 11:30:01 - Before Sunrise 
+2024-09-10 11:40:01 - Before Sunrise 
+2024-09-10 11:50:01 - Before Sunrise 
+2024-09-10 12:00:01 - Before Sunrise 
+2024-09-10 12:10:01 - Before Sunrise 
+2024-09-10 12:20:01 - Before Sunrise 
+2024-09-10 12:30:01 - Passed Sunrise 
+2024-09-10 12:30:01 - Shutting Down Camera 
+2024-09-10 12:31:31 - Shut down camera Successful 
+2024-09-10 12:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-10 12:31:33 - Shutdown Complete 
+2024-09-10 12:40:01 - Passed Sunrise 
+2024-09-10 12:40:01 - CT Camera not operating 
+2024-09-10 12:50:01 - Passed Sunrise 
+2024-09-10 12:50:01 - CT Camera not operating 
+2024-09-10 13:00:01 - Passed Sunrise 
+2024-09-10 13:00:01 - CT Camera not operating 
+2024-09-10 13:10:01 - Passed Sunrise 
+2024-09-10 13:10:01 - CT Camera not operating 
+2024-09-10 13:20:01 - Passed Sunrise 
+2024-09-10 13:20:01 - CT Camera not operating 
+2024-09-10 13:30:01 - Passed Sunrise 
+2024-09-10 13:30:01 - CT Camera not operating 
+2024-09-10 13:40:01 - Passed Sunrise 
+2024-09-10 13:40:01 - CT Camera not operating 
+2024-09-10 13:50:01 - Passed Sunrise 
+2024-09-10 13:50:01 - CT Camera not operating 
+2024-09-10 14:00:01 - Passed Sunrise 
+2024-09-10 14:00:01 - CT Camera not operating 
+2024-09-10 14:10:01 - Passed Sunrise 
+2024-09-10 14:10:01 - CT Camera not operating 
+2024-09-10 14:20:01 - Passed Sunrise 
+2024-09-10 14:20:01 - CT Camera not operating 
+2024-09-10 14:30:01 - Passed Sunrise 
+2024-09-10 14:30:01 - CT Camera not operating 
+2024-09-10 14:40:01 - Passed Sunrise 
+2024-09-10 14:40:01 - CT Camera not operating 
+2024-09-10 14:50:01 - Passed Sunrise 
+2024-09-10 14:50:01 - CT Camera not operating 
+2024-09-10 15:00:01 - Passed Sunrise 
+2024-09-10 15:00:01 - CT Camera not operating 
+2024-09-10 15:10:01 - Passed Sunrise 
+2024-09-10 15:10:01 - CT Camera not operating 
+2024-09-10 15:20:01 - Passed Sunrise 
+2024-09-10 15:20:01 - CT Camera not operating 
+2024-09-10 15:30:01 - Passed Sunrise 
+2024-09-10 15:30:01 - CT Camera not operating 
+2024-09-10 15:40:02 - Passed Sunrise 
+2024-09-10 15:40:02 - CT Camera not operating 
+2024-09-10 15:50:01 - Passed Sunrise 
+2024-09-10 15:50:01 - CT Camera not operating 
+2024-09-10 16:00:01 - Passed Sunrise 
+2024-09-10 16:00:01 - CT Camera not operating 
+2024-09-10 16:10:01 - Passed Sunrise 
+2024-09-10 16:10:01 - CT Camera not operating 
+2024-09-10 16:20:01 - Passed Sunrise 
+2024-09-10 16:20:01 - CT Camera not operating 
+2024-09-10 16:30:01 - Passed Sunrise 
+2024-09-10 16:30:01 - CT Camera not operating 
+2024-09-10 16:40:02 - Passed Sunrise 
+2024-09-10 16:40:02 - CT Camera not operating 
+2024-09-10 16:50:01 - Passed Sunrise 
+2024-09-10 16:50:01 - CT Camera not operating 
+2024-09-10 20:01:01 - Added sunrise_time: 2024-09-11 12:22:45 
+2024-09-11 10:00:01 - Before Sunrise 
+2024-09-11 10:10:01 - Before Sunrise 
+2024-09-11 10:20:01 - Before Sunrise 
+2024-09-11 10:30:01 - Before Sunrise 
+2024-09-11 10:40:01 - Before Sunrise 
+2024-09-11 10:50:01 - Before Sunrise 
+2024-09-11 11:00:01 - Before Sunrise 
+2024-09-11 11:10:01 - Before Sunrise 
+2024-09-11 11:20:01 - Before Sunrise 
+2024-09-11 11:30:02 - Before Sunrise 
+2024-09-11 11:40:01 - Before Sunrise 
+2024-09-11 11:50:01 - Before Sunrise 
+2024-09-11 12:00:01 - Before Sunrise 
+2024-09-11 12:10:01 - Before Sunrise 
+2024-09-11 12:20:01 - Before Sunrise 
+2024-09-11 12:30:01 - Passed Sunrise 
+2024-09-11 12:30:01 - CT Camera not operating 
+2024-09-11 12:40:01 - Passed Sunrise 
+2024-09-11 12:40:01 - CT Camera not operating 
+2024-09-11 12:50:01 - Passed Sunrise 
+2024-09-11 12:50:01 - CT Camera not operating 
+2024-09-11 13:00:01 - Passed Sunrise 
+2024-09-11 13:00:01 - CT Camera not operating 
+2024-09-11 13:10:01 - Passed Sunrise 
+2024-09-11 13:10:01 - CT Camera not operating 
+2024-09-11 13:20:01 - Passed Sunrise 
+2024-09-11 13:20:01 - CT Camera not operating 
+2024-09-11 13:30:01 - Passed Sunrise 
+2024-09-11 13:30:01 - CT Camera not operating 
+2024-09-11 13:40:01 - Passed Sunrise 
+2024-09-11 13:40:01 - CT Camera not operating 
+2024-09-11 13:50:01 - Passed Sunrise 
+2024-09-11 13:50:01 - CT Camera not operating 
+2024-09-11 14:00:01 - Passed Sunrise 
+2024-09-11 14:00:01 - CT Camera not operating 
+2024-09-11 14:10:01 - Passed Sunrise 
+2024-09-11 14:10:01 - CT Camera not operating 
+2024-09-11 14:20:01 - Passed Sunrise 
+2024-09-11 14:20:01 - CT Camera not operating 
+2024-09-11 14:30:01 - Passed Sunrise 
+2024-09-11 14:30:01 - CT Camera not operating 
+2024-09-11 14:33:24 - Added sunrise_time: 2024-09-12 12:23:42 
+2024-09-11 14:34:15 - Before Sunrise 
+2024-09-11 14:34:36 - Passed Sunrise 
+2024-09-11 14:34:36 - Shutting Down Camera 
+2024-09-11 14:35:56 - Shut down camera Successful 
+2024-09-11 14:35:56 - CTM complete. Powering Down MagnaPS 
+2024-09-11 14:35:58 - Shutdown Complete 
+2024-09-11 14:40:01 - Passed Sunrise 
+2024-09-11 14:40:01 - Shutting Down Camera 
+2024-09-11 14:40:15 - Passed Sunrise 
+2024-09-11 14:40:15 - CT Camera not operating 
+2024-09-11 14:41:32 - Shut down camera Successful 
+2024-09-11 14:41:32 - CTM complete. Powering Down MagnaPS 
+2024-09-11 14:41:34 - Shutdown Complete 
+2024-09-11 14:50:01 - Passed Sunrise 
+2024-09-11 14:50:01 - Error in checking rc log shutting down
+2024-09-11 14:50:01 - Shutting Down Camera 
+2024-09-11 14:51:31 - Shut down camera Successful 
+2024-09-11 14:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 14:51:33 - Shutdown Complete 
+2024-09-11 15:00:01 - Passed Sunrise 
+2024-09-11 15:00:01 - Error in checking rc log shutting down
+2024-09-11 15:00:01 - Shutting Down Camera 
+2024-09-11 15:01:31 - Shut down camera Successful 
+2024-09-11 15:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 15:01:33 - Shutdown Complete 
+2024-09-11 15:10:01 - Passed Sunrise 
+2024-09-11 15:10:01 - Error in checking rc log shutting down
+2024-09-11 15:10:01 - Shutting Down Camera 
+2024-09-11 15:11:31 - Shut down camera Successful 
+2024-09-11 15:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 15:11:33 - Shutdown Complete 
+2024-09-11 15:20:01 - Passed Sunrise 
+2024-09-11 15:20:01 - Error in checking rc log shutting down
+2024-09-11 15:20:01 - Shutting Down Camera 
+2024-09-11 15:21:31 - Shut down camera Successful 
+2024-09-11 15:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 15:21:33 - Shutdown Complete 
+2024-09-11 15:30:02 - Passed Sunrise 
+2024-09-11 15:30:02 - Error in checking rc log shutting down
+2024-09-11 15:30:02 - Shutting Down Camera 
+2024-09-11 15:31:32 - Shut down camera Successful 
+2024-09-11 15:31:32 - CTM complete. Powering Down MagnaPS 
+2024-09-11 15:31:34 - Shutdown Complete 
+2024-09-11 15:40:01 - Passed Sunrise 
+2024-09-11 15:40:01 - Error in checking rc log shutting down
+2024-09-11 15:40:01 - Shutting Down Camera 
+2024-09-11 15:41:31 - Shut down camera Successful 
+2024-09-11 15:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 15:41:33 - Shutdown Complete 
+2024-09-11 15:50:01 - Passed Sunrise 
+2024-09-11 15:50:01 - Error in checking rc log shutting down
+2024-09-11 15:50:01 - Shutting Down Camera 
+2024-09-11 15:51:31 - Shut down camera Successful 
+2024-09-11 15:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 15:51:33 - Shutdown Complete 
+2024-09-11 16:00:01 - Passed Sunrise 
+2024-09-11 16:00:01 - Error in checking rc log shutting down
+2024-09-11 16:00:01 - Shutting Down Camera 
+2024-09-11 16:01:31 - Shut down camera Successful 
+2024-09-11 16:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 16:01:33 - Shutdown Complete 
+2024-09-11 16:10:01 - Passed Sunrise 
+2024-09-11 16:10:01 - Error in checking rc log shutting down
+2024-09-11 16:10:01 - Shutting Down Camera 
+2024-09-11 16:11:31 - Shut down camera Successful 
+2024-09-11 16:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 16:11:33 - Shutdown Complete 
+2024-09-11 16:20:02 - Passed Sunrise 
+2024-09-11 16:20:02 - Error in checking rc log shutting down
+2024-09-11 16:20:02 - Shutting Down Camera 
+2024-09-11 16:21:32 - Shut down camera Successful 
+2024-09-11 16:21:32 - CTM complete. Powering Down MagnaPS 
+2024-09-11 16:21:34 - Shutdown Complete 
+2024-09-11 16:30:01 - Passed Sunrise 
+2024-09-11 16:30:01 - Error in checking rc log shutting down
+2024-09-11 16:30:01 - Shutting Down Camera 
+2024-09-11 16:31:31 - Shut down camera Successful 
+2024-09-11 16:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 16:31:33 - Shutdown Complete 
+2024-09-11 16:40:01 - Passed Sunrise 
+2024-09-11 16:40:01 - Error in checking rc log shutting down
+2024-09-11 16:40:01 - Shutting Down Camera 
+2024-09-11 16:41:31 - Shut down camera Successful 
+2024-09-11 16:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 16:41:33 - Shutdown Complete 
+2024-09-11 16:50:01 - Passed Sunrise 
+2024-09-11 16:50:01 - Error in checking rc log shutting down
+2024-09-11 16:50:01 - Shutting Down Camera 
+2024-09-11 16:51:31 - Shut down camera Successful 
+2024-09-11 16:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-11 16:51:33 - Shutdown Complete 
+2024-09-11 17:34:17 - Before Sunrise 
+2024-09-11 17:34:50 - Before Sunrise 
+2024-09-11 17:35:13 - Before Sunrise 
+2024-09-11 17:36:05 - Before Sunrise 
+2024-09-11 17:36:43 - Before Sunrise 
+2024-09-11 17:37:26 - Before Sunrise 
+2024-09-11 17:38:01 - Before Sunrise 
+2024-09-11 20:01:01 - Added sunrise_time: 2024-09-12 12:23:42 
+2024-09-11 20:41:20 - Before Sunrise 
+2024-09-11 20:42:26 - Before Sunrise 
+2024-09-11 20:42:55 - Before Sunrise 
+2024-09-11 20:42:58 - Before Sunrise 
+2024-09-11 20:43:44 - Before Sunrise 
+2024-09-11 20:43:45 - Before Sunrise 
+2024-09-11 20:43:48 - Before Sunrise 
+2024-09-11 20:44:39 - Passed Sunrise 
+2024-09-11 20:45:55 - Before Sunrise 
+2024-09-11 20:46:13 - Passed Sunrise 
+2024-09-11 20:47:07 - Passed Sunrise 
+2024-09-11 20:47:07 - Shutting Down Camera 
+2024-09-11 20:54:47 - Passed Sunrise 
+2024-09-11 20:54:47 - Error in checking rc log shutting down
+2024-09-11 20:54:47 - Shutting Down Camera 
+2024-09-11 20:59:53 - Passed Sunrise 
+2024-09-11 20:59:53 - Error in checking rc log shutting down
+2024-09-11 20:59:53 - Shutting Down Camera 
+2024-09-11 21:01:13 - Shut down camera Successful 
+2024-09-11 21:01:13 - CTM complete. Powering Down MagnaPS 
+2024-09-11 21:01:13 - Shutdown Complete 
+2024-09-12 02:16:40 - Added sunrise_time: 2024-09-12 12:23:42 
+2024-09-12 10:00:01 - Before Sunrise 
+2024-09-12 10:10:01 - Before Sunrise 
+2024-09-12 10:20:01 - Before Sunrise 
+2024-09-12 10:30:01 - Before Sunrise 
+2024-09-12 10:40:01 - Before Sunrise 
+2024-09-12 10:50:01 - Before Sunrise 
+2024-09-12 11:00:01 - Before Sunrise 
+2024-09-12 11:10:01 - Before Sunrise 
+2024-09-12 11:20:01 - Before Sunrise 
+2024-09-12 11:30:01 - Before Sunrise 
+2024-09-12 11:40:01 - Before Sunrise 
+2024-09-12 11:50:01 - Before Sunrise 
+2024-09-12 12:00:01 - Before Sunrise 
+2024-09-12 12:10:01 - Before Sunrise 
+2024-09-12 12:20:01 - Before Sunrise 
+2024-09-12 12:30:01 - Passed Sunrise 
+2024-09-12 12:30:01 - Error in checking rc log shutting down
+2024-09-12 12:30:01 - Shutting Down Camera 
+2024-09-12 12:31:31 - Shut down camera Successful 
+2024-09-12 12:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 12:31:33 - Shutdown Complete 
+2024-09-12 12:40:01 - Passed Sunrise 
+2024-09-12 12:40:01 - Error in checking rc log shutting down
+2024-09-12 12:40:01 - Shutting Down Camera 
+2024-09-12 12:41:31 - Shut down camera Successful 
+2024-09-12 12:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 12:41:33 - Shutdown Complete 
+2024-09-12 12:50:01 - Passed Sunrise 
+2024-09-12 12:50:01 - Error in checking rc log shutting down
+2024-09-12 12:50:01 - Shutting Down Camera 
+2024-09-12 12:51:31 - Shut down camera Successful 
+2024-09-12 12:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 12:51:33 - Shutdown Complete 
+2024-09-12 13:00:01 - Passed Sunrise 
+2024-09-12 13:00:01 - Error in checking rc log shutting down
+2024-09-12 13:00:01 - Shutting Down Camera 
+2024-09-12 13:01:31 - Shut down camera Successful 
+2024-09-12 13:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 13:01:33 - Shutdown Complete 
+2024-09-12 13:10:01 - Passed Sunrise 
+2024-09-12 13:10:01 - Error in checking rc log shutting down
+2024-09-12 13:10:01 - Shutting Down Camera 
+2024-09-12 13:11:31 - Shut down camera Successful 
+2024-09-12 13:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 13:11:33 - Shutdown Complete 
+2024-09-12 13:20:01 - Passed Sunrise 
+2024-09-12 13:20:01 - Error in checking rc log shutting down
+2024-09-12 13:20:01 - Shutting Down Camera 
+2024-09-12 13:21:31 - Shut down camera Successful 
+2024-09-12 13:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 13:21:33 - Shutdown Complete 
+2024-09-12 13:30:01 - Passed Sunrise 
+2024-09-12 13:30:01 - Error in checking rc log shutting down
+2024-09-12 13:30:01 - Shutting Down Camera 
+2024-09-12 13:31:31 - Shut down camera Successful 
+2024-09-12 13:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 13:31:33 - Shutdown Complete 
+2024-09-12 13:40:01 - Passed Sunrise 
+2024-09-12 13:40:01 - Error in checking rc log shutting down
+2024-09-12 13:40:01 - Shutting Down Camera 
+2024-09-12 13:41:31 - Shut down camera Successful 
+2024-09-12 13:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 13:41:33 - Shutdown Complete 
+2024-09-12 13:50:01 - Passed Sunrise 
+2024-09-12 13:50:01 - Error in checking rc log shutting down
+2024-09-12 13:50:01 - Shutting Down Camera 
+2024-09-12 13:51:31 - Shut down camera Successful 
+2024-09-12 13:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 13:51:33 - Shutdown Complete 
+2024-09-12 14:00:01 - Passed Sunrise 
+2024-09-12 14:00:01 - Error in checking rc log shutting down
+2024-09-12 14:00:01 - Shutting Down Camera 
+2024-09-12 14:01:32 - Shut down camera Successful 
+2024-09-12 14:01:32 - CTM complete. Powering Down MagnaPS 
+2024-09-12 14:01:34 - Shutdown Complete 
+2024-09-12 14:10:01 - Passed Sunrise 
+2024-09-12 14:10:01 - Error in checking rc log shutting down
+2024-09-12 14:10:01 - Shutting Down Camera 
+2024-09-12 14:11:31 - Shut down camera Successful 
+2024-09-12 14:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 14:11:33 - Shutdown Complete 
+2024-09-12 14:20:01 - Passed Sunrise 
+2024-09-12 14:20:01 - Error in checking rc log shutting down
+2024-09-12 14:20:01 - Shutting Down Camera 
+2024-09-12 14:21:31 - Shut down camera Successful 
+2024-09-12 14:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 14:21:33 - Shutdown Complete 
+2024-09-12 14:30:01 - Passed Sunrise 
+2024-09-12 14:30:01 - Error in checking rc log shutting down
+2024-09-12 14:30:01 - Shutting Down Camera 
+2024-09-12 14:31:31 - Shut down camera Successful 
+2024-09-12 14:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 14:31:33 - Shutdown Complete 
+2024-09-12 14:40:01 - Passed Sunrise 
+2024-09-12 14:40:01 - Error in checking rc log shutting down
+2024-09-12 14:40:01 - Shutting Down Camera 
+2024-09-12 14:41:31 - Shut down camera Successful 
+2024-09-12 14:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 14:41:33 - Shutdown Complete 
+2024-09-12 14:50:02 - Passed Sunrise 
+2024-09-12 14:50:02 - Error in checking rc log shutting down
+2024-09-12 14:50:02 - Shutting Down Camera 
+2024-09-12 14:51:32 - Shut down camera Successful 
+2024-09-12 14:51:32 - CTM complete. Powering Down MagnaPS 
+2024-09-12 14:51:34 - Shutdown Complete 
+2024-09-12 15:00:01 - Passed Sunrise 
+2024-09-12 15:00:01 - Error in checking rc log shutting down
+2024-09-12 15:00:01 - Shutting Down Camera 
+2024-09-12 15:01:31 - Shut down camera Successful 
+2024-09-12 15:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 15:01:33 - Shutdown Complete 
+2024-09-12 15:10:01 - Passed Sunrise 
+2024-09-12 15:10:01 - Error in checking rc log shutting down
+2024-09-12 15:10:01 - Shutting Down Camera 
+2024-09-12 15:11:31 - Shut down camera Successful 
+2024-09-12 15:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 15:11:33 - Shutdown Complete 
+2024-09-12 15:20:01 - Passed Sunrise 
+2024-09-12 15:20:01 - Error in checking rc log shutting down
+2024-09-12 15:20:01 - Shutting Down Camera 
+2024-09-12 15:21:31 - Shut down camera Successful 
+2024-09-12 15:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 15:21:33 - Shutdown Complete 
+2024-09-12 15:30:01 - Passed Sunrise 
+2024-09-12 15:30:01 - Error in checking rc log shutting down
+2024-09-12 15:30:01 - Shutting Down Camera 
+2024-09-12 15:31:31 - Shut down camera Successful 
+2024-09-12 15:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 15:31:33 - Shutdown Complete 
+2024-09-12 15:40:01 - Passed Sunrise 
+2024-09-12 15:40:01 - Error in checking rc log shutting down
+2024-09-12 15:40:01 - Shutting Down Camera 
+2024-09-12 15:41:31 - Shut down camera Successful 
+2024-09-12 15:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 15:41:33 - Shutdown Complete 
+2024-09-12 15:50:01 - Passed Sunrise 
+2024-09-12 15:50:01 - Error in checking rc log shutting down
+2024-09-12 15:50:01 - Shutting Down Camera 
+2024-09-12 15:51:31 - Shut down camera Successful 
+2024-09-12 15:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 15:51:33 - Shutdown Complete 
+2024-09-12 16:00:01 - Passed Sunrise 
+2024-09-12 16:00:01 - Error in checking rc log shutting down
+2024-09-12 16:00:01 - Shutting Down Camera 
+2024-09-12 16:01:31 - Shut down camera Successful 
+2024-09-12 16:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 16:01:33 - Shutdown Complete 
+2024-09-12 16:10:01 - Passed Sunrise 
+2024-09-12 16:10:01 - Error in checking rc log shutting down
+2024-09-12 16:10:01 - Shutting Down Camera 
+2024-09-12 16:11:31 - Shut down camera Successful 
+2024-09-12 16:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 16:11:33 - Shutdown Complete 
+2024-09-12 16:20:01 - Passed Sunrise 
+2024-09-12 16:20:01 - Error in checking rc log shutting down
+2024-09-12 16:20:01 - Shutting Down Camera 
+2024-09-12 16:21:31 - Shut down camera Successful 
+2024-09-12 16:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 16:21:33 - Shutdown Complete 
+2024-09-12 16:30:01 - Passed Sunrise 
+2024-09-12 16:30:01 - Error in checking rc log shutting down
+2024-09-12 16:30:01 - Shutting Down Camera 
+2024-09-12 16:31:31 - Shut down camera Successful 
+2024-09-12 16:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 16:31:34 - Shutdown Complete 
+2024-09-12 16:40:01 - Passed Sunrise 
+2024-09-12 16:40:01 - Error in checking rc log shutting down
+2024-09-12 16:40:01 - Shutting Down Camera 
+2024-09-12 16:41:31 - Shut down camera Successful 
+2024-09-12 16:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 16:41:33 - Shutdown Complete 
+2024-09-12 16:50:01 - Passed Sunrise 
+2024-09-12 16:50:01 - Error in checking rc log shutting down
+2024-09-12 16:50:01 - Shutting Down Camera 
+2024-09-12 16:51:31 - Shut down camera Successful 
+2024-09-12 16:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-12 16:51:33 - Shutdown Complete 
+2024-09-12 20:01:01 - Added sunrise_time: 2024-09-13 12:24:39 
+2024-09-13 10:00:01 - Before Sunrise 
+2024-09-13 10:10:01 - Before Sunrise 
+2024-09-13 10:20:01 - Before Sunrise 
+2024-09-13 10:30:01 - Before Sunrise 
+2024-09-13 10:40:01 - Before Sunrise 
+2024-09-13 10:50:02 - Before Sunrise 
+2024-09-13 11:00:01 - Before Sunrise 
+2024-09-13 11:10:01 - Before Sunrise 
+2024-09-13 11:20:01 - Before Sunrise 
+2024-09-13 11:30:01 - Before Sunrise 
+2024-09-13 11:40:01 - Before Sunrise 
+2024-09-13 11:50:02 - Before Sunrise 
+2024-09-13 12:00:01 - Before Sunrise 
+2024-09-13 12:10:01 - Before Sunrise 
+2024-09-13 12:20:01 - Before Sunrise 
+2024-09-13 12:30:01 - Passed Sunrise 
+2024-09-13 12:30:01 - Error in checking rc log shutting down
+2024-09-13 12:30:01 - Shutting Down Camera 
+2024-09-13 12:31:31 - Shut down camera Successful 
+2024-09-13 12:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 12:31:33 - Shutdown Complete 
+2024-09-13 12:40:01 - Passed Sunrise 
+2024-09-13 12:40:01 - Error in checking rc log shutting down
+2024-09-13 12:40:01 - Shutting Down Camera 
+2024-09-13 12:41:31 - Shut down camera Successful 
+2024-09-13 12:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 12:41:33 - Shutdown Complete 
+2024-09-13 12:50:01 - Passed Sunrise 
+2024-09-13 12:50:01 - Error in checking rc log shutting down
+2024-09-13 12:50:01 - Shutting Down Camera 
+2024-09-13 12:51:31 - Shut down camera Successful 
+2024-09-13 12:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 12:51:33 - Shutdown Complete 
+2024-09-13 13:00:01 - Passed Sunrise 
+2024-09-13 13:00:01 - Error in checking rc log shutting down
+2024-09-13 13:00:01 - Shutting Down Camera 
+2024-09-13 13:01:31 - Shut down camera Successful 
+2024-09-13 13:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 13:01:33 - Shutdown Complete 
+2024-09-13 13:10:01 - Passed Sunrise 
+2024-09-13 13:10:01 - Error in checking rc log shutting down
+2024-09-13 13:10:01 - Shutting Down Camera 
+2024-09-13 13:11:31 - Shut down camera Successful 
+2024-09-13 13:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 13:11:33 - Shutdown Complete 
+2024-09-13 13:20:01 - Passed Sunrise 
+2024-09-13 13:20:01 - Error in checking rc log shutting down
+2024-09-13 13:20:01 - Shutting Down Camera 
+2024-09-13 13:21:31 - Shut down camera Successful 
+2024-09-13 13:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 13:21:33 - Shutdown Complete 
+2024-09-13 13:30:01 - Passed Sunrise 
+2024-09-13 13:30:01 - Error in checking rc log shutting down
+2024-09-13 13:30:01 - Shutting Down Camera 
+2024-09-13 13:31:31 - Shut down camera Successful 
+2024-09-13 13:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 13:31:33 - Shutdown Complete 
+2024-09-13 13:40:02 - Passed Sunrise 
+2024-09-13 13:40:02 - Error in checking rc log shutting down
+2024-09-13 13:40:02 - Shutting Down Camera 
+2024-09-13 13:41:32 - Shut down camera Successful 
+2024-09-13 13:41:32 - CTM complete. Powering Down MagnaPS 
+2024-09-13 13:41:34 - Shutdown Complete 
+2024-09-13 13:50:01 - Passed Sunrise 
+2024-09-13 13:50:01 - Error in checking rc log shutting down
+2024-09-13 13:50:01 - Shutting Down Camera 
+2024-09-13 13:51:31 - Shut down camera Successful 
+2024-09-13 13:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 13:51:33 - Shutdown Complete 
+2024-09-13 14:00:01 - Passed Sunrise 
+2024-09-13 14:00:01 - Error in checking rc log shutting down
+2024-09-13 14:00:01 - Shutting Down Camera 
+2024-09-13 14:01:31 - Shut down camera Successful 
+2024-09-13 14:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 14:01:33 - Shutdown Complete 
+2024-09-13 14:10:01 - Passed Sunrise 
+2024-09-13 14:10:01 - Error in checking rc log shutting down
+2024-09-13 14:10:01 - Shutting Down Camera 
+2024-09-13 14:11:31 - Shut down camera Successful 
+2024-09-13 14:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 14:11:33 - Shutdown Complete 
+2024-09-13 14:20:01 - Passed Sunrise 
+2024-09-13 14:20:01 - Error in checking rc log shutting down
+2024-09-13 14:20:01 - Shutting Down Camera 
+2024-09-13 14:21:31 - Shut down camera Successful 
+2024-09-13 14:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 14:21:34 - Shutdown Complete 
+2024-09-13 14:30:01 - Passed Sunrise 
+2024-09-13 14:30:01 - Error in checking rc log shutting down
+2024-09-13 14:30:01 - Shutting Down Camera 
+2024-09-13 14:31:31 - Shut down camera Successful 
+2024-09-13 14:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 14:31:33 - Shutdown Complete 
+2024-09-13 14:40:01 - Passed Sunrise 
+2024-09-13 14:40:01 - Error in checking rc log shutting down
+2024-09-13 14:40:01 - Shutting Down Camera 
+2024-09-13 14:41:31 - Shut down camera Successful 
+2024-09-13 14:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 14:41:33 - Shutdown Complete 
+2024-09-13 14:50:01 - Passed Sunrise 
+2024-09-13 14:50:01 - Error in checking rc log shutting down
+2024-09-13 14:50:01 - Shutting Down Camera 
+2024-09-13 14:51:31 - Shut down camera Successful 
+2024-09-13 14:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 14:51:33 - Shutdown Complete 
+2024-09-13 15:00:01 - Passed Sunrise 
+2024-09-13 15:00:01 - Error in checking rc log shutting down
+2024-09-13 15:00:01 - Shutting Down Camera 
+2024-09-13 15:01:31 - Shut down camera Successful 
+2024-09-13 15:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 15:01:33 - Shutdown Complete 
+2024-09-13 15:10:01 - Passed Sunrise 
+2024-09-13 15:10:01 - Error in checking rc log shutting down
+2024-09-13 15:10:01 - Shutting Down Camera 
+2024-09-13 15:11:31 - Shut down camera Successful 
+2024-09-13 15:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 15:11:33 - Shutdown Complete 
+2024-09-13 15:20:01 - Passed Sunrise 
+2024-09-13 15:20:01 - Error in checking rc log shutting down
+2024-09-13 15:20:01 - Shutting Down Camera 
+2024-09-13 15:21:31 - Shut down camera Successful 
+2024-09-13 15:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 15:21:33 - Shutdown Complete 
+2024-09-13 15:30:01 - Passed Sunrise 
+2024-09-13 15:30:01 - Error in checking rc log shutting down
+2024-09-13 15:30:01 - Shutting Down Camera 
+2024-09-13 15:31:31 - Shut down camera Successful 
+2024-09-13 15:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 15:31:33 - Shutdown Complete 
+2024-09-13 15:40:01 - Passed Sunrise 
+2024-09-13 15:40:01 - Error in checking rc log shutting down
+2024-09-13 15:40:01 - Shutting Down Camera 
+2024-09-13 15:41:31 - Shut down camera Successful 
+2024-09-13 15:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 15:41:33 - Shutdown Complete 
+2024-09-13 15:50:01 - Passed Sunrise 
+2024-09-13 15:50:01 - Error in checking rc log shutting down
+2024-09-13 15:50:01 - Shutting Down Camera 
+2024-09-13 15:51:31 - Shut down camera Successful 
+2024-09-13 15:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 15:51:33 - Shutdown Complete 
+2024-09-13 16:00:01 - Passed Sunrise 
+2024-09-13 16:00:01 - Error in checking rc log shutting down
+2024-09-13 16:00:01 - Shutting Down Camera 
+2024-09-13 16:01:31 - Shut down camera Successful 
+2024-09-13 16:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 16:01:33 - Shutdown Complete 
+2024-09-13 16:10:02 - Passed Sunrise 
+2024-09-13 16:10:02 - Error in checking rc log shutting down
+2024-09-13 16:10:02 - Shutting Down Camera 
+2024-09-13 16:11:32 - Shut down camera Successful 
+2024-09-13 16:11:32 - CTM complete. Powering Down MagnaPS 
+2024-09-13 16:11:34 - Shutdown Complete 
+2024-09-13 16:20:01 - Passed Sunrise 
+2024-09-13 16:20:01 - Error in checking rc log shutting down
+2024-09-13 16:20:01 - Shutting Down Camera 
+2024-09-13 16:21:31 - Shut down camera Successful 
+2024-09-13 16:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 16:21:33 - Shutdown Complete 
+2024-09-13 16:30:01 - Passed Sunrise 
+2024-09-13 16:30:01 - Error in checking rc log shutting down
+2024-09-13 16:30:01 - Shutting Down Camera 
+2024-09-13 16:31:31 - Shut down camera Successful 
+2024-09-13 16:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 16:31:33 - Shutdown Complete 
+2024-09-13 16:40:01 - Passed Sunrise 
+2024-09-13 16:40:01 - Error in checking rc log shutting down
+2024-09-13 16:40:01 - Shutting Down Camera 
+2024-09-13 16:41:31 - Shut down camera Successful 
+2024-09-13 16:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 16:41:33 - Shutdown Complete 
+2024-09-13 16:50:01 - Passed Sunrise 
+2024-09-13 16:50:01 - Error in checking rc log shutting down
+2024-09-13 16:50:01 - Shutting Down Camera 
+2024-09-13 16:51:31 - Shut down camera Successful 
+2024-09-13 16:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-13 16:51:33 - Shutdown Complete 
+2024-09-13 20:01:01 - Added sunrise_time: 2024-09-14 12:25:35 
+2024-09-14 10:00:01 - Before Sunrise 
+2024-09-14 10:10:01 - Before Sunrise 
+2024-09-14 10:20:01 - Before Sunrise 
+2024-09-14 10:30:01 - Before Sunrise 
+2024-09-14 10:40:01 - Before Sunrise 
+2024-09-14 10:50:01 - Before Sunrise 
+2024-09-14 11:00:01 - Before Sunrise 
+2024-09-14 11:10:01 - Before Sunrise 
+2024-09-14 11:20:01 - Before Sunrise 
+2024-09-14 11:30:01 - Before Sunrise 
+2024-09-14 11:40:01 - Before Sunrise 
+2024-09-14 11:50:01 - Before Sunrise 
+2024-09-14 12:00:01 - Before Sunrise 
+2024-09-14 12:10:02 - Before Sunrise 
+2024-09-14 12:20:01 - Before Sunrise 
+2024-09-14 12:30:01 - Passed Sunrise 
+2024-09-14 12:30:01 - Error in checking rc log shutting down
+2024-09-14 12:30:01 - Shutting Down Camera 
+2024-09-14 12:31:31 - Shut down camera Successful 
+2024-09-14 12:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 12:31:33 - Shutdown Complete 
+2024-09-14 12:40:01 - Passed Sunrise 
+2024-09-14 12:40:01 - Error in checking rc log shutting down
+2024-09-14 12:40:01 - Shutting Down Camera 
+2024-09-14 12:41:31 - Shut down camera Successful 
+2024-09-14 12:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 12:41:33 - Shutdown Complete 
+2024-09-14 12:50:02 - Passed Sunrise 
+2024-09-14 12:50:02 - Error in checking rc log shutting down
+2024-09-14 12:50:02 - Shutting Down Camera 
+2024-09-14 12:51:32 - Shut down camera Successful 
+2024-09-14 12:51:32 - CTM complete. Powering Down MagnaPS 
+2024-09-14 12:51:34 - Shutdown Complete 
+2024-09-14 13:00:01 - Passed Sunrise 
+2024-09-14 13:00:01 - Error in checking rc log shutting down
+2024-09-14 13:00:01 - Shutting Down Camera 
+2024-09-14 13:01:31 - Shut down camera Successful 
+2024-09-14 13:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 13:01:33 - Shutdown Complete 
+2024-09-14 13:10:01 - Passed Sunrise 
+2024-09-14 13:10:01 - Error in checking rc log shutting down
+2024-09-14 13:10:01 - Shutting Down Camera 
+2024-09-14 13:11:31 - Shut down camera Successful 
+2024-09-14 13:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 13:11:33 - Shutdown Complete 
+2024-09-14 13:20:01 - Passed Sunrise 
+2024-09-14 13:20:01 - Error in checking rc log shutting down
+2024-09-14 13:20:01 - Shutting Down Camera 
+2024-09-14 13:21:31 - Shut down camera Successful 
+2024-09-14 13:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 13:21:33 - Shutdown Complete 
+2024-09-14 13:30:01 - Passed Sunrise 
+2024-09-14 13:30:01 - Error in checking rc log shutting down
+2024-09-14 13:30:01 - Shutting Down Camera 
+2024-09-14 13:31:31 - Shut down camera Successful 
+2024-09-14 13:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 13:31:33 - Shutdown Complete 
+2024-09-14 13:40:02 - Passed Sunrise 
+2024-09-14 13:40:02 - Error in checking rc log shutting down
+2024-09-14 13:40:02 - Shutting Down Camera 
+2024-09-14 13:41:32 - Shut down camera Successful 
+2024-09-14 13:41:32 - CTM complete. Powering Down MagnaPS 
+2024-09-14 13:41:34 - Shutdown Complete 
+2024-09-14 13:50:01 - Passed Sunrise 
+2024-09-14 13:50:01 - Error in checking rc log shutting down
+2024-09-14 13:50:01 - Shutting Down Camera 
+2024-09-14 13:51:31 - Shut down camera Successful 
+2024-09-14 13:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 13:51:33 - Shutdown Complete 
+2024-09-14 14:00:01 - Passed Sunrise 
+2024-09-14 14:00:01 - Error in checking rc log shutting down
+2024-09-14 14:00:01 - Shutting Down Camera 
+2024-09-14 14:01:31 - Shut down camera Successful 
+2024-09-14 14:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 14:01:33 - Shutdown Complete 
+2024-09-14 14:10:01 - Passed Sunrise 
+2024-09-14 14:10:01 - Error in checking rc log shutting down
+2024-09-14 14:10:01 - Shutting Down Camera 
+2024-09-14 14:11:31 - Shut down camera Successful 
+2024-09-14 14:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 14:11:33 - Shutdown Complete 
+2024-09-14 14:20:01 - Passed Sunrise 
+2024-09-14 14:20:01 - Error in checking rc log shutting down
+2024-09-14 14:20:01 - Shutting Down Camera 
+2024-09-14 14:21:31 - Shut down camera Successful 
+2024-09-14 14:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 14:21:33 - Shutdown Complete 
+2024-09-14 14:30:01 - Passed Sunrise 
+2024-09-14 14:30:01 - Error in checking rc log shutting down
+2024-09-14 14:30:01 - Shutting Down Camera 
+2024-09-14 14:31:31 - Shut down camera Successful 
+2024-09-14 14:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 14:31:33 - Shutdown Complete 
+2024-09-14 14:40:01 - Passed Sunrise 
+2024-09-14 14:40:01 - Error in checking rc log shutting down
+2024-09-14 14:40:01 - Shutting Down Camera 
+2024-09-14 14:41:31 - Shut down camera Successful 
+2024-09-14 14:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 14:41:33 - Shutdown Complete 
+2024-09-14 14:50:01 - Passed Sunrise 
+2024-09-14 14:50:01 - Error in checking rc log shutting down
+2024-09-14 14:50:01 - Shutting Down Camera 
+2024-09-14 14:51:31 - Shut down camera Successful 
+2024-09-14 14:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 14:51:33 - Shutdown Complete 
+2024-09-14 15:00:01 - Passed Sunrise 
+2024-09-14 15:00:01 - Error in checking rc log shutting down
+2024-09-14 15:00:01 - Shutting Down Camera 
+2024-09-14 15:01:31 - Shut down camera Successful 
+2024-09-14 15:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 15:01:33 - Shutdown Complete 
+2024-09-14 15:10:01 - Passed Sunrise 
+2024-09-14 15:10:01 - Error in checking rc log shutting down
+2024-09-14 15:10:01 - Shutting Down Camera 
+2024-09-14 15:11:31 - Shut down camera Successful 
+2024-09-14 15:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 15:11:33 - Shutdown Complete 
+2024-09-14 15:20:01 - Passed Sunrise 
+2024-09-14 15:20:01 - Error in checking rc log shutting down
+2024-09-14 15:20:01 - Shutting Down Camera 
+2024-09-14 15:21:31 - Shut down camera Successful 
+2024-09-14 15:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 15:21:33 - Shutdown Complete 
+2024-09-14 15:30:01 - Passed Sunrise 
+2024-09-14 15:30:01 - Error in checking rc log shutting down
+2024-09-14 15:30:01 - Shutting Down Camera 
+2024-09-14 15:31:31 - Shut down camera Successful 
+2024-09-14 15:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 15:31:33 - Shutdown Complete 
+2024-09-14 15:40:01 - Passed Sunrise 
+2024-09-14 15:40:01 - Error in checking rc log shutting down
+2024-09-14 15:40:01 - Shutting Down Camera 
+2024-09-14 15:41:31 - Shut down camera Successful 
+2024-09-14 15:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 15:41:33 - Shutdown Complete 
+2024-09-14 15:50:01 - Passed Sunrise 
+2024-09-14 15:50:01 - Error in checking rc log shutting down
+2024-09-14 15:50:01 - Shutting Down Camera 
+2024-09-14 15:51:31 - Shut down camera Successful 
+2024-09-14 15:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 15:51:33 - Shutdown Complete 
+2024-09-14 16:00:01 - Passed Sunrise 
+2024-09-14 16:00:01 - Error in checking rc log shutting down
+2024-09-14 16:00:01 - Shutting Down Camera 
+2024-09-14 16:01:31 - Shut down camera Successful 
+2024-09-14 16:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 16:01:33 - Shutdown Complete 
+2024-09-14 16:10:01 - Passed Sunrise 
+2024-09-14 16:10:01 - Error in checking rc log shutting down
+2024-09-14 16:10:01 - Shutting Down Camera 
+2024-09-14 16:11:32 - Shut down camera Successful 
+2024-09-14 16:11:32 - CTM complete. Powering Down MagnaPS 
+2024-09-14 16:11:34 - Shutdown Complete 
+2024-09-14 16:20:01 - Passed Sunrise 
+2024-09-14 16:20:01 - Error in checking rc log shutting down
+2024-09-14 16:20:01 - Shutting Down Camera 
+2024-09-14 16:21:31 - Shut down camera Successful 
+2024-09-14 16:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 16:21:33 - Shutdown Complete 
+2024-09-14 16:30:01 - Passed Sunrise 
+2024-09-14 16:30:01 - Error in checking rc log shutting down
+2024-09-14 16:30:01 - Shutting Down Camera 
+2024-09-14 16:31:31 - Shut down camera Successful 
+2024-09-14 16:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 16:31:33 - Shutdown Complete 
+2024-09-14 16:40:01 - Passed Sunrise 
+2024-09-14 16:40:01 - Error in checking rc log shutting down
+2024-09-14 16:40:01 - Shutting Down Camera 
+2024-09-14 16:41:31 - Shut down camera Successful 
+2024-09-14 16:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 16:41:33 - Shutdown Complete 
+2024-09-14 16:50:01 - Passed Sunrise 
+2024-09-14 16:50:01 - Error in checking rc log shutting down
+2024-09-14 16:50:01 - Shutting Down Camera 
+2024-09-14 16:51:31 - Shut down camera Successful 
+2024-09-14 16:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-14 16:51:33 - Shutdown Complete 
+2024-09-14 20:01:01 - Added sunrise_time: 2024-09-15 12:26:31 
+2024-09-15 10:00:01 - Before Sunrise 
+2024-09-15 10:10:01 - Before Sunrise 
+2024-09-15 10:20:01 - Before Sunrise 
+2024-09-15 10:30:01 - Before Sunrise 
+2024-09-15 10:40:01 - Before Sunrise 
+2024-09-15 10:50:01 - Before Sunrise 
+2024-09-15 11:00:01 - Before Sunrise 
+2024-09-15 11:10:01 - Before Sunrise 
+2024-09-15 11:20:01 - Before Sunrise 
+2024-09-15 11:30:01 - Before Sunrise 
+2024-09-15 11:40:01 - Before Sunrise 
+2024-09-15 11:50:01 - Before Sunrise 
+2024-09-15 12:00:01 - Before Sunrise 
+2024-09-15 12:10:01 - Before Sunrise 
+2024-09-15 12:20:01 - Before Sunrise 
+2024-09-15 12:30:01 - Passed Sunrise 
+2024-09-15 12:30:01 - Error in checking rc log shutting down
+2024-09-15 12:30:01 - Shutting Down Camera 
+2024-09-15 12:31:31 - Shut down camera Successful 
+2024-09-15 12:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 12:31:33 - Shutdown Complete 
+2024-09-15 12:40:01 - Passed Sunrise 
+2024-09-15 12:40:01 - Error in checking rc log shutting down
+2024-09-15 12:40:01 - Shutting Down Camera 
+2024-09-15 12:41:31 - Shut down camera Successful 
+2024-09-15 12:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 12:41:33 - Shutdown Complete 
+2024-09-15 12:50:01 - Passed Sunrise 
+2024-09-15 12:50:01 - Error in checking rc log shutting down
+2024-09-15 12:50:01 - Shutting Down Camera 
+2024-09-15 12:51:31 - Shut down camera Successful 
+2024-09-15 12:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 12:51:33 - Shutdown Complete 
+2024-09-15 13:00:01 - Passed Sunrise 
+2024-09-15 13:00:01 - Error in checking rc log shutting down
+2024-09-15 13:00:01 - Shutting Down Camera 
+2024-09-15 13:01:31 - Shut down camera Successful 
+2024-09-15 13:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 13:01:33 - Shutdown Complete 
+2024-09-15 13:10:01 - Passed Sunrise 
+2024-09-15 13:10:01 - Error in checking rc log shutting down
+2024-09-15 13:10:01 - Shutting Down Camera 
+2024-09-15 13:11:32 - Shut down camera Successful 
+2024-09-15 13:11:32 - CTM complete. Powering Down MagnaPS 
+2024-09-15 13:11:34 - Shutdown Complete 
+2024-09-15 13:20:01 - Passed Sunrise 
+2024-09-15 13:20:01 - Error in checking rc log shutting down
+2024-09-15 13:20:01 - Shutting Down Camera 
+2024-09-15 13:21:31 - Shut down camera Successful 
+2024-09-15 13:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 13:21:33 - Shutdown Complete 
+2024-09-15 13:30:01 - Passed Sunrise 
+2024-09-15 13:30:01 - Error in checking rc log shutting down
+2024-09-15 13:30:01 - Shutting Down Camera 
+2024-09-15 13:31:31 - Shut down camera Successful 
+2024-09-15 13:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 13:31:33 - Shutdown Complete 
+2024-09-15 13:40:01 - Passed Sunrise 
+2024-09-15 13:40:01 - Error in checking rc log shutting down
+2024-09-15 13:40:01 - Shutting Down Camera 
+2024-09-15 13:41:31 - Shut down camera Successful 
+2024-09-15 13:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 13:41:33 - Shutdown Complete 
+2024-09-15 13:50:01 - Passed Sunrise 
+2024-09-15 13:50:01 - Error in checking rc log shutting down
+2024-09-15 13:50:01 - Shutting Down Camera 
+2024-09-15 13:51:31 - Shut down camera Successful 
+2024-09-15 13:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 13:51:33 - Shutdown Complete 
+2024-09-15 14:00:02 - Passed Sunrise 
+2024-09-15 14:00:02 - Error in checking rc log shutting down
+2024-09-15 14:00:02 - Shutting Down Camera 
+2024-09-15 14:01:32 - Shut down camera Successful 
+2024-09-15 14:01:32 - CTM complete. Powering Down MagnaPS 
+2024-09-15 14:01:34 - Shutdown Complete 
+2024-09-15 14:10:01 - Passed Sunrise 
+2024-09-15 14:10:01 - Error in checking rc log shutting down
+2024-09-15 14:10:01 - Shutting Down Camera 
+2024-09-15 14:11:31 - Shut down camera Successful 
+2024-09-15 14:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 14:11:33 - Shutdown Complete 
+2024-09-15 14:20:01 - Passed Sunrise 
+2024-09-15 14:20:01 - Error in checking rc log shutting down
+2024-09-15 14:20:01 - Shutting Down Camera 
+2024-09-15 14:21:31 - Shut down camera Successful 
+2024-09-15 14:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 14:21:33 - Shutdown Complete 
+2024-09-15 14:30:01 - Passed Sunrise 
+2024-09-15 14:30:01 - Error in checking rc log shutting down
+2024-09-15 14:30:01 - Shutting Down Camera 
+2024-09-15 14:31:31 - Shut down camera Successful 
+2024-09-15 14:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 14:31:33 - Shutdown Complete 
+2024-09-15 14:40:01 - Passed Sunrise 
+2024-09-15 14:40:01 - Error in checking rc log shutting down
+2024-09-15 14:40:01 - Shutting Down Camera 
+2024-09-15 14:41:31 - Shut down camera Successful 
+2024-09-15 14:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 14:41:33 - Shutdown Complete 
+2024-09-15 14:50:01 - Passed Sunrise 
+2024-09-15 14:50:01 - Error in checking rc log shutting down
+2024-09-15 14:50:01 - Shutting Down Camera 
+2024-09-15 14:51:31 - Shut down camera Successful 
+2024-09-15 14:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 14:51:33 - Shutdown Complete 
+2024-09-15 15:00:01 - Passed Sunrise 
+2024-09-15 15:00:01 - Error in checking rc log shutting down
+2024-09-15 15:00:01 - Shutting Down Camera 
+2024-09-15 15:01:31 - Shut down camera Successful 
+2024-09-15 15:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 15:01:33 - Shutdown Complete 
+2024-09-15 15:10:01 - Passed Sunrise 
+2024-09-15 15:10:01 - Error in checking rc log shutting down
+2024-09-15 15:10:01 - Shutting Down Camera 
+2024-09-15 15:11:31 - Shut down camera Successful 
+2024-09-15 15:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 15:11:33 - Shutdown Complete 
+2024-09-15 15:20:01 - Passed Sunrise 
+2024-09-15 15:20:01 - Error in checking rc log shutting down
+2024-09-15 15:20:01 - Shutting Down Camera 
+2024-09-15 15:21:31 - Shut down camera Successful 
+2024-09-15 15:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 15:21:33 - Shutdown Complete 
+2024-09-15 15:30:01 - Passed Sunrise 
+2024-09-15 15:30:01 - Error in checking rc log shutting down
+2024-09-15 15:30:01 - Shutting Down Camera 
+2024-09-15 15:31:31 - Shut down camera Successful 
+2024-09-15 15:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 15:31:33 - Shutdown Complete 
+2024-09-15 15:40:01 - Passed Sunrise 
+2024-09-15 15:40:01 - Error in checking rc log shutting down
+2024-09-15 15:40:01 - Shutting Down Camera 
+2024-09-15 15:41:31 - Shut down camera Successful 
+2024-09-15 15:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 15:41:34 - Shutdown Complete 
+2024-09-15 15:50:01 - Passed Sunrise 
+2024-09-15 15:50:01 - Error in checking rc log shutting down
+2024-09-15 15:50:01 - Shutting Down Camera 
+2024-09-15 15:51:31 - Shut down camera Successful 
+2024-09-15 15:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 15:51:33 - Shutdown Complete 
+2024-09-15 16:00:01 - Passed Sunrise 
+2024-09-15 16:00:01 - Error in checking rc log shutting down
+2024-09-15 16:00:01 - Shutting Down Camera 
+2024-09-15 16:01:31 - Shut down camera Successful 
+2024-09-15 16:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 16:01:33 - Shutdown Complete 
+2024-09-15 16:10:01 - Passed Sunrise 
+2024-09-15 16:10:01 - Error in checking rc log shutting down
+2024-09-15 16:10:01 - Shutting Down Camera 
+2024-09-15 16:11:31 - Shut down camera Successful 
+2024-09-15 16:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 16:11:33 - Shutdown Complete 
+2024-09-15 16:20:01 - Passed Sunrise 
+2024-09-15 16:20:01 - Error in checking rc log shutting down
+2024-09-15 16:20:01 - Shutting Down Camera 
+2024-09-15 16:21:31 - Shut down camera Successful 
+2024-09-15 16:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 16:21:33 - Shutdown Complete 
+2024-09-15 16:30:01 - Passed Sunrise 
+2024-09-15 16:30:01 - Error in checking rc log shutting down
+2024-09-15 16:30:01 - Shutting Down Camera 
+2024-09-15 16:31:32 - Shut down camera Successful 
+2024-09-15 16:31:32 - CTM complete. Powering Down MagnaPS 
+2024-09-15 16:31:34 - Shutdown Complete 
+2024-09-15 16:40:01 - Passed Sunrise 
+2024-09-15 16:40:01 - Error in checking rc log shutting down
+2024-09-15 16:40:01 - Shutting Down Camera 
+2024-09-15 16:41:31 - Shut down camera Successful 
+2024-09-15 16:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 16:41:33 - Shutdown Complete 
+2024-09-15 16:50:01 - Passed Sunrise 
+2024-09-15 16:50:01 - Error in checking rc log shutting down
+2024-09-15 16:50:01 - Shutting Down Camera 
+2024-09-15 16:51:31 - Shut down camera Successful 
+2024-09-15 16:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-15 16:51:33 - Shutdown Complete 
+2024-09-15 20:01:01 - Added sunrise_time: 2024-09-16 12:27:27 
+2024-09-16 10:00:01 - Before Sunrise 
+2024-09-16 10:10:01 - Before Sunrise 
+2024-09-16 10:20:01 - Before Sunrise 
+2024-09-16 10:30:01 - Before Sunrise 
+2024-09-16 10:40:01 - Before Sunrise 
+2024-09-16 10:50:01 - Before Sunrise 
+2024-09-16 11:00:01 - Before Sunrise 
+2024-09-16 11:10:01 - Before Sunrise 
+2024-09-16 11:20:01 - Before Sunrise 
+2024-09-16 11:30:01 - Before Sunrise 
+2024-09-16 11:40:01 - Before Sunrise 
+2024-09-16 11:50:01 - Before Sunrise 
+2024-09-16 12:00:01 - Before Sunrise 
+2024-09-16 12:10:01 - Before Sunrise 
+2024-09-16 12:20:01 - Before Sunrise 
+2024-09-16 12:30:01 - Passed Sunrise 
+2024-09-16 12:30:01 - Error in checking rc log shutting down
+2024-09-16 12:30:01 - Shutting Down Camera 
+2024-09-16 12:31:31 - Shut down camera Successful 
+2024-09-16 12:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 12:31:33 - Shutdown Complete 
+2024-09-16 12:40:01 - Passed Sunrise 
+2024-09-16 12:40:01 - Error in checking rc log shutting down
+2024-09-16 12:40:01 - Shutting Down Camera 
+2024-09-16 12:41:31 - Shut down camera Successful 
+2024-09-16 12:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 12:41:33 - Shutdown Complete 
+2024-09-16 12:50:01 - Passed Sunrise 
+2024-09-16 12:50:01 - Error in checking rc log shutting down
+2024-09-16 12:50:01 - Shutting Down Camera 
+2024-09-16 12:51:31 - Shut down camera Successful 
+2024-09-16 12:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 12:51:33 - Shutdown Complete 
+2024-09-16 13:00:01 - Passed Sunrise 
+2024-09-16 13:00:01 - Error in checking rc log shutting down
+2024-09-16 13:00:01 - Shutting Down Camera 
+2024-09-16 13:01:31 - Shut down camera Successful 
+2024-09-16 13:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 13:01:33 - Shutdown Complete 
+2024-09-16 13:10:01 - Passed Sunrise 
+2024-09-16 13:10:01 - Error in checking rc log shutting down
+2024-09-16 13:10:01 - Shutting Down Camera 
+2024-09-16 13:11:32 - Shut down camera Successful 
+2024-09-16 13:11:32 - CTM complete. Powering Down MagnaPS 
+2024-09-16 13:11:34 - Shutdown Complete 
+2024-09-16 13:20:01 - Passed Sunrise 
+2024-09-16 13:20:01 - Error in checking rc log shutting down
+2024-09-16 13:20:01 - Shutting Down Camera 
+2024-09-16 13:21:31 - Shut down camera Successful 
+2024-09-16 13:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 13:21:33 - Shutdown Complete 
+2024-09-16 13:30:01 - Passed Sunrise 
+2024-09-16 13:30:01 - Error in checking rc log shutting down
+2024-09-16 13:30:01 - Shutting Down Camera 
+2024-09-16 13:31:31 - Shut down camera Successful 
+2024-09-16 13:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 13:31:33 - Shutdown Complete 
+2024-09-16 13:40:01 - Passed Sunrise 
+2024-09-16 13:40:01 - Error in checking rc log shutting down
+2024-09-16 13:40:01 - Shutting Down Camera 
+2024-09-16 13:41:31 - Shut down camera Successful 
+2024-09-16 13:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 13:41:33 - Shutdown Complete 
+2024-09-16 13:50:01 - Passed Sunrise 
+2024-09-16 13:50:01 - Error in checking rc log shutting down
+2024-09-16 13:50:01 - Shutting Down Camera 
+2024-09-16 13:51:31 - Shut down camera Successful 
+2024-09-16 13:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 13:51:33 - Shutdown Complete 
+2024-09-16 14:00:02 - Passed Sunrise 
+2024-09-16 14:00:02 - Error in checking rc log shutting down
+2024-09-16 14:00:02 - Shutting Down Camera 
+2024-09-16 14:01:32 - Shut down camera Successful 
+2024-09-16 14:01:32 - CTM complete. Powering Down MagnaPS 
+2024-09-16 14:01:34 - Shutdown Complete 
+2024-09-16 14:10:01 - Passed Sunrise 
+2024-09-16 14:10:01 - Error in checking rc log shutting down
+2024-09-16 14:10:01 - Shutting Down Camera 
+2024-09-16 14:11:31 - Shut down camera Successful 
+2024-09-16 14:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 14:11:33 - Shutdown Complete 
+2024-09-16 14:20:01 - Passed Sunrise 
+2024-09-16 14:20:01 - Error in checking rc log shutting down
+2024-09-16 14:20:01 - Shutting Down Camera 
+2024-09-16 14:21:31 - Shut down camera Successful 
+2024-09-16 14:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 14:21:33 - Shutdown Complete 
+2024-09-16 14:30:01 - Passed Sunrise 
+2024-09-16 14:30:01 - Error in checking rc log shutting down
+2024-09-16 14:30:01 - Shutting Down Camera 
+2024-09-16 14:31:31 - Shut down camera Successful 
+2024-09-16 14:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 14:31:33 - Shutdown Complete 
+2024-09-16 14:40:01 - Passed Sunrise 
+2024-09-16 14:40:01 - Error in checking rc log shutting down
+2024-09-16 14:40:01 - Shutting Down Camera 
+2024-09-16 14:41:31 - Shut down camera Successful 
+2024-09-16 14:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 14:41:33 - Shutdown Complete 
+2024-09-16 14:50:01 - Passed Sunrise 
+2024-09-16 14:50:01 - Error in checking rc log shutting down
+2024-09-16 14:50:01 - Shutting Down Camera 
+2024-09-16 14:51:31 - Shut down camera Successful 
+2024-09-16 14:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 14:51:33 - Shutdown Complete 
+2024-09-16 15:00:01 - Passed Sunrise 
+2024-09-16 15:00:01 - Error in checking rc log shutting down
+2024-09-16 15:00:01 - Shutting Down Camera 
+2024-09-16 15:01:31 - Shut down camera Successful 
+2024-09-16 15:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 15:01:33 - Shutdown Complete 
+2024-09-16 15:10:01 - Passed Sunrise 
+2024-09-16 15:10:01 - Error in checking rc log shutting down
+2024-09-16 15:10:01 - Shutting Down Camera 
+2024-09-16 15:11:31 - Shut down camera Successful 
+2024-09-16 15:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 15:11:33 - Shutdown Complete 
+2024-09-16 15:20:01 - Passed Sunrise 
+2024-09-16 15:20:01 - Error in checking rc log shutting down
+2024-09-16 15:20:01 - Shutting Down Camera 
+2024-09-16 15:21:31 - Shut down camera Successful 
+2024-09-16 15:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 15:21:33 - Shutdown Complete 
+2024-09-16 15:30:01 - Passed Sunrise 
+2024-09-16 15:30:01 - Error in checking rc log shutting down
+2024-09-16 15:30:01 - Shutting Down Camera 
+2024-09-16 15:31:31 - Shut down camera Successful 
+2024-09-16 15:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 15:31:33 - Shutdown Complete 
+2024-09-16 15:40:01 - Passed Sunrise 
+2024-09-16 15:40:01 - Error in checking rc log shutting down
+2024-09-16 15:40:01 - Shutting Down Camera 
+2024-09-16 15:41:31 - Shut down camera Successful 
+2024-09-16 15:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 15:41:34 - Shutdown Complete 
+2024-09-16 15:50:01 - Passed Sunrise 
+2024-09-16 15:50:01 - Error in checking rc log shutting down
+2024-09-16 15:50:01 - Shutting Down Camera 
+2024-09-16 15:51:31 - Shut down camera Successful 
+2024-09-16 15:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 15:51:33 - Shutdown Complete 
+2024-09-16 16:00:01 - Passed Sunrise 
+2024-09-16 16:00:01 - Error in checking rc log shutting down
+2024-09-16 16:00:01 - Shutting Down Camera 
+2024-09-16 16:01:31 - Shut down camera Successful 
+2024-09-16 16:01:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 16:01:33 - Shutdown Complete 
+2024-09-16 16:10:01 - Passed Sunrise 
+2024-09-16 16:10:01 - Error in checking rc log shutting down
+2024-09-16 16:10:01 - Shutting Down Camera 
+2024-09-16 16:11:31 - Shut down camera Successful 
+2024-09-16 16:11:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 16:11:33 - Shutdown Complete 
+2024-09-16 16:20:01 - Passed Sunrise 
+2024-09-16 16:20:01 - Error in checking rc log shutting down
+2024-09-16 16:20:01 - Shutting Down Camera 
+2024-09-16 16:21:31 - Shut down camera Successful 
+2024-09-16 16:21:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 16:21:33 - Shutdown Complete 
+2024-09-16 16:30:01 - Passed Sunrise 
+2024-09-16 16:30:01 - Error in checking rc log shutting down
+2024-09-16 16:30:01 - Shutting Down Camera 
+2024-09-16 16:31:31 - Shut down camera Successful 
+2024-09-16 16:31:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 16:31:33 - Shutdown Complete 
+2024-09-16 16:40:01 - Passed Sunrise 
+2024-09-16 16:40:01 - Error in checking rc log shutting down
+2024-09-16 16:40:01 - Shutting Down Camera 
+2024-09-16 16:41:31 - Shut down camera Successful 
+2024-09-16 16:41:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 16:41:33 - Shutdown Complete 
+2024-09-16 16:50:01 - Passed Sunrise 
+2024-09-16 16:50:01 - Error in checking rc log shutting down
+2024-09-16 16:50:01 - Shutting Down Camera 
+2024-09-16 16:51:31 - Shut down camera Successful 
+2024-09-16 16:51:31 - CTM complete. Powering Down MagnaPS 
+2024-09-16 16:51:33 - Shutdown Complete 
+2024-09-16 20:01:01 - Added sunrise_time: 2024-09-17 12:28:23 
