@@ -114,7 +114,7 @@ cout<<"FoV above the horizon: "<<atan(tanFoV)*180/pi<<" degrees"<<endl;
 cout<<"FoV below the horizon: "<<dFoVBelow*180./pi<<" degrees"<<endl; 
 cout<<"The minimum shower length: "<<dMinLength<<" degrees"<<endl; 
 cout<<"The minimum number of photoelectrons per sqr meter mirror: "<<dMinimumNumberPhotoelectrons<<" photoelectrons"<<endl;
-cout<<"Total mirror area = number of photoelectrons in the shower / minimum number of photoelectrons per sqr meter mirror = 1e4/ "<<dMinimumNumberPhotoelectrons<<" = "<<1e4/dMinimumNumberPhotoelectrons<<" sq meters"<<endl;
+cout<<"Total mirror area = number of photoelectrons in the shower / minimum number of photoelectrons per sqr meter mirror = 100/ "<<dMinimumNumberPhotoelectrons<<" = "<<100/dMinimumNumberPhotoelectrons<<" sq meters"<<endl;
 
 cout<<"Exposure time for point source sensitivity: "<<dExposureHours<<" hours"<<endl;
 cout<<"Neutrino energy step size on log scale: "<<dLogEnergyStep<<" [ ] "<<endl;
@@ -2307,6 +2307,9 @@ void TrinitySimUtilities::CalculateDiffuseFluxDifferentialSensitivity()
      {
        cout<<dE[i]<<"  "<<dF[i]<<endl;;
      }
+     
+  SaveCanvas(cDiffSensitivity, "DiffSensitivity");
+  SaveCanvas(cAcceptance, "Acceptance");
 
 }
 
