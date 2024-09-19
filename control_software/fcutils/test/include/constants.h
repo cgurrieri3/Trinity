@@ -50,6 +50,7 @@
 //#define Get_Files_Starlink		0x1B
 #define Do_HV_Current_Scan		0x1C
 //#define RE_DOWNLOAD_BACKUP		0x1D
+#define DO_TRG_SCAN_SF_PBP      0x1E
 
 const std::string HOME_DIR="/home/trinity";
 const std::string CS_DIR = HOME_DIR+"/Programs/Trinity/control_software/";

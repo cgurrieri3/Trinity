@@ -763,7 +763,7 @@ void Set_Ch_Trigger_Threshold(int i,  int file, __u32 command, std::string &resp
         std::cout << "Can not open Discriminator Offsets file." << std::endl;
     }else{
         __u32 CMD_Packet = 0;
-        __u8 music_ID = ((command >> 20));
+        __u8 music_ID = ((command >> 20) & 0x0F);
 		__u8 ch_ID = ((command>>16) & 0x0F);
         __u16 glob_threshold_value = (command & 0xFFFF);
         __u16 ch_threshold_value = 0;
@@ -782,7 +782,7 @@ void Set_Ch_Trigger_Threshold(int i,  int file, __u32 command, std::string &resp
         BV_value = stoi(BV_str);
         DiscriminatorOffset.close();
 
-        std::cout << std::endl << "Setting trigger threshold for SIAB# " << i << " Channel# "<< ch_ID <<std::endl;
+        std::cout << std::endl << "Setting trigger threshold for SIAB# " << i << " Channel# "<< (ch_ID & 0xFFFF) << std::endl;
         //cout<<threshold_value + BV_value[i]<<endl;
         //cout<<threshold_value + BV_value[i+1]<<endl;
         std::string response_fake;    // this is being passed, so the Write_to_Music_Register function does not complain, but we are not using it.

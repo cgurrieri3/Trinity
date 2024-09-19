@@ -1002,13 +1002,14 @@ void Do_Trigger_Scan_SF(std::string& msg)
 // Raise threshold on all  pixels not scanned, record the threshold and 
 // rate. Once completed, switch to different pixel.
 
-/*void Do_Trigger_Scan_SF_PBP(std::string& msg)
+void Do_Trigger_Scan_SF_PBP(std::string& msg)
 {
 	printf("\n--------------- Starting Single Focus Trigger Scan ---------------\n");
 	// msg contains 7-bytes.
 	// Byte 0 and 1 are Start point in DAC units, Byte 2 and 3 are Number of Steps,
 	// Byte 4 and 5 are Step Size and Byte 6 is Step Duration.
-	int NoOfPixels = 16*16;
+	//int NoOfPixels = 16*16;
+	int NoOfPixels = 3;
 	int StartPoint   = stoi(msg.substr(0, 4),0,16);
 	int NofSteps     = stoi(msg.substr(4, 4),0,16);
 	int StepSize     = stoi(msg.substr(8, 4),0,16);
@@ -1034,34 +1035,41 @@ void Do_Trigger_Scan_SF(std::string& msg)
 	sprintf(tmp, "_%02d.txt", SF_TScanNo);
 	strcat(filename, tmp);
 	TScan_File.open(filename, ios::app|ios::ate);
-	TScan_File << "Pixel No." << "\t" << "Rate" << std::endl;
+	TScan_File << "Th[DAC]:" << "\t";
 	for(int i = 0; i < NofSteps; i++){
 		TScan_File << StartPoint + i*StepSize<<"\t";
 	}
 	TScan_File<<std::endl;
+	TScan_File << "Pixel #" << "\t\t" << "Rate" << std::endl;
 
-	printf("-------------------------------------------------\n");
-	printf("Setting all discriminators to Max Threshold\n");
-	printf("-------------------------------------------------\n");
-
-
-	std::stringstream trg_stream;
-	trg_stream << std::setfill('0') << std::setw(4) << std::hex << 0;
-	std::string siab_cmd = "0000FFFF2503" + trg_stream.str();
-	wqsiab.send(siab_cmd);
-	sleep(10);
-	std::cout << "Done." << std::endl;
-	std::stringstream siabID;
 	for(int i=0; i<NoOfPixels; i++){
+		printf("-------------------------------------------------\n");
+		printf("Setting all discriminators to Max Threshold\n");
+		printf("-------------------------------------------------\n");
+		std::stringstream trg_stream;
+		trg_stream << std::setfill('0') << std::setw(4) << std::hex << 0;
+		std::string siab_cmd = "0000FFFF2503" + trg_stream.str();
+		wqsiab.send(siab_cmd);
+		sleep(10);
+		std::cout << "Done." << std::endl;
+		std::stringstream siabID;
+
 		printf("-------------------------------------------------\n");
 		printf("Running Trigger Scan on pixel no.: %d\n",i);
 
-		siabID << std::setfill('0') << std::setw(8) << std::hex << trg_threshold;
+		int siabNum = i/16;
+		siabID << std::setfill('0') << std::setw(8) << std::hex << (1 << siabNum);
+		TScan_File << i << "\t\t";
 		for(int j=0; j<NofSteps; j++){
-			int trg_threshold = StartPoint + i*StepSize;
-			trg_stream << std::setfill('0') << std::setw(3) << std::hex << trg_threshold;
-			trg_stream << std::setfill('0') << std::setw(1) << std::hex << i%16;
-			std::string siab_cmd = siabID+"2503" + trg_stream.str();
+			int trg_threshold = StartPoint + j*StepSize;
+			trg_stream.str("");
+			trg_stream << std::setfill('0') << std::setw(4) << std::hex << trg_threshold;
+			//trg_stream << std::setfill('0') << std::setw(1) << std::hex << i%16;
+			int musicCh = (((i%8) + 4) & 0x7);
+			int musicLoc = ((2 - ((i/8)%2)) << 4 | musicCh);
+			std::stringstream music_pos;
+			music_pos << std::setfill('0') << std::setw(2) << std::hex << musicLoc;
+			siab_cmd = siabID.str() + "26" + music_pos.str() + trg_stream.str();
 			printf("-------------------------------------------------\n");
 			std::cout << "Setting the threshold on Music chips to: " << trg_threshold << " DAC units." << std::endl;
 			wqsiab.send(siab_cmd);
@@ -1101,8 +1109,9 @@ void Do_Trigger_Scan_SF(std::string& msg)
 
 			int Trigger_Rate = stoi(state_response.substr(8, 8), 0 ,16);
 			state_response.clear();
-			TScan_File << i << "\t\t" << trg_threshold << "\t\t" << Trigger_Rate << std::endl;
+			TScan_File << Trigger_Rate << "\t";
 		}
+		TScan_File << std::endl;
 
 	}
 	
@@ -1117,7 +1126,7 @@ void Do_Trigger_Scan_SF(std::string& msg)
 
 	printf("-------------------------------------------------\n");
 	printf("-------------------------------------------------\n\n");
-}*/
+}
 
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
@@ -1207,6 +1216,8 @@ void Process_RC_Msg(const std::string& msg)
 		case DO_TRG_SCAN_SF:
 			Do_Trigger_Scan_SF(msg_payload);
 			break;
+		case DO_TRG_SCAN_SF_PBP:
+			Do_Trigger_Scan_SF_PBP(msg_payload);
 		case Kill_SIAB_ID:
 			Kill_SIAB();
 			break;
