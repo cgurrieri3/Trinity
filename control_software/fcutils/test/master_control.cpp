@@ -1009,7 +1009,8 @@ void Do_Trigger_Scan_SF_PBP(std::string& msg)
 	// Byte 0 and 1 are Start point in DAC units, Byte 2 and 3 are Number of Steps,
 	// Byte 4 and 5 are Step Size and Byte 6 is Step Duration.
 	//int NoOfPixels = 16*16;
-	int NoOfPixels = 3;
+	//int NoOfPixels = 16;
+	int NoOfPixels = 1;
 	int StartPoint   = stoi(msg.substr(0, 4),0,16);
 	int NofSteps     = stoi(msg.substr(4, 4),0,16);
 	int StepSize     = stoi(msg.substr(8, 4),0,16);
@@ -1042,33 +1043,52 @@ void Do_Trigger_Scan_SF_PBP(std::string& msg)
 	TScan_File<<std::endl;
 	TScan_File << "Pixel #" << "\t\t" << "Rate" << std::endl;
 
-	for(int i=0; i<NoOfPixels; i++){
-		printf("-------------------------------------------------\n");
-		printf("Setting all discriminators to Max Threshold\n");
-		printf("-------------------------------------------------\n");
-		std::stringstream trg_stream;
-		trg_stream << std::setfill('0') << std::setw(4) << std::hex << 0;
-		std::string siab_cmd = "0000FFFF2503" + trg_stream.str();
-		wqsiab.send(siab_cmd);
-		sleep(10);
-		std::cout << "Done." << std::endl;
-		std::stringstream siabID;
+	printf("-------------------------------------------------\n");
+	printf("Setting all discriminators to Max Threshold\n");
+	printf("-------------------------------------------------\n");
+	std::stringstream trg_stream;
+	trg_stream << std::setfill('0') << std::setw(4) << std::hex << 0;
+	std::string siab_cmd = "0000FFFF2503" + trg_stream.str();
+	wqsiab.send(siab_cmd);
+	sleep(10);
+	std::cout << "Done." << std::endl;
 
+	std::cout << "Preparing the Trigger Board" << std::endl;
+	wqtrgb.send(TB_Prepare);
+	sleep(1);
+	std::cout << "Configuring the Trigger Board" << std::endl;
+	wqtrgb.send(TScan_Config);
+	sleep(2);
+
+
+	for(int i=0; i<NoOfPixels; i++){
 		printf("-------------------------------------------------\n");
 		printf("Running Trigger Scan on pixel no.: %d\n",i);
 
-		int siabNum = i/16;
-		siabID << std::setfill('0') << std::setw(8) << std::hex << (1 << siabNum);
+		std::stringstream siabID;
+		//int siabNum = i/16;
+		//int siabNum = i;
+		//siabID << std::setfill('0') << std::setw(8) << std::hex << (1 << siabNum);
+		siabID << std::setfill('0') << std::setw(8) << std::hex << 0x0000FFFF;
 		TScan_File << i << "\t\t";
+
+		/*int musicCh = (((i%8) + 4) & 0x7); //when i is pixel id (range 0-255)
+		int musicLoc = ((((i/8)%2) + 1) << 4 | musicCh); //when i is pixel id (range 0-255)
+
+		int musicCh = (((i%8) + 4) & 0x7); //when i is siab channel id (range 0-15)
+		int musicLoc = (((i%8) + 1) << 4 | musicCh); //when i is siab channel id (range 0-15)
+
+		int musicLoc = (3 << 4 | i); //when i is music channel id (range 0-7)*/
+
+		std::stringstream music_pos;
+		//music_pos << std::setfill('0') << std::setw(2) << std::hex << musicLoc;
+		music_pos << std::setfill('0') << std::setw(2) << std::hex << 0x30;
+
 		for(int j=0; j<NofSteps; j++){
 			int trg_threshold = StartPoint + j*StepSize;
 			trg_stream.str("");
 			trg_stream << std::setfill('0') << std::setw(4) << std::hex << trg_threshold;
 			//trg_stream << std::setfill('0') << std::setw(1) << std::hex << i%16;
-			int musicCh = (((i%8) + 4) & 0x7);
-			int musicLoc = ((2 - ((i/8)%2)) << 4 | musicCh);
-			std::stringstream music_pos;
-			music_pos << std::setfill('0') << std::setw(2) << std::hex << musicLoc;
 			siab_cmd = siabID.str() + "26" + music_pos.str() + trg_stream.str();
 			printf("-------------------------------------------------\n");
 			std::cout << "Setting the threshold on Music chips to: " << trg_threshold << " DAC units." << std::endl;
@@ -1076,12 +1096,6 @@ void Do_Trigger_Scan_SF_PBP(std::string& msg)
 			sleep(10);
 			std::cout << "Done." << std::endl;
 
-			std::cout << "Preparing the Trigger Board" << std::endl;
-			wqtrgb.send(TB_Prepare);
-			sleep(1);
-			std::cout << "Configuring the Trigger Board" << std::endl;
-			wqtrgb.send(TScan_Config);
-			sleep(2);
 			std::cout << "Starting the Global Trigger\n" << std::endl;
 			wqtrgb.send(TB_Enable_Trigger);
 
@@ -1112,6 +1126,15 @@ void Do_Trigger_Scan_SF_PBP(std::string& msg)
 			TScan_File << Trigger_Rate << "\t";
 		}
 		TScan_File << std::endl;
+		printf("-------------------------------------------------\n");
+		printf("Setting threshold of pixel no.: %d to Max Threshold\n",i);
+		printf("-------------------------------------------------\n");
+		trg_stream.str("");
+		trg_stream << std::setfill('0') << std::setw(4) << std::hex << 0;
+		siab_cmd = siabID.str() + "26" + music_pos.str() + trg_stream.str();
+		wqsiab.send(siab_cmd);
+		sleep(10);
+		std::cout << "Done." << std::endl;
 
 	}
 	
@@ -1218,6 +1241,7 @@ void Process_RC_Msg(const std::string& msg)
 			break;
 		case DO_TRG_SCAN_SF_PBP:
 			Do_Trigger_Scan_SF_PBP(msg_payload);
+			break;
 		case Kill_SIAB_ID:
 			Kill_SIAB();
 			break;

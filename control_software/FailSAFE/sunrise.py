@@ -9,7 +9,7 @@ observer = ephem.Observer()
 observer.lat = '38.5202'
 observer.lon = '-113.2883'
 observer.elevation = 3048
-observer.horizon = '-10'
+observer.horizon = '-8'
 # Compute sunrise time for tomorrow
 tomorrow = datetime.utcnow() + timedelta(days=1)
 observer.date = tomorrow

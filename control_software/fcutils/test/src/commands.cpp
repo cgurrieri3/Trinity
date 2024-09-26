@@ -770,7 +770,7 @@ void Set_Ch_Trigger_Threshold(int i,  int file, __u32 command, std::string &resp
 
         int fail_ctr = 0;
         int startline = i*2 + (music_ID == 2);
-        unsigned short BV_value = 0;
+        unsigned short BV_value[2] = {0};
         std::string BV_str;
         //Reading the Discriminator Offset value for the SIAB pointed by i
         getline(DiscriminatorOffset,BV_str);
@@ -778,30 +778,43 @@ void Set_Ch_Trigger_Threshold(int i,  int file, __u32 command, std::string &resp
         {
             getline(DiscriminatorOffset,BV_str);
         }
-        getline(DiscriminatorOffset,BV_str);
-        BV_value = stoi(BV_str);
+        for(int j = startline; j<startline+2; j++)
+        {
+            getline(DiscriminatorOffset,BV_str);
+            BV_value[j-startline] = stoi(BV_str);
+        }
         DiscriminatorOffset.close();
 
-        std::cout << std::endl << "Setting trigger threshold for SIAB# " << i << " Channel# "<< (ch_ID & 0xFFFF) << std::endl;
+        std::cout << std::endl << "Setting trigger threshold for SIAB# " << i << " Music " << music_ID << " Channel# "<< (ch_ID & 0xFFFF) << std::endl;
         //cout<<threshold_value + BV_value[i]<<endl;
         //cout<<threshold_value + BV_value[i+1]<<endl;
         std::string response_fake;    // this is being passed, so the Write_to_Music_Register function does not complain, but we are not using it.
         if(music_ID == 1){
-            ch_threshold_value = glob_threshold_value + BV_value;
+            ch_threshold_value = glob_threshold_value + BV_value[0];
             ch_threshold_value = ((ch_threshold_value << 3) | 0xF007);
             CMD_Packet = ((0x15 << 24) | (((0x01 << 6) | (ch_ID+8)) << 16) | ch_threshold_value);
-            std::cout << std::hex << CMD_Packet << std::endl;
             if(!Write_to_Music_Register(file, CMD_Packet, response_fake))
                 fail_ctr++;
             usleep(10000);
         }else if(music_ID == 2){
-           ch_threshold_value = glob_threshold_value + BV_value;
+           ch_threshold_value = glob_threshold_value + BV_value[1];
            ch_threshold_value = ((ch_threshold_value << 3) | 0xF007);
            CMD_Packet = ((0x15 << 24) | (((0x02 << 6) | (ch_ID+8)) << 16) | ch_threshold_value);
-           std::cout << std::hex << CMD_Packet << std::endl;
            if(!Write_to_Music_Register(file, CMD_Packet, response_fake))
                fail_ctr++;
            usleep(10000);
+        }else if(music_ID == 3){
+            ch_threshold_value = glob_threshold_value + BV_value[0];
+            ch_threshold_value = ((ch_threshold_value << 3) | 0xF007);
+            CMD_Packet = ((0x15 << 24) | (((0x01 << 6) | (ch_ID+8)) << 16) | ch_threshold_value);
+            Write_to_Music_Register(file, CMD_Packet, response_fake);
+            usleep(10000);
+            CMD_Packet = 0;
+            ch_threshold_value = glob_threshold_value + BV_value[1];
+            ch_threshold_value = ((ch_threshold_value << 3) | 0xF007);
+            CMD_Packet = ((0x15 << 24) | (((0x02 << 6) | (ch_ID+8)) << 16) | ch_threshold_value);
+            Write_to_Music_Register(file, CMD_Packet, response_fake);
+            usleep(10000);
         }else{
             std::cout << "An error occured. Could not understand the Music IDs." << std::endl;
         }
