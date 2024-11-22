@@ -4,43 +4,61 @@ import time
 import math
 import communicate as lets
 import parseMetar as pm
+import numpy as np
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
+from selenium.webdriver import FirefoxOptions 
+from selenium.webdriver import FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import FirefoxOptions
 from selenium.webdriver.common.by import By
 from PIL import Image, ImageChops
 import cv2
-import numpy as np
 
 
 
 def get_screenshot(link, output_png):
-	lets.communicate('Taking screenshot...')
-	# Set up Firefox options for headless mode
+	# lets.communicate('Taking screenshot...')
+	# # Create a Firefox webdriver with the specified options
+	# #browser = webdriver.Firefox(options=firefox_options)
+	# service = FirefoxService(executable_path='/snap/bin/geckodriver')   
+	# options = FirefoxOptions()
+	# options.add_argument('--headless')  # Run Firefox in headless mode
+	# browser = webdriver.Firefox(service=service, options=options) 
+	# service = Service(executable_path="/snap/bin/geckodriver")
+	# browser = webdriver.Firefox(service=service)
+	# # Set up Firefox options for headless mode
+	# firefox_options = Options()
 	#firefox_options = Options()
+	#opts = FirefoxOptions()
+	#opts.add_argument("--headless")
+	#browser = webdriver.Firefox(options=opts)
 	#firefox_options.add_argument('--headless')  # Run Firefox in headless mode
-
 	# Create a Firefox webdriver with the specified options
-	#browser = webdriver.Firefox(options=firefox_options)
-	service = Service(executable_path="/snap/bin/geckodriver")
-	firefox_options = Options()
-	firefox_options.add_argument('--headless')  # Run Firefox in headless mode
+	#browser = webdriver.Firefox(service=service,options=firefox_options)
 
-	# Create a Firefox webdriver with the specified options
-	browser = webdriver.Firefox(service=service,options=firefox_options)
+	print('Taking screenshot...')
+
+    # Configure Firefox WebDriver for headless mode
+	service = Service(executable_path='/snap/bin/geckodriver')  # Path to geckodriver
+	options = FirefoxOptions()
+	options.add_argument('--headless')  # Run in headless mode
+
+    # Start Firefox browser
+	browser = webdriver.Firefox(service=service, options=options)
+
 	browser.get(link)
 
-	try:
-	    myElem = WebDriverWait(browser, 15).until(EC.presence_of_element_located((By.ID, 'Nearest weather stations')))
-	    
-	except TimeoutException:
-	    pass
 
+	#myElem = WebDriverWait(browser, 15).until(EC.presence_of_element_located((By.ID, 'Nearest weather stations')))
 	screenshot = browser.save_screenshot(f'Weather_radar/{output_png}')
 	browser.quit()
+         
+
 
 def take_screenshot():
 	#get_screenshot('https://www.windy.com/-Clouds-clouds?clouds,38.574,-115.032,7','clouds.png') #regular clouds
@@ -110,7 +128,7 @@ def get_difference(png1):
 	# difference.show()
 	if percentage_difference_small > 4000:
 		
-		lets.communicate(f'{png1} Activity in region is too high')
+		lets.communicate(f'{png1} activity seems high')
 		return 0
 	elif percentage_difference > 5000:
 		
@@ -118,7 +136,7 @@ def get_difference(png1):
 		return 1
 	else:
 		
-		lets.communicate(f'{png1} seem fine')
+		lets.communicate(f'{png1} seem clear')
 		return 1
 
 def cloud_base_caluation(temp, dewpoint):
@@ -140,7 +158,10 @@ def airport_report():
 def query_last_wx():
 	current_time = datetime.now()
 	if current_time.minute % 2 == 0:
-		take_screenshot()
+		try:
+			take_screenshot()
+		except: 
+			lets.communicate("Screenshot failing moving on...")
 	#SIAB_current, HVcurrent, SIMP_Temp, UC_Temp,MUSICpower,HVswitch,hv_Current, hv, asad, tb_current,trigger
 	# Local host lines for access
 	host = 'localhost'
@@ -205,40 +226,38 @@ def query_last_wx():
 	# print(dewpoint)
 	# print(cloud_base_caluation(TempC, dewpoint))
 	cloud_base=cloud_base_caluation(TempC,dewpoint)
+	lets.communicate(f'Cloud base: {cloud_base:.0f} ft a.s.l.')
+
 	radar=get_difference('radar')
 	#clouds=get_difference('clouds')
 	# add another spot that will check a smaller region around milford
 	if radar == 0: # clouds == 0 #cloud_base < 11000 or
-		lets.log_file(f'Cloud base: {cloud_base}')
-		
 		lets.log_file('Testing: Weather seems bad ')
-
 	else:
-		lets.log_file(f'Cloud base: {cloud_base}')
-		lets.log_file('Testing: Weather seems good')
 		all_good = 1 + all_good 
-	
 
-	if TempC <= 0:
-		all_good = 1 + all_good
+	if not math.isnan(TempC) and not math.isnan(Rhumidity):
+		if TempC <= 0:
+			all_good = 1 + all_good
 
-	elif Rhumidity < 75 and TempC > 0: # add cloud base?
-		all_good = 1 + all_good
-		#print('WX: hum good')
-	else:
-		lets.communicate(f'WX: Humidity to high = {Rhumidity} ')
+		elif Rhumidity < 75 and TempC > 0: # add cloud base?
+			all_good = 1 + all_good
+			#print('WX: hum good')
+		else:
+			lets.communicate(f'WX: Humidity to high = {Rhumidity:.0f} ')
 
+	if not math.isnan(wind_value) and not math.isnan(wind_direction):	
+		# wind speeds can be higher when they do not impact the door
+		if wind_value < 20 and wind_direction < 315 and wind_direction > 225:
+			all_good = 1 + all_good
+			#print('WX: Wind good')
+		elif wind_value < 15.5:
+			all_good = 1 + all_good
+		else:
+			lets.communicate(f'WX: Wind to high = {wind_value:.0f} ')
 		
-	# wind speeds can be higher when they do not impact the door
-	if wind_value < 13 and wind_direction < 315 and wind_direction > 225:
-		all_good = 1 + all_good
-		#print('WX: Wind good')
-	elif wind_value < 10.5:
-		all_good = 1 + all_good
-	else:
-		lets.communicate(f'WX: Wind to high = {wind_value} ')
-		
 
+	#print(all_good)
 	if all_good == 4:
 		
 		return 1
@@ -246,5 +265,6 @@ def query_last_wx():
 		
 		return 0
 
-#query_last_wx() # if the weather is not good this will alert the user on bootup of trinity.py
+#get_screenshot('https://www.windy.com/-Weather-radar-radar?radar,38.565,-115.021,7','radar.png')
+query_last_wx() # if the weather is not good this will alert the user on bootup of trinity.py
 airport_report()
