@@ -16,7 +16,6 @@ from datetime import datetime, timedelta
 from pypdf import PdfWriter
 import pandas as pd
 import numpy as np
-from zipfile import ZipFile 
 
 def run_ssh(command):
     # Run the command and capture its output
@@ -39,7 +38,7 @@ def run_ssh(command):
 
 
 # Sends Emails
-def send_email(date,data,expt,attachment_path=None,attachment_path_mp4=None):
+def send_email(date,data,expt,attachment_path=None):
     # SMTP server details
     # Email configuration
     sender_email = 'sstepanoff3@gatech.edu'
@@ -76,20 +75,9 @@ def send_email(date,data,expt,attachment_path=None,attachment_path_mp4=None):
         )
         msg.attach(part)
 
-    # Attach MP4 video file
-    with open(attachment_path_mp4, "rb") as attachment:
-        part_mp4 = MIMEBase("application", "octet-stream")
-        part_mp4.set_payload(attachment.read())
-        encoders.encode_base64(part_mp4)
-        part_mp4.add_header(
-            "Content-Disposition",
-            f"attachment; filename={os.path.basename(attachment_path_mp4)}",
-        )
-        msg.attach(part_mp4)
-
     # Connect to the SMTP server
     smtp_server = smtplib.SMTP('outbound.mail.gatech.edu', 25)  # Assuming smtp.gatech.edu is the SMTP server for gatech.edu
-    smtp_server.set_debuglevel(0)  # Optional: This will print debug information
+    smtp_server.set_debuglevel(1)  # Optional: This will print debug information
     smtp_server.sendmail(sender_email, receiver_email, msg.as_string())
 
     # Close the connection
@@ -144,27 +132,12 @@ def compare_file_date_with_current(file_path):
     file_size = os.path.getsize(file_path)  # size in bytes
 
     # Convert file size to MB
-    file_size = (file_size / 1024)/1000  # convert bytes to megabytes
-    #print(file_size)
-    # with ZipFile(folder_path+file_modification_date.strftime('%Y%m%d') + ".zip",'w') as zip: 
-    #         # writing each file one by one 
-    #     zip.write(folder_path + file_modification_date.strftime('%Y%m%d') + ".pdf") 
+    file_size = file_size / 1024  # convert bytes to megabytes
+
     # Compare dates and file size
     if file_modification_date == current_date and file_size > 0.1:
-        #print("Here")
         return file_modification_date.strftime('%Y%m%d') + ".pdf"
-    
-    # elif file_size > 20:
-    #     print("File must be zipped")
-    #     # writing files to a zipfile 
-    #     with ZipFile(folder_path + file_modification_date.strftime('%Y%m%d') + ".zip",'w') as zip: 
-    #         # writing each file one by one 
-    #             #filething = folder_path + file_modification_date.strftime('%Y%m%d') + ".pdf"
-    #             zip.write(folder_path + file_modification_date.strftime('%Y%m%d') + ".pdf") 
-        
-    #     return file_modification_date.strftime('%Y%m%d') + ".zip"
     else:
-        #print("there")
         logging.info('File size too small or none at all')
         return False
 
@@ -196,52 +169,91 @@ def merge_pdf(data,path):
   merger.close()
   return name
 
-def getvideo(date):
-    date = date.strftime('%Y%m%d')
-    command = f'python3 /data/TrinityLabComputer/DataSummary/scripts/vid.py -d {date}'  # Replace with your desired command
-    run_ssh(command)     
-    time.sleep(5)
-
-    return f'/data/TrinityLabComputer/cams/VIDS/Horizon_{date}.mp4'
 
 
 
+def send_email(date):
+    # SMTP server details
+    # Email configuration
+    sender_email = 'sstepanoff3@gatech.edu'
+    receiver_email = 'TrinityObservations@groups.gatech.edu'
+    #receiver_email = 'sstepanoff3@gatech.edu'
+    # Set the subject and body of the email
+    subject = f'Trinity Data Summary {date}'
+    #subject = 'TEST'
+    body = f"""
+    The Trinity Demonstrator Data Summary for {date}
+    """
+    # Total Observing time: {"{:.1f}".format(data[0])} out of {expt[0]} hours
+    
+    # Sources:
+    # NGC: {"{:.1f}".format(data[1])} out of {expt[1]} hours
+    # TXS: {"{:.1f}".format(data[2])} out of {expt[2]} hours
 
-# The command you want to run
-system_path = "/data/TrinityLabComputer/"
+    # """
 
-# Configure logging
-logging.basicConfig(filename=f'{system_path}/DataSummary/email.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    # Create the email message
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    # msg.attach(MIMEText(body, "plain"))
+
+    # # Attach PDF file
+    # with open(attachment_path, "rb") as attachment:
+    #     part = MIMEBase("application", "octet-stream")
+    #     part.set_payload(attachment.read())
+    #     encoders.encode_base64(part)
+    #     part.add_header(
+    #         "Content-Disposition",
+    #         f"attachment; filename= {date}.pdf",
+    #     )
+    #     msg.attach(part)
+
+    # Connect to the SMTP server
+    smtp_server = smtplib.SMTP('outbound.mail.gatech.edu', 25)  # Assuming smtp.gatech.edu is the SMTP server for gatech.edu
+    smtp_server.set_debuglevel(1)  # Optional: This will print debug information
+    smtp_server.sendmail(sender_email, receiver_email, msg.as_string())
+
+    # Close the connection
+    smtp_server.quit()
+
+#send_email(current_date,dataTimesArr,expectedTimesArr,attachment_path)
+current_date = datetime.now().date()
+send_email(current_date)
+
+# # The command you want to run
+# system_path = "/data/TrinityLabComputer/"
+
+# # Configure logging
+# logging.basicConfig(filename=f'{system_path}/DataSummary/email.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-os.chdir(system_path+"/DataSummary/scripts/")
+# os.chdir(system_path+"/DataSummary/scripts/")
 
-command = f'./getDataSummary.sh'  # Replace with your desired command
-run_ssh(command)
+# command = f'./getDataSummary.sh'  # Replace with your desired command
+# run_ssh(command)
 
-command = f'./getTScanFiles.sh'  # Replace with your desired command
-run_ssh(command)
+# command = f'./getTScanFiles.sh'  # Replace with your desired command
+# run_ssh(command)
 
-folder_path = system_path + "DataSummary/SummaryFiles/"
-most_recent_file = get_most_recent_file(folder_path)
+# folder_path = system_path + "DataSummary/SummaryFiles/"
+# most_recent_file = get_most_recent_file(folder_path)
 
-if most_recent_file:
-    logging.info(f"Most recent file: {most_recent_file}")
-    todays_file=compare_file_date_with_current(most_recent_file)
-    if todays_file != False:
-        current_date = datetime.now().date()
-
-        #current_date = datetime.datetime.date(2024, 11, 2).date()
-        datasum_path = folder_path + todays_file
-        attachment_path=merge_pdf(datasum_path,system_path)
-        attachment_path_mp4=getvideo(current_date)
-        dataTimesArr,expectedTimesArr=getDataTimes(current_date)
-
-        send_email(current_date,dataTimesArr,expectedTimesArr,attachment_path,attachment_path_mp4)
-        logging.info("The most recent file was modified today.")
-        os.remove(attachment_path)
-    else:
-        logging.error("No file for today")
-else:
-    logging.info("Folder is empty.")
+# if most_recent_file:
+#     logging.info(f"Most recent file: {most_recent_file}")
+#     todays_file=compare_file_date_with_current(most_recent_file)
+#     if todays_file != False:
+#         current_date = datetime.now().date()
+#         datasum_path = folder_path + todays_file
+#         attachment_path=merge_pdf(datasum_path,system_path)
+        
+#         dataTimesArr,expectedTimesArr=getDataTimes(current_date)
+#         send_email(current_date,dataTimesArr,expectedTimesArr,attachment_path)
+#         logging.info("The most recent file was modified today.")
+#         os.remove(attachment_path)
+#     else:
+#         logging.error("No file for today")
+# else:
+#     logging.info("Folder is empty.")
 
