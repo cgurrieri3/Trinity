@@ -69,7 +69,7 @@ def dp16(ldp,meas,siab_c, simp_t, uc_t, music_p,hv_s):
 def accepted_values_1(meas, asad,tb_c, trigger_rate):
 	#print(asad)
 	if meas == "ASADCurrent":
-		acpt_low = asad * 0.8
+		acpt_low = asad * 0.6
 		acpt_hi = asad * 1.4
 	elif meas == "TBCurrent":
 		acpt_low = tb_c * 0.9
@@ -107,7 +107,8 @@ def accepted_values_4(meas, hv_c,hv):
 	acpt_low = 0
 	acpt_hi = 0
 	if meas == "HV":
-		acpt_low = hv * 0.95
+		#acpt_low = hv * 0.95
+		acpt_low = 41.7
 		acpt_hi = hv * 1.05
 	elif meas == "HV_currents":
 		acpt_low = 2
@@ -238,6 +239,7 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 						#print("Error:", str(e))
 						#print(f"Last data point for measurement '{measurement}': {last_data_point['4']}")
 						match_status = dp4(last_data_point,measurement,hv_c, hv)
+						matched_conditions.append(match_status)
 						#print(match_status)
 						
 					except:
@@ -275,9 +277,12 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 		return -1
 
 	else:
-
-		# lets.communicate('Check statemessages something is wrong')	
-		return 0
+		#print(matched_conditions)
+		for name, value in zip(measurements, matched_conditions):
+			if value == 0:
+				lets.communicate(f'Check statemessages {name} is out of bounds')	
+				return name
+		#return 0
 
 #query_last_SM(270, 17, 17, 1, 0, 4, 42,170,320,0,4)
 #query_last_SM(180, 17, 17, 1, 0, 4, 42,1219,240,1,4)
