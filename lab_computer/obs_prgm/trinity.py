@@ -24,35 +24,30 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 	lets.log_file(f"Monitor start: {intial_files} files ")
 	total_cycles = int(intrigs_nfiles) + int(intial_files)
 	lets.log_file(f"Total Cycles = {total_cycles} ")
-	cwx.take_screenshot()
+	# try:
+	# 	cwx.take_screenshot()
+	# except: 
+	# 	lets.communicate("Screenshot failing moving on...")
 	exit_message= ""
 	loops = 0
 	errors = 0
 	errors_rclog = 0
+	errors_WX = 0
 	while True:
 	# While the camera is operating this will check WEATHER, STATE MESSAGES, TIME, RCLOGS for DAQ, FILES
 		lets.fancy_communicate("")
 		if state == 'i':
-			# safe_weather=cwx.query_last_wx()
-			# if safe_weather ==1:
-			# 	print('CM: WX weather conditions safe')
-			# 	lets.log_file('CM: WX weather conditions safe ')
-			# else:
-			# 	print('CM: WX weather condtions UNSAFE')
-			# 	lets.log_file('CM: WX weather condtions UNSAFE ')
-			# 	break
-				
-			
+
 			# check state messges
 			safe_proceed = csm.query_last_SM(180, 35, 35, 1, 0, 4, 42,1830,240,1,4)
 			if safe_proceed == 1:
 				lets.communicate('Monitor: SM within limits')
-				
+
 			else:
-				lets.communicate('Monitor: SM OUTSIDE limits')
+				lets.communicate(f'Monitor: SM OUTSIDE limits {safe_proceed}')
 				break
 
-			# check files 
+			# check files
 			if loops > 4: # **14
 				safe_files = cdata.check_files_internal(intial_files, total_cycles)
 				if safe_files == 0:
@@ -65,23 +60,23 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 
 				else:
 					lets.communicate('Monitor: Files Saved')
-					
+
 
 			# checks the rc log for errors
 			## **1 new lines to test
-			if errors_rclog < 4: 
+			if errors_rclog < 4:
 				safe_rc_log=crc.check_daq()
-				
+
 				if safe_rc_log != 1:
 					errors_rclog += 1
 					lets.communicate(f'Monitor: rclog error in DAQ {errors_rclog}/4 ')
 					exit_message = 'restart'
-					
+
 				else:
 					errors_rclog = 0
 					lets.communicate('Monitor: rclog DAQ good')
 					exit_message = ''
-					
+
 			else:
 				lets.communicate('Monitor: rclog had error for to many runs')
 				break
@@ -97,8 +92,8 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 
 			# check state messages
 			#lets.communicate(f'Monitor: Number or errors StateMessages #{errors}.')
+			safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
 			if errors < 20:
-				safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
 				if safe_proceed == 1:
 					lets.communicate('Monitor: SM within limits')
 					errors = 0
@@ -110,17 +105,17 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 
 				else:
 					errors = errors + 1
-					lets.communicate(f'Monitor: SM outide limits #{errors}/20')
-					
+					lets.communicate(f'Monitor: SM {safe_proceed} is outide limits #{errors}/20')
+
 			else:
 				lets.communicate('Monitor: SM errors persisted to long, SHUTTING DOWN... ')
-				exit_message = 'State messages NOT hv current/hv voltage'
+				exit_message = f"State Messages: {safe_proceed}"
 				break
 
 			#lets.communicate(f'Monitor: Number or errors StateMessages #{errors}.')
-			
-			if loops > 4: 
-				
+
+			if loops > 4:
+
 				# checks the file data
 				safe_number,intial_files=cdata.check_files_external(intial_files)
 				if safe_number != 1:
@@ -133,40 +128,47 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 
 				## **2 new code to check when run
 				# check the rc logs for the DAQ doesnt have errors
-				if errors_rclog < 20: 
+				if errors_rclog < 20:
 					safe_rc_log=crc.check_daq()
 					#print(safe_rc_log)
 					if safe_rc_log != 1:
 						errors_rclog += 1
 						lets.communicate(f'Monitor: rclog error in DAQ # {errors_rclog}/20')
-						
+
 					else:
 						errors_rclog = 0
 						lets.communicate(f'Monitor: rclog for DAQ good')
-						
+
 				else:
 					lets.communicate('Monitor: rclog DAQ did not correct, SHUTTING DOWN...')
 					exit_message = 'Error in RCLOG in DAQ'
 					break
-					
+
 
 		if wx_override != 'yes': # only overrides if it is yes
+			if errors_WX < 4:
+				safe_weather=cwx.query_last_wx() # one bad contiions it will break
+				if safe_weather ==1:
+					cwx.airport_report()
+					errors_WX = 0
+					lets.communicate('Monitor: WX condition safe')
 
-			safe_weather=cwx.query_last_wx() # one bad contiions it will break
-			if safe_weather ==1:
-				lets.communicate('Monitor: WX condition safe')
-				
+				else:
+					errors_WX +=1
+					lets.communicate(f'Monitor: Weather out of bounds # {errors_WX}/4')
+
 			else:
-				lets.communicate('Monitor: WX conditions UNSAFE')
-				exit_message = 'Weather conditions'
+				lets.communicate('Monitor: WX conditions unsafe, SHUTTING DOWN...')
+				exit_message = 'Monitor: WX condition unsafe'
 				break
-			cwx.airport_report()
+
 
 		else:
 			lets.communicate('Monitor: Weather OVERRIDE in place')
 			print('Camera will NOT shut off due to weather')
 
 		time.sleep(15)
+		print("Stop monitoring \"cntl+c\": Note this will not stop the DAQ")
 		loops = loops + 1 # updates the loop for checking the intrigs data files
 	return exit_message
 
@@ -190,6 +192,17 @@ def shut_down_CT():
 		ssh.MagnaPS('off')
 		ssh.MicroTSA('off')
 		ssh.chiller('off')
+
+####################################################################################################
+# Failsafe Shutdown -Adam ##########################################################################
+		adam_fs_dir = '/data/TrinityLabComputer/obs_prgm/AdamTesting'
+		adam_fsOFF_path = '/data/TrinityLabComputer/obs_prgm/AdamTesting/turn_off.sh'
+		resultFS = subprocess.run(['bash', adam_fsOFF_path], cwd=adam_fs_dir, capture_output=True, text=True)
+		lets.communicate('Failsafe shutdown completed')
+####################################################################################################
+####################################################################################################
+
+
 	except KeyboardInterrupt:
 		lets.communicate('shut down INCOMPLETE User stopped...')
 		#exit_mess = 'keyinterupt'
@@ -208,80 +221,75 @@ def turn_on_CT_init():
 	ssh.chiller('on')
 	ssh.LVPS('on')
 
+	lets.fancy_communicate('Sequence init starting')
 	ssh.CTM_init()
-	lets.fancy_communicate('Sequence init complete')
 
 
 
 def turn_on_CT_config(config):
 
-	# ssh.MagnaPS('on')
-	# ssh.MicroTSA('on')
-	# ssh.chiller('on')
-	
-	# ssh.LVPS('on')
 
-	# ssh.CTM_init()
 	turn_on_CT_init()
 	## **14
-	time_counter = 30
-	time.sleep(30) # change this to try try for 3 minutes every 20 seconds rather then wait incase it is sooner
-	safe_proceed=csm.query_last_SM(270, 35, 35, 1, 0, 4, 42,170,320,0,4)
-	while safe_proceed != 1 and time_counter < 600:
-		time.sleep(10)
-		time_counter = time_counter + 10
-		lets.communicate(f'Waiting for statemessage to update after init {time_counter}')
-		safe_proceed=csm.query_last_SM(270, 35, 35, 1, 0, 4, 42,170,320,0,4)
-	
+	# time_counter = 30
+	# time.sleep(30) # change this to try try for 3 minutes every 20 seconds rather then wait incase it is sooner
+	# safe_proceed=csm.query_last_SM(270, 35, 35, 1, 0, 4, 42,170,320,0,4)
+	# while safe_proceed != 1 and time_counter < 600:
+	# 	time.sleep(10)
+	# 	time_counter = time_counter + 10
+	# 	lets.communicate(f'Waiting for statemessage to update after init {time_counter}')
+	# 	safe_proceed=csm.query_last_SM(270, 35, 35, 1, 0, 4, 42,170,320,0,4)
+
 
 	# check the state messages for the next 5 minutes if nothing then return error
 	#siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigger_rate
-	
-	if safe_proceed == 1:
-		lets.fancy_communicate('Sequence init complete')
-		lets.log_file('Sequence Init COMPLETE ')
-		if config == 'internal':
-			ssh.CTM_config_hled()
-		elif config == 'external':
-			ssh.CTM_config_single()
-			
+
+	#if safe_proceed == 1:
+	time.sleep(5)
+	lets.fancy_communicate('Sequence init complete')
+	lets.log_file('Sequence Init COMPLETE ')
+	if config == 'internal':
+		ssh.CTM_config_hled()
+	elif config == 'external':
+		ssh.CTM_config_single()
+
 def daqRECONFIGURE(rate, wx_override):
 
 	ssh.CTM_stop()
 	time.sleep(5)
-	
+
 	lets.fancy_communicate('DAQ stop \n SM disabled')
 	lets.log_file('stopping DAQ')
-	
+
 	ssh.CTM_config_single()
 	lets.communicate("sequence config single focus only complete")
 	lets.log_file("sequence singlefocus only complete")
-	
+
 	ssh.CTM_set_trigger(rate) # state messages enabled
-			
-	lets.fancy_communicate(f'Trigger Rate {rate} \n SM enabled')
-	lets.log_file(f'Trigger Rate set {rate} ')
+
+	lets.fancy_communicate(f'Trigger Threshold {rate} \n SM enabled')
+	lets.log_file(f'Trigger Threshold set {rate} ')
 
 	time.sleep(5)
 	ssh.CTM_start()
 
 	lets.fancy_communicate('DAQ start \n SM enabled')
 	lets.log_file('Starting DAQ')
-	
+
 	monitor_to_shutdown(wx_override)
 
-	
-	
-	
+
+
+
 def full_shutdown(exit_mess):
 	lets.fancy_communicate('Shuting Down Operations')
 	lets.log_file('Camera shuting down ')
-	
+
 	shut_down_CT()
 	lets.log_file('Camera shutdown ')
-	
+
 	lets.fancy_communicate('Shut Down Complete')
-	
+
 	lets.communicate('Sending Email to group')
 	lets.send_email(exit_mess)
 	lets.log_file(f'Email sent reason {exit_mess}')
@@ -296,15 +304,15 @@ def monitor_to_shutdown(wx):
 
 	except Exception as e:
 		lets.communicate('error in monitoring')
-		print("An error occurred:", e)
+		lets.communicate("An error occurred:", e)
 		exit_mess = 'error in monitoring'
-	
+
 	if exit_mess != 'keyinterupt':
 
 		full_shutdown(exit_mess)
 
 
-	
+
 def internal_datastop(exit_mess):
 	if exit_mess == 'restart':
 		lets.fancy_communicate('Camera restart due to rclog')
@@ -328,6 +336,15 @@ def internal_triggers(amount,wx_override):
 	ssh.reboot_CTCPU()
 	time.sleep(10)
 
+####################################################################################################>
+# Failsafe Start -Adam #############################################################################>
+	adam_fs_dir = '/data/TrinityLabComputer/obs_prgm/AdamTesting'
+	adam_fsON_path = '/data/TrinityLabComputer/AdamTesting/turn_on.sh'
+	resultFS = subprocess.run(['bash', adam_fsON_path], cwd=adam_fs_dir, capture_output=True, text=True)
+	lets.communicate('Failsafe started')
+####################################################################################################>
+####################################################################################################>
+
 	turn_on_CT_config('internal')
 	time_counter = 60
 	time.sleep(60) # change this to try try for 3 minutes every 20 seconds rather then wait incase it is sooner
@@ -341,11 +358,11 @@ def internal_triggers(amount,wx_override):
 	if safe_proceed == 1:
 		lets.fancy_communicate('Sequence config complete')
 		lets.log_file(f"Sequence -cs COMPLETE ")
-		
+
 		ssh.CTM_start()
 		lets.fancy_communicate('DAQ starting\n SM enabled')
 		lets.log_file('Sequence start & SM enabled COMPLETE ')
-		
+
 		# check info while taking data
 		try:
 			exit_mess=monitor_observations('i',amount,wx_override)
@@ -358,7 +375,7 @@ def internal_triggers(amount,wx_override):
 			lets.communicate('Error in monitoring')
 			exit_mess = 'Error in monitoring'
 			internal_datastop(exit_mess)
-		
+
 	else:
 		lets.fancy_communicate('SM config FAILED')
 		lets.log_file('Internal triggers config sm failed ')
@@ -422,8 +439,8 @@ def find_tRate(df):
     #     else:
     #         lets.log_file("The closest value is never being high enough.")
     #         trate = 120
-    trate = 290
-    lets.communicate(f"The trigger rate was set to {trate}")
+    #trate = 290
+    lets.communicate(f"The trigger threshold was set to {trate}")
 
     return trate
 
@@ -457,17 +474,17 @@ def get_new_tRate(wx_override):
     df.columns = names=['Steps', 'Threshold', 'TriggerRate']
     lets.communicate(df)
     trate=find_tRate(df)
-    lets.fancy_communicate(f'New trigger rate to be set to {trate}')
+    lets.fancy_communicate(f'New trigger thresold to be set to {trate}')
     lets.communicate("Single Focus Only reconfigure starting")
     ssh.CTM_config_single()
     time.sleep(120)
     lets.communicate("Single Focus Only reconfigure complete")
     return trate
-    
+
 
 
 def body_extrigs(wx_override = 'no'):
-	lets.fancy_communicate('External Configure Complete \n SM enabled')	
+	lets.fancy_communicate('External Configure Complete \n SM enabled')
 	lets.log_file('external config complete ')
 
 	# checks the statemessage after waiting 60 seconds and then again every 30 since the asad board needs time to update
@@ -482,78 +499,62 @@ def body_extrigs(wx_override = 'no'):
 
 
 	if safe_proceed == 1:
-		lets.communicate('State messages safe moving on')
-		
+		lets.communicate('State messages safe moving on starting DAQ')
+
+		lets.fancy_communicate('DAQ starting')
+		ssh.CTM_start()
+		lets.communicate('Sleeping for 15 seconds...')
+		lets.log_file('Starting DAQ sleeping for 15 seconds')
+		time.sleep(15)
+
+		lets.fancy_communicate('HV updating to 44.0')
 		ssh.CTM_LVPS_HV(44) # State messages enabled
-		lets.fancy_communicate('HV updated 44.0 COMPLETED \n SM enabled')
-		lets.log_file('HV to 44.0 COMPLETE')
+		lets.communicate('HV to 44.0 COMPLETE')
+		time.sleep(5)
 
-		time_counter = 20 # **4
-		time.sleep(20)
-		safe_proceed = csm.query_last_SM(180,35,35,1,0,4,44,1830,240,1,4)
-		while safe_proceed != 1 and time_counter < 300:
-			time.sleep(10)
-			time_counter = time_counter + 10
-			lets.communicate(f'Waiting for statemessage to update after LVPS update {time_counter}')
-			safe_proceed = csm.query_last_SM(180,35,35,1,0,4,44,1830,240,1,4)
+		lets.fancy_communicate('Turning on SIABS')
+		ssh.CTM_HV_ON() # state messages enabled
+		lets.communicate('HV on completed \n SM enabled')
+		lets.log_file('HV ON COMPLETE and SM enabled')
 
-		# add a time check for light levels!!
-		if safe_proceed == 1:
-			lets.fancy_communicate('Turning on HV')
-			
-			
-			ssh.CTM_HV_ON() # state messages enabled
-			lets.fancy_communicate('HV on completed \n SM enabled')
-			lets.log_file('HV ON COMPLETE and SM enabled')
 
-			time_counter = 20 # **5
-			time.sleep(20)
-			safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
-			while safe_proceed != 1 and time_counter < 500:
-				time.sleep(20)
-				time_counter = time_counter + 20
-				lets.communicate(f'Waiting for statemessage to update after HV on {time_counter}')
-				safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
+		lets.fancy_communicate('Setting trigger threshold')
+		# add the trigger rate scan
+		rate = 150
+		ssh.CTM_set_trigger(rate) # state messages enabled
+		lets.fancy_communicate(f'Trigger threshold {rate} \n SM enabled')
+		lets.log_file(f'Trigger threshold set {rate} ')
 
-			if safe_proceed == 1:
-				lets.fancy_communicate('Setting trigger rate')
-				# add the trigger rate scan 
-				
-				rate = 270
-				ssh.CTM_set_trigger(rate) # state messages enabled
-				
-				lets.fancy_communicate(f'Trigger Rate {rate} \n SM enabled')
-				lets.log_file(f'Trigger Rate set {rate} ')
-        
-				inputbyuser = input("To continue type \"c\" and open the door") 
-				if inputbyuser == "c":
-					ssh.door('up')
-					lets.fancy_communicate('Door Up')
-					lets.log_file('Door up ')
+		while True:
+			inputbyuser = input("To continue type \"c\"- open the door or \"q\"-return to main prompt: ") 
+			if inputbyuser == "c":
+				ssh.door('up')
+				lets.fancy_communicate('Door Up')
+				lets.log_file('Door up ')
 
-					#lets.fancy_communicate('Trigger Rate Scan')
-					#rate= get_new_tRate(wx_override)
-		
-					ssh.CTM_start()
+				monitor_to_shutdown(wx_override)
+				break
+			elif inputbyuser == "q":
+				lets.communicate("Not opening the door back to main prompt. ")
+				break
+			else: 
+				print("Invalid input. Please try again. ")
 
-					lets.fancy_communicate('DAQ start \n SM enabled')
-					lets.log_file('Starting DAQ')
 					
-					monitor_to_shutdown(wx_override)
-		
+
 def external_triggers(process,wx_override='no'): # LEFT OFF COMMENTING HERE
 	clt.create_file()
-	safe_light=clt.check_current_time() 
+	safe_light=clt.check_current_time()
 
 	# overides the weather
 	if wx_override != 'no':
 		safe_weather = 1
 	else:
 		safe_weather = cwx.query_last_wx() # **3
- 
+
 	if safe_weather == 1 and safe_light == 1:
 		lets.communicate('Time and weather are safe')
-		
+
 		if process == 'start':
 			lets.fancy_communicate('Rebooting CTCPU...')
 			lets.log_file(f'Rebooting CTCPU')
@@ -561,11 +562,21 @@ def external_triggers(process,wx_override='no'): # LEFT OFF COMMENTING HERE
 			ssh.reboot_CTCPU()
 			time.sleep(10)
 
+####################################################################################################>
+# Failsafe Start -Adam #############################################################################>
+			adam_fs_dir = '/data/TrinityLabComputer/obs_prgm/AdamTesting'
+			adam_fsON_path = '/data/TrinityLabComputer/obs_prgm/AdamTesting/turn_on.sh'
+			resultFS = subprocess.run(['bash', adam_fsON_path], cwd=adam_fs_dir, capture_output=True, text=True)
+			lets.communicate('Failsafe started')
+####################################################################################################>
+####################################################################################################>
+
+
 			turn_on_CT_config('external')
 			body_extrigs(wx_override)
-		
+
 		if process == 're':
-			
+
 			ssh.CTM_config_single() # leave state messages enabled
 			body_extrigs(wx_override)
 
@@ -575,7 +586,7 @@ def external_triggers(process,wx_override='no'): # LEFT OFF COMMENTING HERE
 def trigger_scan(command,start =0,step = 0,size = 0,rate = 170,weather='no'):
 	if command == 'fromDAQ':
 		rclog=crc.check_rc_log('Starting the run#') # maybe add another line in here
-		if rclog == 1: 
+		if rclog == 1:
 			ssh.CTM_stop()
 			time.sleep(5)
 
@@ -585,7 +596,7 @@ def trigger_scan(command,start =0,step = 0,size = 0,rate = 170,weather='no'):
 
 			crc.plot_triggerRate_scan()
 			lets.fancy_communicate('Trigger Rate scan complete: \n To start a new scan type: triggerScan, newScan \n To start DAQ type: triggerScan, startDAQ \n SM not Enabled')
-			
+
 
 		else:
 			print(f'Incorrect step in rclog to continue with {command}')
@@ -595,99 +606,102 @@ def trigger_scan(command,start =0,step = 0,size = 0,rate = 170,weather='no'):
 		lets.communicate(f'Time for TriggerScan to complete: {step*25}s')
 		time.sleep(step*25)
 		crc.plot_triggerRate_scan()
+
+
+	# elif command == 'fromIntrigs':
 		
+	# 	rclog=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt')
+		
+	# 	if rclog == 1: 
 
-	elif command == 'fromIntrigs':
-		rclog=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt')
-		if rclog == 1: 
-			turn_on_CT_config('external')
-			lets.communicate('External Config COMPLETED \n SM enabled')
-			lets.log_file('external config complete ')
+	# 		ssh.CTM_config_single()
+	# 		lets.communicate('External Config COMPLETED \n SM enabled')
+	# 		lets.log_file('external config complete ')
 
-			time_counter = 60 # **7
-			time.sleep(60)
-			safe_proceed = csm.query_last_SM(180, 35, 35, 1, 0, 4, 42,1830,240,1,4)
-			while safe_proceed != 1 and time_counter < 600:
-				time.sleep(30)
-				time_counter = time_counter + 30
-				lets.communicate(f'Waiting for statemessage to update after Sequence config {time_counter}s')
-				safe_proceed = csm.query_last_SM(180, 35, 35, 1, 0, 4, 42,1830,240,1,4)
+	# 		time_counter = 60 # **7
+	# 		time.sleep(60)
+	# 		safe_proceed = csm.query_last_SM(180, 35, 35, 1, 0, 4, 42,1830,240,1,4)
+	# 		while safe_proceed != 1 and time_counter < 600:
+	# 			time.sleep(30)
+	# 			time_counter = time_counter + 30
+	# 			lets.communicate(f'Waiting for statemessage to update after Sequence config {time_counter}s')
+	# 			safe_proceed = csm.query_last_SM(180, 35, 35, 1, 0, 4, 42,1830,240,1,4)
 
 
-			if safe_proceed == 1:
-				
-				ssh.CTM_LVPS_HV(44) # State messages enabled
-				lets.fancy_communicate('LVPS updated to 44V \n SM enabled')
-				lets.log_file('LVPS updated to 44V \n SM enabled')
+	# 		if safe_proceed == 1:
 
-				time_counter = 20 ## **8
-				time.sleep(20)
-				safe_proceed = csm.query_last_SM(180,35,35,1,0,4,44,1830,240,1,4)
-				while safe_proceed != 1 and time_counter < 300:
-					time.sleep(10)
-					time_counter = time_counter + 10
-					lets.communicate(f'Waiting for statemessage to update after LVPS update {time_counter}s ')
-					safe_proceed = csm.query_last_SM(180,35,35,1,0,4,44,1830,240,1,4)
+	# 			ssh.CTM_LVPS_HV(44) # State messages enabled
+	# 			lets.fancy_communicate('LVPS updated to 44V \n SM enabled')
+	# 			lets.log_file('LVPS updated to 44V \n SM enabled')
 
-				if safe_proceed == 1:
-					
-					lets.fancy_communicate('Turnning on HV')
-					
-					ssh.CTM_HV_ON() # state messages enabled
-					lets.fancy_communicate('HV ON \n SM enabled')
-					lets.log_file('HV ON COMPLETE ')
+	# 			time_counter = 20 ## **8
+	# 			time.sleep(20)
+	# 			safe_proceed = csm.query_last_SM(180,35,35,1,0,4,44,1830,240,1,4)
+	# 			while safe_proceed != 1 and time_counter < 300:
+	# 				time.sleep(10)
+	# 				time_counter = time_counter + 10
+	# 				lets.communicate(f'Waiting for statemessage to update after LVPS update {time_counter}s ')
+	# 				safe_proceed = csm.query_last_SM(180,35,35,1,0,4,44,1830,240,1,4)
 
-					time_counter = 30 ## **9
-					time.sleep(30)
-					safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
-					while safe_proceed != 1 and time_counter < 600:
-						time.sleep(10)
-						time_counter = time_counter + 10
-						lets.communicate(f'Waiting for statemessage to update after HV on {time_counter}s ')
-						safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
+	# 			if safe_proceed == 1:
 
-					if safe_proceed == 1:
-						ssh.trigger_scan(start,step,size)
-						# do the chekcing
-						# add state message
+	# 				lets.fancy_communicate('Turnning on HV')
 
-					else:
-						lets.fancy_communicate('Error in turning on HV')
-				else:
-					lets.fancy_communicate('Error in LVPS update')
-			else: 
-				lets.fancy_communicate('Error in config sequence')
-		else:
-			print(f'Incorrect step in rclog to continue with {command}')
+	# 				ssh.CTM_HV_ON() # state messages enabled
+	# 				lets.fancy_communicate('HV ON \n SM enabled')
+	# 				lets.log_file('HV ON COMPLETE ')
+
+	# 				time_counter = 30 ## **9
+	# 				time.sleep(30)
+	# 				safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
+	# 				while safe_proceed != 1 and time_counter < 600:
+	# 					time.sleep(10)
+	# 					time_counter = time_counter + 10
+	# 					lets.communicate(f'Waiting for statemessage to update after HV on {time_counter}s ')
+	# 					safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
+
+	# 				if safe_proceed == 1:
+	# 					ssh.trigger_scan(start,step,size)
+	# 					# do the chekcing
+	# 					# add state message
+
+	# 				else:
+	# 					lets.fancy_communicate('Error in turning on HV')
+	# 			else:
+	# 				lets.fancy_communicate('Error in LVPS update')
+	# 		else:
+	# 			lets.fancy_communicate('Error in config sequence')
+	# 	else:
+	# 		print(f'Incorrect step in rclog to continue with {command}')
 
 
 	elif command == 'startDAQ':
 		# this needs to be from whatever is at the end of a trigger scan
 		rclog=crc.check_rc_log('Moving Trigger Scan Counters to: /home/trinity/Programs/Trinity/control_software')
-		if rclog == 1: 
-			
+		if rclog == 1:
+
 			ssh.CTM_config_single()
 
-			
+
 			time_counter = 60 ## **12
 			time.sleep(60) # change this to try try for 3 minutes every 20 seconds rather then wait incase it is sooner
-			safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
+			safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
 			while safe_proceed != 1 and time_counter < 600:
 				time.sleep(30)
 				time_counter = time_counter + 30
 				lets.communicate(f'Waiting for statemessage to update after config sequence {time_counter}')
-				safe_proceed = csm.query_last_SM(180,35,35,1,1,18,44,1830,240,1,4)
-				
+				safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
+
 			if safe_proceed == 1:
 				lets.fancy_communicate('Extrenal Config complete \n SM enabled')
 				lets.log_file('Extrenal Config complete \n SM enabled')
-				
+
 				lets.fancy_communicate('Setting trigger_rate')
 				ssh.CTM_set_trigger(rate) # state messages enabled
-				
-				lets.fancy_communicate(f'Trigger Rate Set {rate} \n SM enabled')
-				lets.log_file(f'Trigger Rate set {rate} ')
-					
+
+				lets.fancy_communicate(f'Trigger threshold Set {rate} \n SM enabled')
+				lets.log_file(f'Trigger threshold set {rate} ')
+
 				ssh.door('up')
 				lets.fancy_communicate('The door is up')
 				lets.log_file('Door up ')
@@ -710,7 +724,7 @@ def trigger_scan(command,start =0,step = 0,size = 0,rate = 170,weather='no'):
 
 def main():
 	while True:
-		
+
 		#check_data_directory()
 		com_in = input("Enter a command (off, intrigs, extrigs, monitor_e, monitor_i, set_cutoff): ")
 
@@ -725,20 +739,20 @@ def main():
 			shut_down_CT()
 			lets.log_file('Camera shutdown ')
 			lets.fancy_communicate('Shut Down Complete')
-			
+
 		elif com_in == 'init': # no data running, from sequence off or reboot
 			rclog1=crc.check_rc_log('Staring Master Control at:') # maybe add another line in here
 			rclog2=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt')
 			if rclog1 > 0  or rclog2 > 0:
 				lets.fancy_communicate('Steps to Sequence init')
-				
+
 				turn_on_CT_init()
-				
+
 				lets.fancy_communicate('Sequence init complete')
 				lets.log_file('init complete ')
 			else:
 				print('Incorrect process based on rc log')
-			
+
 		elif com_in == 'hled': # after init
 			rclog1=crc.check_rc_log('Staring Master Control at:') # maybe add another line in here
 			rclog2=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt')
@@ -748,7 +762,7 @@ def main():
 
 				lets.fancy_communicate('Sequence config complete')
 				lets.log_file('config hled complete ')
-				
+
 			else:
 				print('Incorrect process based on rc log')
 
@@ -757,11 +771,11 @@ def main():
 			rclog2=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt')
 			if rclog1 > 0 or rclog2 > 0:
 				lets.fancy_communicate('Steps to Sequence config singleFocus')
-				
+
 				turn_on_CT_config(com_in)
 				lets.fancy_communicate(' Sequence config complete')
 				lets.log_file('config single complete')
-				
+
 			else:
 				print('Incorrect process based on rc log')
 
@@ -787,6 +801,8 @@ def main():
 
 					if restart == 'restart':
 						lets.communicate('Problem with rclog tried restarting Camera is off')
+				else:
+					internal_datastop("none")
 
 
 			else:
@@ -794,8 +810,8 @@ def main():
 
 
 
-		elif com_in == 'extrigs': # re only after intrigs - so the command intrigs and statemessages on and daq stopped 
-			# start seqence off or freshly rebooted 
+		elif com_in == 'extrigs': # re only after intrigs - so the command intrigs and statemessages on and daq stopped
+			# start seqence off or freshly rebooted
 			com_in = input("Reconfig or start from power off re, start, DAQre: ")
 
 			wx_override = input("Do you want to override the weather ex. yes or no: ")
@@ -803,7 +819,7 @@ def main():
 				pwd_wx_ovrd = input("Please enter a password: ")
 				if pwd_wx_ovrd != "oct3":
 					wx_override = 'no'
-			if com_in == 're': 
+			if com_in == 're':
 				rclog=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt') # maybe add another line in here
 				#print(rclog)
 				#rclog =1
@@ -815,7 +831,7 @@ def main():
 				else:
 					print('Incorrect process based on rc log')
 
-			if com_in == 'start': 
+			if com_in == 'start':
 				rclog1=crc.check_rc_log('Staring Master Control at:') # maybe add another line in here
 				rclog2=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/power_off_seq.txt')
 				if rclog1 > 0 or rclog2 > 0:
@@ -825,21 +841,21 @@ def main():
 
 				else:
 					print('Incorrect process based on rc log')
-					
+
 			if com_in == 'DAQre':
-				double_check = input("This is to reconfigure after DAQ starts do you want to proceed enter a trigger RATE!: ")
-				if double_check.is_digit():
+				double_check = input("This is to reconfigure after DAQ starts do you want to proceed enter a trigger threshold!: ")
+				if double_check.isdigit():
 					daqRECONFIGURE(double_check,wx_override)
 
 		elif com_in == 'triggerScan':
 			password = input('Password: ')
 			if password == 'oct3':
-				com_in = input('Enter next command fromIntrigs, fromDAQ,startDAQ,newScan:')
-				if com_in == 'fromIntrigs' or com_in == 'fromDAQ' or com_in == 'newScan':
+				com_in = input('Enter next command fromDAQ,startDAQ,newScan:')
+				if com_in == 'fromDAQ' or com_in == 'newScan':
 					inputs_trig=input('start step size ex 140 10 3:')
 					try:
 						list_trig = [int(num) for num in inputs_trig.split(' ')]
-						#check that they are numbers and then seperate	
+						#check that they are numbers and then seperate
 						if len(list_trig) == 3:
 							strt = list_trig[0]
 							stp = list_trig[1]
@@ -855,7 +871,7 @@ def main():
 
 			else:
 				print('password incorrect no access to triggerScan')
-				
+
 		elif com_in == 'monitor_i': # doesnt run anythong with camera except turning it off
 			wx_override = input("Do you want to overrride the weather ex. yes or no: ")
 			if wx_override == 'yes':
@@ -863,19 +879,20 @@ def main():
 				if pwd_wx_ovrd != "oct3":
 					wx_override = 'no'
 
-			runs = input("how many internal trigger runs do you need?")
-			try:
-				exit_mess=monitor_observations('i',amount,wx_override)
-				internal_datastop(exit_mess)
+			amount = input("how many internal trigger runs do you need?")
+			exit_mess=monitor_observations('i',amount,wx_override)
+			# try:
+			# 	exit_mess=monitor_observations('i',amount,wx_override)
+			# 	internal_datastop(exit_mess)
 
-			except KeyboardInterrupt:
-				lets.communicate('User stopped monitoring')
+			# except KeyboardInterrupt:
+			# 	lets.communicate('User stopped monitoring')
 
-			except:
-				lets.communicate('Error in monitoring')
-				exit_mess = 'Error in monitoring'
-				internal_datastop(exit_mess)
-			
+			# except:
+			# 	lets.communicate('Error in monitoring')
+			# 	exit_mess = 'Error in monitoring'
+			# 	internal_datastop(exit_mess)
+
 			# ssh.CTM_stop() # stops data but leaves Statemessages enablebd
 
 			# lets.communicate('Stopping Data Aquisition')
@@ -889,13 +906,13 @@ def main():
 					wx_override = 'no'
 
 			monitor_to_shutdown(wx_override)
-			
+
 
 		elif com_in == 'set_cutoff': # does not have anythong to do with camera 
 			cutoff = input('Manual cut off date and time ex: "2023-11-15 12:43:09": ')
 			if cutoff == '' or cutoff == ' ':
 				clt.create_file()
-				
+
 			else:
 				date_format = "%Y-%m-%d %H:%M:%S"
 				try:
@@ -912,12 +929,24 @@ def main():
 				pwd_wx_ovrd = input("Please enter a password: ")
 				if pwd_wx_ovrd != "oct3":
 					wx_override = 'no'
-      
+
 			print('Starting SAIB testing script on CTCPU')
 			exit_mesesage=pxlt.SIAB_testing(wx_override)
-			#	full_shutdown(exit_message)  
+			#	full_shutdown(exit_message)
 			print(f'shut down {exit_mesesage}')
 
+		elif com_in == "siaboff":
+			uinput = input("Which SIAB would you like to turn off? ")
+			if 0<= int(uinput) <=15:
+				yes=input("The DAQ is running? y or n: ")
+				if yes == 'y':
+					lets.communicate(f"Turing off SIAB {uinput}")
+					ssh.CTM_HV_OFF(uinput)
+					lets.communicate(f"Completed")
+				else:
+					print("DAQ needs to be running")
+			else:
+				print("Please enter a number between 0-15 ")
 		# make trigger rate scan option and HVscan options
 if __name__ == "__main__":
 	#lets.send_email('Testing Email')
