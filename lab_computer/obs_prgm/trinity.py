@@ -13,7 +13,7 @@ import communicate as lets
 import time
 import datetime
 import multiprocessing
-from datetime import datetime
+from datetime import datetime,timedelta
 
 
 # state: internal or external, intrigs_nfiles: number of internal trigger files.
@@ -304,7 +304,7 @@ def monitor_to_shutdown(wx):
 
 	except Exception as e:
 		lets.communicate('error in monitoring')
-		lets.communicate("An error occurred:", e)
+		lets.communicate(f"An error occurred: {e}")
 		exit_mess = 'error in monitoring'
 
 	if exit_mess != 'keyinterupt':
@@ -483,7 +483,7 @@ def get_new_tRate(wx_override):
 
 
 
-def body_extrigs(wx_override = 'no'):
+def body_extrigs(wx_override = 'no',noise_runs='no'):
 	lets.fancy_communicate('External Configure Complete \n SM enabled')
 	lets.log_file('external config complete ')
 
@@ -525,6 +525,16 @@ def body_extrigs(wx_override = 'no'):
 		lets.fancy_communicate(f'Trigger threshold {rate} \n SM enabled')
 		lets.log_file(f'Trigger threshold set {rate} ')
 
+		if noise_runs== "yes" or noise_runs == "y":
+			lets.log_file('starting noise data runs')
+			lets.fancy_communicate("Starting Noise Data Runs for 22 minutes...")
+			lets.communicate("\033[1;32mPlease check on ctcpu: \x1B[3mcdCData\x1B[0m for file creation.")
+			current_time = datetime.now()
+			time_change = timedelta(minutes=22) 
+			new_time = (current_time + time_change).strftime("%H:%M:%S")
+			lets.communicate(f"The data collection period will end at {new_time} ET.\nPlease check the horizon cam before opening the door\n ---")
+			time.sleep(1320)
+			lets.communicate("Noise Data runs are complete. \n --- ")
 		while True:
 			inputbyuser = input("To continue type \"c\"- open the door or \"q\"-return to main prompt: ") 
 			if inputbyuser == "c":
@@ -542,10 +552,9 @@ def body_extrigs(wx_override = 'no'):
 
 					
 
-def external_triggers(process,wx_override='no'): # LEFT OFF COMMENTING HERE
+def external_triggers(process,wx_override='no',noise_runs='no'): # LEFT OFF COMMENTING HERE
 	clt.create_file()
 	safe_light=clt.check_current_time()
-
 	# overides the weather
 	if wx_override != 'no':
 		safe_weather = 1
@@ -573,15 +582,16 @@ def external_triggers(process,wx_override='no'): # LEFT OFF COMMENTING HERE
 
 
 			turn_on_CT_config('external')
-			body_extrigs(wx_override)
+			body_extrigs(wx_override,"no")
 
 		if process == 're':
 
-			ssh.CTM_config_single() # leave state messages enabled
-			body_extrigs(wx_override)
+			#ssh.CTM_config_single() # leave state messages enabled
+			body_extrigs(wx_override,noise_runs)
 
 	else:
 		lets.communicate('Weather or Time unsafe')
+
 
 def trigger_scan(command,start =0,step = 0,size = 0,rate = 170,weather='no'):
 	if command == 'fromDAQ':
@@ -814,19 +824,22 @@ def main():
 			# start seqence off or freshly rebooted
 			com_in = input("Reconfig or start from power off re, start, DAQre: ")
 
-			wx_override = input("Do you want to override the weather ex. yes or no: ")
+			wx_override = input("Do you want to override the weather (yes or no): ")
 			if wx_override == 'yes':
 				pwd_wx_ovrd = input("Please enter a password: ")
 				if pwd_wx_ovrd != "oct3":
 					wx_override = 'no'
+			
+
+
 			if com_in == 're':
+				noise_runs = input("Take HV ON noise runs (yes or no): ")
 				rclog=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt') # maybe add another line in here
 				#print(rclog)
-				#rclog =1
 				if rclog == 1:
 					lets.fancy_communicate('Starting external triggers')
 					lets.log_file(f'Starting external {com_in} triggers ')
-					external_triggers(com_in,wx_override)
+					external_triggers(com_in,wx_override,noise_runs)
 
 				else:
 					print('Incorrect process based on rc log')
@@ -837,7 +850,7 @@ def main():
 				if rclog1 > 0 or rclog2 > 0:
 					lets.fancy_communicate('Starting external triggers')
 					lets.log_file(f'Starting external {com_in} triggers ')
-					external_triggers(com_in,wx_override)
+					external_triggers(com_in,wx_override,"no")
 
 				else:
 					print('Incorrect process based on rc log')
