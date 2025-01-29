@@ -25,7 +25,7 @@
 */5 * * * * /data/TrinityLabComputer/cams/horizonsnap.py >> /data/TrinityLabComputer/cams/hcron.log 2>&1 # update horizon cam images
 * * * * * /data/TrinityLabComputer/cams/update_site.exp $(ls -t /data/TrinityLabComputer/cams/IN/|head -1) $(ls -t /data/TrinityLabComputer/cams/OUT/|head -1) >> /data/TrinityLabComputer/cams/scron.log 2>&1
 
-0 11 * * * /usr/bin/python3 /data/TrinityLabComputer/scheduling/scheduler.py # adds the schedule to the website
+0 11 * * * /usr/bin/python3 /data/TrinityLabComputer/scheduling/scheduler.py >> /data/TrinityLabComputer/scheduling/cron.log 2>&1 # adds the schedule to the website
 
 # Copy files/images Control Computer -> This Lab Computer (cos-4a10345)
 * * * * * /usr/bin/expect /data/TrinityLabComputer/weather/update_wx.sh >> /data/TrinityLabComputer/weather/cron.log 2>&1
