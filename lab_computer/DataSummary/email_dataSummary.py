@@ -126,9 +126,11 @@ def get_most_recent_file(folder_path):
 
     # Filter out directories, get file paths and creation times
     file_info = [(os.path.join(folder_path, f), os.path.getmtime(os.path.join(folder_path, f))) for f in files if os.path.isfile(os.path.join(folder_path, f))]
-
+    #print(file_info)
+    filtered_data = [item for item in file_info if 'create.log' not in item[0]]
+    #print(filtered_data)
     # Get the most recent file based on creation time
-    most_recent_file = max(file_info, key=lambda x: x[1])[0]
+    most_recent_file = max(filtered_data, key=lambda x: x[1])[0]
 
     return most_recent_file
 
@@ -185,9 +187,18 @@ def merge_pdf(data,path):
   
   make_database_plots(current_date)
   #pdfs = [f'{path}scheduling/schedule_pdf/schedule_{formatted_date}.pdf',f'/data/TrinityLabComputer/DataSummary/Otherfiles/TScans_{formatted_date}.pdf',f'/data/TrinityLabComputer/DataSummary/Otherfiles/output{formatted_date}.pdf']
-
-  pdfs = [f'{path}scheduling/schedule_pdf/schedule_{formatted_date}.pdf',data,f'/data/TrinityLabComputer/DataSummary/Otherfiles/output{formatted_date}.pdf',f'/data/TrinityLabComputer/DataSummary/Otherfiles/TScans_{formatted_date}.pdf']
-
+  if data != False:
+    pdfs = [f'{path}scheduling/schedule_pdf/schedule_{formatted_date}.pdf',data,
+            f'/data/TrinityLabComputer/DataSummary/Otherfiles/output{formatted_date}.pdf',
+            f'/data/TrinityLabComputer/DataSummary/Otherfiles/TScans_{formatted_date}.pdf',
+            f'/data/TrinityLabComputer/DataSummary/EventCleaningFiles/EventCleanedCluster_{formatted_date}.pdf'
+            ]
+#   f'/data/TrinityLabComputer/DataSummary/EventCleaningFiles/EventCleanedCluster_{formatted_date}.pdf'
+  else: 
+      pdfs = [f'{path}scheduling/schedule_pdf/schedule_{formatted_date}.pdf',
+            f'/data/TrinityLabComputer/DataSummary/Otherfiles/output{formatted_date}.pdf',
+            f'/data/TrinityLabComputer/DataSummary/Otherfiles/TScans_{formatted_date}.pdf'
+            ]
   merger = PdfWriter()  
   for pdf in pdfs:
       merger.append(pdf)
@@ -219,20 +230,26 @@ os.chdir(system_path+"/DataSummary/scripts/")
 command = f'./getDataSummary.sh'  # Replace with your desired command
 run_ssh(command)
 
+command = f'./getEventCleaning.sh'  # Replace with your desired command
+run_ssh(command)
+
 command = f'./getTScanFiles.sh'  # Replace with your desired command
 run_ssh(command)
 
 folder_path = system_path + "DataSummary/SummaryFiles/"
 most_recent_file = get_most_recent_file(folder_path)
-
+#print(most_recent_file)
 if most_recent_file:
     logging.info(f"Most recent file: {most_recent_file}")
     todays_file=compare_file_date_with_current(most_recent_file)
+    print(todays_file)
     if todays_file != False:
         current_date = datetime.now().date()
 
-        #current_date = datetime.datetime.date(2024, 11, 2).date()
+        #current_date = datetime.date(2025, 1, 4).date()
         datasum_path = folder_path + todays_file
+        print(datasum_path)
+        print(system_path)
         attachment_path=merge_pdf(datasum_path,system_path)
         attachment_path_mp4=getvideo(current_date)
         dataTimesArr,expectedTimesArr=getDataTimes(current_date)
@@ -242,6 +259,14 @@ if most_recent_file:
         os.remove(attachment_path)
     else:
         logging.error("No file for today")
+        current_date = datetime.now().date()
+
+        #current_date = datetime.date(2025, 1, 4).date()
+        #datasum_path = folder_path + todays_file
+        attachment_path=merge_pdf(False,system_path)
+        attachment_path_mp4=getvideo(current_date)
+        dataTimesArr,expectedTimesArr=getDataTimes(current_date)
+        send_email(current_date,dataTimesArr,expectedTimesArr,attachment_path,attachment_path_mp4)
 else:
     logging.info("Folder is empty.")
 
