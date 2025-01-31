@@ -33,6 +33,7 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 	errors = 0
 	errors_rclog = 0
 	errors_WX = 0
+	errors_data = 0
 	while True:
 	# While the camera is operating this will check WEATHER, STATE MESSAGES, TIME, RCLOGS for DAQ, FILES
 		lets.fancy_communicate("")
@@ -115,16 +116,19 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 			#lets.communicate(f'Monitor: Number or errors StateMessages #{errors}.')
 
 			if loops > 4:
+				if errors_data < 5:
+					# checks the file data
+					safe_number,intial_files=cdata.check_files_external(intial_files)
+					if safe_number != 1:
+						errors_data += 1
+						lets.communicate(f'Monitor: Files OUTSIDES acceptable limits #{errors_data}/5')
 
-				# checks the file data
-				safe_number,intial_files=cdata.check_files_external(intial_files)
-				if safe_number != 1:
-					lets.communicate('Monitor: Files OUTSIDES acceptable limits')
+					else:
+						lets.communicate('Monitor: Files saving within acceptable limits')
+				else:
+					lets.communicate('Monitor: File data is not correct, SHUTTING DOWN...')
 					exit_message = 'File saving'
 					break
-
-				else:
-					lets.communicate('Monitor: Files saving within acceptable limits')
 
 				## **2 new code to check when run
 				# check the rc logs for the DAQ doesnt have errors
@@ -586,7 +590,7 @@ def external_triggers(process,wx_override='no',noise_runs='no'): # LEFT OFF COMM
 
 		if process == 're':
 
-			#ssh.CTM_config_single() # leave state messages enabled
+			ssh.CTM_config_single() # leave state messages enabled
 			body_extrigs(wx_override,noise_runs)
 
 	else:

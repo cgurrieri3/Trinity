@@ -17,11 +17,11 @@ def run_ssh(command):
 	#result = re.sub(r'\x1b\[[0-9;]*m', '', result.decode())
 	# Check for errors
 	if result.returncode == 0:
-	    # Command was successful
-	    lets.log_file(f"{command} output: {result.stdout} ")
+		# Command was successful
+		lets.log_file(f"{command} output: {result.stdout} ")
 	else:
-	    # Command encountered an error
-	    lets.communicate(f"{command} output error: {result.stderr} ")
+		# Command encountered an error
+		lets.communicate(f"{command} output error: {result.stderr} ")
 	return result.stdout
 
 def run_get_file_info():
@@ -42,11 +42,17 @@ def check_file_time(results):
 	#print(index)
 	file_time = results[index+12:index+35]
 	# Parse the string into a datetime object
-	file_time = datetime.datetime.strptime(file_time, "%Y-%m-%dT%H:%M:%S.%f")
+	lets.log_file(file_time)
+	try: 
+		file_time = datetime.datetime.strptime(file_time, "%Y-%m-%dT%H:%M:%S.%f")
+	except:
+		file_time = datetime.datetime(2000,1,1,1,1,1)
+		lets.communicate("Something is wrong with the file information time")
 
 	# strptime
-	#print(file_time)
 	return file_time
+
+
 
 def check_file_size(results): # to make this run faster get all information from one ssh run
 	index = results.find('stat --printf="%s" "$(ls -t | head -n1)')
@@ -83,6 +89,10 @@ def check_files_internal(intial_files,total_cycles):
 	lets.communicate(f'File Information: [#: {files}, time since last: {time_difference.total_seconds()}s, size = {file_size}] ')
 	
 	runs_left = total_cycles - int(files)
+	print(files)
+	print(intial_files)
+	print(time_difference.total_seconds())
+	print(file_size)
 
 	# Checks if a file has been created in the first 6 minutes
 	if files == intial_files or time_difference.total_seconds() > 1020 or file_size == '0':
@@ -112,10 +122,34 @@ def check_files_external(intial_files):
 		intial_files = updated_files
 		return 1,intial_files
 	else:
-		lets.communicate('DA is not working ')
+		lets.log_file('DA is not working ')
 		return 0,intial_files
-	
-#check_last_file_size():
+		
+
+def run_storage_ctcpu():
+	lab_directory()
+	results = str(run_ssh('./storage_ctcpu.exp'))
+	return results
+
+def check_num_storage_ctcpu(results):
+	index = results.find('df | grep -oP')
+	number = results[index+37:index+39]
+	number = ''.join(char for char in number if char.isnumeric())
+	return number
+
+
+
+def check_ctcpu_storage():
+	print("Retrieving CTCPU storage please wait...")
+	result=run_storage_ctcpu()
+	number=check_num_storage_ctcpu(result)
+	#number = "78"
+	if int(number) < 70:
+		print('\033[4m' + "CTCPU Storage is " + number +"%" +'\033[0m')
+	else: 
+		print('\033[4m' + '\033[91m' + "CTCPU Storage is " + number +"%" +'\033[0m')
+
+check_ctcpu_storage()
 
 #run_get_file_info()
 
