@@ -41,8 +41,8 @@
 # Email Summaries of Data from prior night
 0 10 * * * /data/TrinityLabComputer/DataSummary/scripts/createDataSummary.sh >> /data/TrinityLabComputer/DataSummary/scripts/create.log 2>&1
 0 10 * * * /data/TrinityLabComputer/DataSummary/scripts/createEventCleaning.sh >> /data/TrinityLabComputer/DataSummary/scripts/create.log 2>&1
-47 13 * * * /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/create_csv.sh >> /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/cron.log 2>&1
-15 10 * * * /data/TrinityLabComputer/DataSummary/scripts/updateSMonHive.sh
+31 10 * * * /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/create_csv.sh >> /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/cron.log 2>&1
+40 10 * * * /data/TrinityLabComputer/DataSummary/scripts/updateSMonHive.sh
 30 10 * * * /data/TrinityLabComputer/DataSummary/email_dataSummary.py >> /data/TrinityLabComputer/DataSummary/cemail.log 2>&1
 
 
