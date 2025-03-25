@@ -1,1 +1,0 @@
-# Trinity Control Software

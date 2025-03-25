@@ -1,3 +1,0 @@
-crontab -l > crontab.bak
-
-How to create the backup

@@ -1,5 +1,0 @@
-
-#DEPEND LIST DONT DELETE
-
-TrinityPerformanceCalculationsNew.o: TrinitySimUtilities.h
-TrinitySimUtilities.o: TrinitySimUtilities.h

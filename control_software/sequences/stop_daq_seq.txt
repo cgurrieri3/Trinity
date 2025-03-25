@@ -1,3 +1,0 @@
-# Stopping the Global Run on Master Control and sleeping for 10 seconds
-100B00000000000000
-10

@@ -1,4 +1,0 @@
-Step	Threshold	Rate
-0		135		0
-1		140		0
-2		145		0

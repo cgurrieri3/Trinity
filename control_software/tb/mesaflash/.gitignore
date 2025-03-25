@@ -1,6 +1,0 @@
-*.o
-mesaflash*
-*.txt
-/Counters
-/TrigScan
-client_tb
