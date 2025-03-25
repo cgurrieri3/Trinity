@@ -3,201 +3,186 @@ R__LOAD_LIBRARY(libExACT.so)
 #include <TTree.h>
 #include <TFile.h>
 
+#include <typeinfo>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <stdexcept>
 
-int TelescopeInformationMerge (std::string filename1, std::string filename2, std::string filenameTilt, std::string filenameTiltRaw ,std::string filename, std::string fileOut){
 
-	std::vector<std::string> headers;
-	std::vector<std::vector<std::string>> data;
-	std::vector<std::string> headers2;
-	std::vector<std::vector<std::string>> data2;
-    std::vector<std::string> headersTilt;
-    std::vector<std::vector<std::string>> dataTilt;
-    std::vector<std::string> headersTiltRaw;
-    std::vector<std::vector<std::string>> dataTiltRaw;
+std::vector<std::vector<std::string>> readCSV(const std::string& filePath);
+void GetTime(uint64_t TriggerBoardTime);
+std::time_t findClosestIndex(const std::vector<double>& sortedVec, double value);
+std::vector<std::string> split(const std::string& str, char delimiter);
+void processRow(const std::vector<std::string>& row, std::vector<float>& destination, size_t start, size_t end);
+std::time_t convertToUnixTime(const std::string& datetime);
 
-	std::ifstream file1(filename1);
+tm* utcTime;
+int microsec;
+uint64_t convtime;
 
-    int timestamp2Index, timestampIndex;
-    if (!file1.is_open()) {
-        throw std::runtime_error("Failed to open file: " + filename1);
-    }
 
-    std::string line;
-    if (std::getline(file1, line)) {
-        std::stringstream ss(line);
-        std::string header;
-        while (ss >> header) {
-            headers.push_back(header);
+int TelescopeInformationMerge (std::string extraFile, std::string StateMesssageFile,std::string filename, std::string fileOut){
+//int TelescopeInformationMerge (std::string extraFile, std::string StateMesssageFile,std::string filename, std::string name){
+
+    // Call the function to read the CSV file
+    //std::vector<std::vector<std::string>> data = readCSV(extraFile);
+    std::size_t start = filename.find("CoBo0_AsAd0_")+12; // Find the position after "COBO_"
+    std::string date = filename.substr(start, 10);  // Extract "2024-08-07"
+	std::cout << date << std::endl;    
+    // Remove the hyphens to get "20240807"
+    date.erase(std::remove(date.begin(), date.end(), '-'), date.end());
+    cout << date << endl;
+    std::string weatherfilename = Form("/storage/hive/project/phy-otte/shared/Trinity/MiscData/WeatherData/weather/weather_%s",date.c_str());
+    cout << weatherfilename << endl;
+    std::vector<std::vector<std::string>> WeatherData = readCSV(weatherfilename);
+    std::vector<double> WeatherTime;
+    std::vector<std::vector<float>> WeatherTempature;
+    std::vector<std::vector<float>> WeatherHumidity;
+
+    bool firstRow = true;
+ 
+    // Process the 2D vector (for example, print it)
+    for (const auto& row : WeatherData) {
+          if (firstRow) {
+            firstRow = false;  // Skip the first row
+            continue;
+        }
+        if (!row.empty()) {
+
+            // get a vector for the time of the statemessages
+            try {
+                // Convert the first value to double, divide by 1,000,000,000
+                std::string firstValue = row[33];
+
+                //cout << firstValue << endl;
+                std::time_t weatherunixTime =convertToUnixTime(firstValue);
+                //cout << weatherunixTime << endl;
+                double timeInDouble = static_cast<double>(weatherunixTime);
+                WeatherTime.push_back(timeInDouble);
+            } catch (const std::invalid_argument& e) {
+                // Handle invalid number cases
+                //std::cerr << "Invalid number in the first column: " << row[33] << std::endl;
+                WeatherTime.push_back(0);
+            } catch (const std::out_of_range& e) {
+                // Handle out-of-range number cases
+                //std::cerr << "Number out of range in the first column: " << row[33] << std::endl;
+                WeatherTime.push_back(0);
+            }
+
+
+            std::vector<float> columns;
+            processRow(row, columns, 14, 14);
+            WeatherTempature.push_back(columns);
+            columns.clear();
+
+            processRow(row, columns, 13, 13);
+            WeatherHumidity.push_back(columns);
+            columns.clear();
+
+
+            
         }
     }
 
-    if (headers.empty()) {
-        throw std::runtime_error("Invalid file format: " + filename1);
-    }
+    std::cout << "Length of Weather Time vector: " << WeatherTime.size() << std::endl;
+    std::cout << "Number of rows in weather temp vector: " << WeatherTempature.size() << std::endl;
+    std::cout << "Number of rows in weather humidity vector: " <<WeatherHumidity.size() << std::endl;
 
-    timestampIndex = 0;
-    for (int i = 0; i < headers.size(); ++i) {
-        if (headers[i] == "timestamp") {
-            timestampIndex = i;
-            break;
+    // Call the function to read the CSV file
+    std::vector<std::vector<std::string>> StateMessageData = readCSV(StateMesssageFile);
+    
+
+    // Vector to store the columsn from the csv
+    std::vector<double> StateMessageTime;
+    std::vector<std::vector<float>> StateMessageHV;
+    std::vector<std::vector<float>> StateMessageHVCurrent;
+
+    std::vector<std::vector<float>> StateMessageSiPMTempatures;
+    std::vector<std::vector<float>> StateMessageUCTempatures;
+    std::vector<std::vector<float>> StateMessageHVSwitch;
+    std::vector<std::vector<float>> StateMessageMUSICPower;
+
+    std::vector<std::vector<float>> StateMessageASADCurrent;
+    std::vector<std::vector<float>> StateMessageSIABCurrents;
+    std::vector<std::vector<float>> StateMessageTBCurrent;
+
+    firstRow = true;
+    
+    // Process the 2D vector (for example, print it)
+    for (const auto& row : StateMessageData) {
+          if (firstRow) {
+            firstRow = false;  // Skip the first row
+            continue;
         }
-    }
+        if (!row.empty()) {
 
-    while (std::getline(file1, line)) {
-        std::stringstream ss(line);
-        std::string cell;
-        std::vector<std::string> row;
-
-        while (ss >> cell) {
-            row.push_back(cell);
-        }
-
-        if (row.size() != headers.size()) {
-            throw std::runtime_error("Invalid file format: " + filename1);
-        }
-
-        data.push_back(row);
-    }
-
-    file1.close();
-
-    std::ifstream file2(filename2);
-    if (!file2.is_open()) {
-        throw std::runtime_error("Failed to open file: " + filename2);
-    }
-
-    if (std::getline(file2, line)) {
-        std::stringstream ss(line);
-        std::string header;
-        while (ss >> header) {
-            headers2.push_back(header);
-        }
-    }
-
-    if (headers2.empty()) {
-        throw std::runtime_error("Invalid file format: " + filename2);
-    }
-
-    timestamp2Index = 0;
-    for (int i = 0; i < headers2.size(); ++i) {
-        if (headers2[i] == "timestamp2") {
-            timestamp2Index = i;
-            break;
-        }
-    }
-
-    while (std::getline(file2, line)) {
-        std::stringstream ss(line);
-        std::string cell;
-        std::vector<std::string> row;
-
-        while (ss >> cell) {
-            row.push_back(cell);
-        }
-
-        if (row.size() != headers2.size()) {
-            throw std::runtime_error("Invalid file format: " + filename2);
-        }
-
-        data2.push_back(row);
-    }
-
-    file2.close();
+            // get a vector for the time of the statemessages
+            try {
+                // Convert the first value to double, divide by 1,000,000,000
+                double firstValue = std::stod(row[0]) / 1000000000.0;
+                StateMessageTime.push_back(firstValue);
+            } catch (const std::invalid_argument& e) {
+                // Handle invalid number cases
+                //std::cerr << "Invalid number in the first column: " << row[0] << std::endl;
+                StateMessageTime.push_back(0);
+            } catch (const std::out_of_range& e) {
+                // Handle out-of-range number cases
+                //std::cerr << "Number out of range in the first column: " << row[0] << std::endl;
+                StateMessageTime.push_back(0);
+            }
 
 
-    std::ifstream file3(filenameTilt);
-    if (!file3.is_open()) {
-        throw std::runtime_error("Failed to open file: " + filenameTilt);
-    }
+            std::vector<float> columns;
+            processRow(row, columns, 2, 5);
+            StateMessageHV.push_back(columns);
+            columns.clear();
 
-    if (std::getline(file3, line)) {
-        std::stringstream ss(line);
-        std::string header;
-        while (ss >> header) {
-            headersTilt.push_back(header);
-        }
-    }
+            processRow(row, columns, 6, 9);
+            StateMessageHVCurrent.push_back(columns);
+            columns.clear();
 
-    if (headersTilt.empty()) {
-        cout<<"Header"<<endl;
-        throw std::runtime_error("Invalid file format: " + filenameTilt);
-    }
+            processRow(row,columns,10,25);
+            StateMessageUCTempatures.push_back(columns);
+            columns.clear();
 
-    timestamp2Index = 0;
-   /* for (int i = 0; i < headers2.size(); ++i) {
-        if (headers2[i] == "timestamp") {
-            timestamp2Index = i;
-            break;
-        }
-    }*/
 
-    while (std::getline(file3, line)) {
-        std::stringstream ss(line);
-        std::string cell;
-        std::vector<std::string> row;
+            processRow(row,columns,26,41);
+            StateMessageMUSICPower.push_back(columns);
+            columns.clear();
+            
+            processRow(row,columns,42,57);
+            StateMessageHVSwitch.push_back(columns);
+            columns.clear();
 
-        while (ss >> cell) {
-            row.push_back(cell);
+            processRow(row, columns, 58, 73);
+            StateMessageSiPMTempatures.push_back(columns);
+            columns.clear();
+
+            processRow(row, columns, 74, 74);
+            StateMessageASADCurrent.push_back(columns);
+            columns.clear();
+
+            processRow(row, columns, 75, 90);
+            StateMessageSIABCurrents.push_back(columns);
+            columns.clear();
+
+            processRow(row, columns, 91, 91);
+            StateMessageTBCurrent.push_back(columns);
+            columns.clear();
+
+            
         }
 
-        if (row.size() != headersTilt.size()) {
-            cout<<"Row"<<endl;
-            throw std::runtime_error("Invalid file format: " + filenameTilt);
-        }
 
-        dataTilt.push_back(row);
     }
+    std::cout << "Length of StateMessageTime vector: " << StateMessageTime.size() << std::endl;
+    std::cout << "Number of rows in columns2to5 vector: " << StateMessageHV.size() << std::endl;
+    std::cout << "Number of rows in SiPM Temps vector: " << StateMessageSiPMTempatures.size() << std::endl;
 
-    file3.close();
 
-    std::ifstream file4(filenameTiltRaw);
-    if (!file4.is_open()) {
-        throw std::runtime_error("Failed to open file: " + filenameTiltRaw);
-    }
-
-    if (std::getline(file4, line)) {
-        std::stringstream ss(line);
-        std::string header;
-        while (ss >> header) {
-            headersTiltRaw.push_back(header);
-        }
-    }
-
-    if (headersTilt.empty()) {
-        cout<<"Header"<<endl;
-        throw std::runtime_error("Invalid file format: " + filenameTiltRaw);
-    }
-
-    timestamp2Index = 0;
-   /* for (int i = 0; i < headers2.size(); ++i) {
-        if (headers2[i] == "timestamp") {
-            timestamp2Index = i;
-            break;
-        }
-    }*/
-
-    while (std::getline(file4, line)) {
-        std::stringstream ss(line);
-        std::string cell;
-        std::vector<std::string> row;
-
-        while (ss >> cell) {
-            row.push_back(cell);
-        }
-
-        if (row.size() != headersTiltRaw.size()) {
-            cout<<"Row"<<endl;
-            throw std::runtime_error("Invalid file format: " + filenameTiltRaw);
-        }
-
-        dataTiltRaw.push_back(row);
-    }
-
-    file4.close();
-
-    ULong64_t normalizedTime = 1683936000;
-    ULong64_t normalizedTimeNs = 1683936000*1e8; //Should be in 10s of ns
-    ULong64_t timeAfterLaunch = 0;
     IEvent *iEvHLED = new IEvent();
     IEvent *iEvBiFocal = new IEvent();
     IEvent *iEvTest = new IEvent();
@@ -233,17 +218,19 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
     tForced->SetBranchAddress("Events",&evForced);
     tTest->SetBranchAddress("Events",&evTest);
     
-    tHLED->SetBranchAddress("RunNumber",&nRunHLED);
-    tBiFocal->SetBranchAddress("RunNumber",&nRunBF);
-    tForced->SetBranchAddress("RunNumber",&nRunForced);
-    tTest->SetBranchAddress("RunNumber",&nRunTest);
+    //tHLED->SetBranchAddress("RunNumber",&nRunHLED);
+    //tBiFocal->SetBranchAddress("RunNumber",&nRunBF);
+    //tForced->SetBranchAddress("RunNumber",&nRunForced);
+    //tTest->SetBranchAddress("RunNumber",&nRunTest);
 
     tHLED->SetBranchAddress("RTimeTB",&rTimeHLED);
     tBiFocal->SetBranchAddress("RTimeTB",&rTimeBiFocal);
     tForced->SetBranchAddress("RTimeTB",&rTimeForced);
     tTest->SetBranchAddress("RTimeTB",&rTimeTest);
+	
 
 	TFile *fOut = new TFile(fileOut.c_str(),"RECREATE");
+
 
     TTree *tMHLED = new TTree("HLED","HLED Events");
     TTree *tMBiFocal = new TTree("BiFocal","BiFocal Events");
@@ -255,17 +242,12 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
     tMForced->Branch("Events","IEvent",&iEvForced,64000,99);
     tMTest->Branch("Events","IEvent",&iEvTest,64000,99);
 
+
+	std::cout<<"Hello World" << std::endl;
     for(int i = 0; i < tHLED->GetEntries(); i++){
-        if(i%100 == 0){
-            cout << "Processing HLED event: "<<i<<endl;
-        }
         tHLED->GetEntry(i);
-        timeAfterLaunch = rTimeHLED - normalizedTimeNs;
-        if(timeAfterLaunch>0){
-            timeAfterLaunch = timeAfterLaunch/1e8;
-        }else{
-            timeAfterLaunch = 0;
-        }
+
+        cout << "HLED Event# " << i <<" is being saved." << endl;
         
         // cout<<evHLED->GetTBTime()<<endl;
         // cout<<normalizedTimeNs<<endl;
@@ -277,17 +259,105 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
         iEvHLED->SetEventType(0);
         iEvHLED->SetROIPixelID(evHLED->GetROIPixelID());
         iEvHLED->SetROIMusicID(evHLED->GetROIMusicID());
-        iEvHLED->SetSignalValue(evHLED->GetSignalValue());
+        iEvHLED->SetSignalValue(evHLED->GetSignalValue());	
+	
+        GetTime((uint64_t)evHLED->GetTBTime());
+        std::cout << "Trigger Time (UTC): ";
+        std::cout << std::put_time(utcTime, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0') << std::setw(6) << microsec << std::endl;
 
-        iEvHLED->SetParametersFromTimestamp(timeAfterLaunch,data,data2);
-        iEvHLED->SetTelescopePointing(timeAfterLaunch,dataTilt);
-        iEvHLED->SetTelescopePointingRaw(timeAfterLaunch,dataTiltRaw);
+        // Find the closest statemessage time
+        int closestIndex = findClosestIndex(StateMessageTime, convtime);
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< StateMessageTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << closestIndex << std::endl;
 
-        iEvHLED->SetRunNumber(nRunHLED);
-        iEvHLED->SetRevTimeTB(rTimeHLED);
+        // Find the closest weather time
+        int WXclosestIndex = findClosestIndex(WeatherTime, convtime);
+        //int WXclosestIndex = 3;
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< WeatherTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << WXclosestIndex << std::endl;
 
+
+
+        
+        // Addes the closetest index of each statemessage to the file using the IEvents class
+        iEvHLED->SetParametersFromTimestamp(
+            StateMessageHV[closestIndex],
+            StateMessageHVCurrent[closestIndex],
+            StateMessageSiPMTempatures[closestIndex],
+            StateMessageUCTempatures[closestIndex],
+            StateMessageMUSICPower[closestIndex],
+            StateMessageHVSwitch[closestIndex],
+            StateMessageASADCurrent[closestIndex],
+            StateMessageSIABCurrents[closestIndex],
+            StateMessageTBCurrent[closestIndex],
+            WeatherHumidity[WXclosestIndex],
+            WeatherTempature[WXclosestIndex]);
+        
+        
+        // //iEvHLED->SetRunNumber(nRunHLED);
+        // //iEvHLED->SetRevTimeTB(rTimeHLED);
+        fOut->cd();
         tMHLED->Fill();
     }
+	
+    for(int i = 0; i < tBiFocal->GetEntries(); i++){
+		
+        tBiFocal->GetEntry(i);
+
+        cout << "BiFocal Event# " << i <<" is being saved." << endl;
+        
+        // cout<<evBiFocal->GetTBTime()<<endl;
+        // cout<<normalizedTimeNs<<endl;
+        // cout<<timeAfterLaunch<<endl;;
+        iEvBiFocal->SetCoBoTime(evBiFocal->GetCoBoTime());
+        iEvBiFocal->SetUNIXTime(evBiFocal->GetUNIXTime());
+        iEvBiFocal->SetTBTime(evBiFocal->GetTBTime());
+
+        iEvBiFocal->SetEventType(0);
+        iEvBiFocal->SetROIPixelID(evBiFocal->GetROIPixelID());
+        iEvBiFocal->SetROIMusicID(evBiFocal->GetROIMusicID());
+        iEvBiFocal->SetSignalValue(evBiFocal->GetSignalValue());	
+	
+        GetTime((uint64_t)evBiFocal->GetTBTime());
+        std::cout << "Trigger Time (UTC): ";
+        std::cout << std::put_time(utcTime, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0') << std::setw(6) << microsec << std::endl;
+
+        // Find the closest statemessage time
+        int closestIndex = findClosestIndex(StateMessageTime, convtime);
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< StateMessageTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << closestIndex << std::endl;
+
+        // Find the closest weather time
+        int WXclosestIndex = findClosestIndex(WeatherTime, convtime);
+        //int WXclosestIndex = 3;
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< WeatherTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << WXclosestIndex << std::endl;
+
+
+
+        
+        // Addes the closetest index of each statemessage to the file using the IEvents class
+        iEvBiFocal->SetParametersFromTimestamp(
+            StateMessageHV[closestIndex],
+            StateMessageHVCurrent[closestIndex],
+            StateMessageSiPMTempatures[closestIndex],
+            StateMessageUCTempatures[closestIndex],
+            StateMessageMUSICPower[closestIndex],
+            StateMessageHVSwitch[closestIndex],
+            StateMessageASADCurrent[closestIndex],
+            StateMessageSIABCurrents[closestIndex],
+            StateMessageTBCurrent[closestIndex],
+            WeatherHumidity[WXclosestIndex],
+            WeatherTempature[WXclosestIndex]);
+        
+        
+        // //iEvBiFocal->SetRunNumber(nRunBiFocal);
+        // //iEvBiFocal->SetRevTimeTB(rTimeBiFocal);
+        fOut->cd();
+        tMBiFocal->Fill();
+	std::cout << "Hello World I am alive" << std::endl;
+    }
+/*
     for(int i = 0; i < tBiFocal->GetEntries(); i++){
         if(i%100 == 0){
             cout << "Processing BiFocal event: "<<i<<endl;
@@ -310,9 +380,7 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
         iEvBiFocal->SetROIMusicID(evBiFocal->GetROIMusicID());
         iEvBiFocal->SetSignalValue(evBiFocal->GetSignalValue());
 
-        iEvBiFocal->SetParametersFromTimestamp(timeAfterLaunch,data,data2);
-        iEvBiFocal->SetTelescopePointing(timeAfterLaunch,dataTilt);
-        iEvBiFocal->SetTelescopePointingRaw(timeAfterLaunch,dataTiltRaw);
+        iEvBiFocal->SetParametersFromTimestamp(timeAfterLaunch,data,StateMessageData);
 
         iEvBiFocal->SetRunNumber(nRunBF);
         iEvBiFocal->SetRevTimeTB(rTimeBiFocal);
@@ -320,19 +388,16 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
         fOut->cd();
         tMBiFocal->Fill();
     }
+*/
     for(int i = 0; i < tForced->GetEntries(); i++){
-        if(i%100 == 0){
-            cout << "Processing Forced event: "<<i<<endl;
-        }
-        fIn->cd();
+		
         tForced->GetEntry(i);
-        timeAfterLaunch = rTimeForced- normalizedTimeNs;
-        timeAfterLaunch = timeAfterLaunch/1e8;
-         if(timeAfterLaunch>0){
-            timeAfterLaunch = timeAfterLaunch/1e8;
-        }else{
-            timeAfterLaunch = 0;
-        }
+
+        cout << "Forced Event# " << i <<" is being saved." << endl;
+        
+        // cout<<evForced->GetTBTime()<<endl;
+        // cout<<normalizedTimeNs<<endl;
+        // cout<<timeAfterLaunch<<endl;;
         iEvForced->SetCoBoTime(evForced->GetCoBoTime());
         iEvForced->SetUNIXTime(evForced->GetUNIXTime());
         iEvForced->SetTBTime(evForced->GetTBTime());
@@ -340,31 +405,83 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
         iEvForced->SetEventType(0);
         iEvForced->SetROIPixelID(evForced->GetROIPixelID());
         iEvForced->SetROIMusicID(evForced->GetROIMusicID());
-        iEvForced->SetSignalValue(evForced->GetSignalValue());
+        iEvForced->SetSignalValue(evForced->GetSignalValue());	
+	
+        GetTime((uint64_t)evForced->GetTBTime());
+        std::cout << "Trigger Time (UTC): ";
+        std::cout << std::put_time(utcTime, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0') << std::setw(6) << microsec << std::endl;
 
-        iEvForced->SetParametersFromTimestamp(timeAfterLaunch,data,data2);
-        iEvForced->SetTelescopePointing(timeAfterLaunch,dataTilt);
-        iEvForced->SetTelescopePointingRaw(timeAfterLaunch,dataTiltRaw);
+        // Find the closest statemessage time
+        int closestIndex = findClosestIndex(StateMessageTime, convtime);
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< StateMessageTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << closestIndex << std::endl;
 
-        iEvForced->SetRunNumber(nRunForced);
-        iEvForced->SetRevTimeTB(rTimeForced);
+        // Find the closest weather time
+        int WXclosestIndex = findClosestIndex(WeatherTime, convtime);
+        //int WXclosestIndex = 3;
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< WeatherTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << WXclosestIndex << std::endl;
 
+
+
+        
+        // Addes the closetest index of each statemessage to the file using the IEvents class
+        iEvForced->SetParametersFromTimestamp(
+            StateMessageHV[closestIndex],
+            StateMessageHVCurrent[closestIndex],
+            StateMessageSiPMTempatures[closestIndex],
+            StateMessageUCTempatures[closestIndex],
+            StateMessageMUSICPower[closestIndex],
+            StateMessageHVSwitch[closestIndex],
+            StateMessageASADCurrent[closestIndex],
+            StateMessageSIABCurrents[closestIndex],
+            StateMessageTBCurrent[closestIndex],
+            WeatherHumidity[WXclosestIndex],
+            WeatherTempature[WXclosestIndex]);
+        
+        
+        // //iEvForced->SetRunNumber(nRunBiFocal);
+        // //iEvForced->SetRevTimeTB(rTimeBiFocal);
         fOut->cd();
         tMForced->Fill();
+	std::cout << "Hello World I am alive" << std::endl;
     }
+    // for(int i = 0; i < tForced->GetEntries(); i++){
+    //     if(i%100 == 0){
+    //         cout << "Processing Forced event: "<<i<<endl;
+    //     }
+    //     fIn->cd();
+    //     tForced->GetEntry(i);
+    //     timeAfterLaunch = rTimeForced- normalizedTimeNs;
+    //     timeAfterLaunch = timeAfterLaunch/1e8;
+    //      if(timeAfterLaunch>0){
+    //         timeAfterLaunch = timeAfterLaunch/1e8;
+    //     }else{
+    //         timeAfterLaunch = 0;
+    //     }
+    //     iEvForced->SetCoBoTime(evForced->GetCoBoTime());
+    //     iEvForced->SetUNIXTime(evForced->GetUNIXTime());
+    //     iEvForced->SetTBTime(evForced->GetTBTime());
+
+    //     iEvForced->SetEventType(0);
+    //     iEvForced->SetROIPixelID(evForced->GetROIPixelID());
+    //     iEvForced->SetROIMusicID(evForced->GetROIMusicID());
+    //     iEvForced->SetSignalValue(evForced->GetSignalValue());
+
+    //     iEvForced->SetParametersFromTimestamp(timeAfterLaunch,data,StateMessageData);
+
+    //     iEvForced->SetRunNumber(nRunForced);
+    //     iEvForced->SetRevTimeTB(rTimeForced);
+
+    //     fOut->cd();
+    //     tMForced->Fill();
+    // }
+
     for(int i = 0; i < tTest->GetEntries(); i++){
-        if(i%100 == 0){
-            cout << "Processing Test event: "<<i<<endl;
-        }
         fIn->cd();
         tTest->GetEntry(i);
-        timeAfterLaunch = rTimeTest- normalizedTimeNs;
-        timeAfterLaunch = timeAfterLaunch/1e8;
-         if(timeAfterLaunch>0){
-            timeAfterLaunch = timeAfterLaunch/1e8;
-        }else{
-            timeAfterLaunch = 0;
-        }
+        cout << "Test Event# " << i <<" is being saved." << endl;
+        
         iEvTest->SetCoBoTime(evTest->GetCoBoTime());
         iEvTest->SetUNIXTime(evTest->GetUNIXTime());
         iEvTest->SetTBTime(evTest->GetTBTime());
@@ -374,12 +491,46 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
         iEvTest->SetROIMusicID(evTest->GetROIMusicID());
         iEvTest->SetSignalValue(evTest->GetSignalValue());
 
-        iEvTest->SetParametersFromTimestamp(timeAfterLaunch,data,data2);
-        iEvTest->SetTelescopePointing(timeAfterLaunch,dataTilt);
-        iEvTest->SetTelescopePointingRaw(timeAfterLaunch,dataTiltRaw);
 
-        iEvTest->SetRunNumber(nRunTest);
-        iEvTest->SetRevTimeTB(rTimeTest);
+        GetTime((uint64_t)evTest->GetTBTime());
+        std::cout << "Trigger Time (UTC): ";
+        std::cout << std::put_time(utcTime, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0') << std::setw(6) << microsec << std::endl;
+
+        // Find the closest statemessage time
+        int closestIndex = findClosestIndex(StateMessageTime, convtime);
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< StateMessageTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << closestIndex << std::endl;
+
+        // Find the closest weather time
+        int WXclosestIndex = findClosestIndex(WeatherTime, convtime);
+        //int WXclosestIndex = 3;
+        std::cout << "Closest value to Event time: " << convtime << " is " << std::fixed << std::setprecision(0)<< WeatherTime[closestIndex] << std::endl;
+        std::cout << "Closest index: " << WXclosestIndex << std::endl;
+
+        
+        // // add the SiPM temps to the .root file
+        // std::vector<float> value = WeatherTempature[closestIndex];
+        // // std::cout << "First column values (divided by 10,000,000):" << std::endl;
+        // for (float v : value) {
+        //     std::cout << v << std::endl;
+        // }
+
+        iEvTest->SetParametersFromTimestamp(
+            StateMessageHV[closestIndex],
+            StateMessageHVCurrent[closestIndex],
+            StateMessageSiPMTempatures[closestIndex],
+            StateMessageUCTempatures[closestIndex],
+            StateMessageMUSICPower[closestIndex],
+            StateMessageHVSwitch[closestIndex],
+            StateMessageASADCurrent[closestIndex],
+            StateMessageSIABCurrents[closestIndex],
+            StateMessageTBCurrent[closestIndex],
+            WeatherHumidity[WXclosestIndex],
+            WeatherTempature[WXclosestIndex]);
+
+            
+        //iEvTest->SetRunNumber(nRunTest);
+        //iEvTest->SetRevTimeTB(rTimeTest);
 
         fOut->cd();
         tMTest->Fill();
@@ -389,7 +540,104 @@ int TelescopeInformationMerge (std::string filename1, std::string filename2, std
     fOut->Close();
     fIn->Close();
 
+    cout<< "SM and .root files merged Sucessfully"<< endl;
 
     return 0;
 }
 
+
+// Function to read a CSV file and return the data as a 2D vector
+std::vector<std::vector<std::string>> readCSV(const std::string& filePath) {
+    std::vector<std::vector<std::string>> data;
+    std::ifstream file(filePath);
+
+    if (!file.is_open()) {
+        std::cerr << "Could not open the file!" << std::endl;
+        return data;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::vector<std::string> fields = split(line, ',');
+        data.push_back(fields);
+    }
+
+    file.close();
+    return data;
+}
+void GetTime(uint64_t TriggerBoardTime){
+    convtime = (TriggerBoardTime / 100000000ULL);
+    
+    //Assuming timeTrig is in the format "seconds since epoch with 10^-7 second resolution"
+    time_t epochTime = static_cast<time_t>(convtime); // Convert to seconds
+    microsec = convtime % 1000000;
+    
+    // Convert to struct tm in UTC
+    utcTime = gmtime(&epochTime);
+
+}
+
+// Function to find the closest index to a given value
+std::time_t findClosestIndex(const std::vector<double>& sortedVec, double value) {
+    // Use lower_bound to find the position where 'value' would be inserted
+    auto it = std::lower_bound(sortedVec.begin(), sortedVec.end(), value);
+
+    // If 'it' is the beginning of the vector, return the first index
+    if (it == sortedVec.begin()) {
+        return 0;
+    }
+
+    // If 'it' is the end of the vector, return the last index
+    if (it == sortedVec.end()) {
+        return sortedVec.size() - 1;
+    }
+
+    // Calculate the distances to the nearest elements
+    int index = it - sortedVec.begin();
+    double distanceToLeft = value - sortedVec[index - 1];
+    double distanceToRight = sortedVec[index] - value;
+
+    // Return the closest index
+    return (distanceToLeft <= distanceToRight) ? index - 1 : index;
+}
+
+// Function to split a string into a vector based on a delimiter
+std::vector<std::string> split(const std::string& str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+void processRow(const std::vector<std::string>& row, std::vector<float>& destination, size_t start, size_t end) {
+    for (size_t i = start; i <= end; ++i) {
+        try {
+            destination.push_back(std::stod(row[i]));
+        } catch (const std::invalid_argument& e) {
+            //std::cerr << "Invalid number in column " << (i + 1) << ": " << row[i] << std::endl;
+        } catch (const std::out_of_range& e) {
+            //std::cerr << "Number out of range in column " << (i + 1) << ": " << row[i] << std::endl;
+        }
+    }
+}
+
+std::time_t convertToUnixTime(const std::string& datetime) {
+    struct tm tm{};
+    
+    // Parse the main date-time part "2024-07-19T00:49:26"
+    strptime(datetime.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
+    std::time_t time = mktime(&tm);
+
+    // Handling fractional seconds if present
+    std::size_t dotPos = datetime.find('.');
+    if (dotPos != std::string::npos) {
+        std::string fractionalPart = datetime.substr(dotPos + 1);
+        int milliseconds = std::stoi(fractionalPart);
+        time += milliseconds / 1000.0;
+    }
+
+    return time;
+}

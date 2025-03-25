@@ -6,23 +6,19 @@ IHealthTools::IHealthTools(){
 IHealthTools::~IHealthTools(){
 
 }
-
+//hasnt been modified for trinity so no comment yet
 bool IHealthTools::IsTimeInRange(unsigned long long lTime,unsigned long long lTimeStart, unsigned long long lTimeEnd){
 
 	return (lTime>=lTimeStart && lTime<=lTimeEnd);
 }
-bool IHealthTools::IsTiltInRange(float fTilt,float fTiltLow,float fTiltHigh){
 
-	return (fTilt>=fTiltLow && fTilt<=fTiltHigh);
-}
 
-std::vector<float> IHealthTools::CameraPeakingTime(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd,float fTiltLow,float fTiltHigh){
+std::vector<float> IHealthTools::CameraPeakingTime(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd){
 
 	IEvent *event = 0;
 	std::vector<float> hv ;
-	float tiltAngle;
 	unsigned long long timeStamp;
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
 	std::vector<float> pkTime = std::vector<float>(nPixelsCamera);
 	
@@ -39,10 +35,10 @@ std::vector<float> IHealthTools::CameraPeakingTime(IFile *file, int entry,unsign
 			file->treeHLED->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
+			
 			//cout<<"HV: "<<hv[0]<<endl;
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -62,9 +58,9 @@ std::vector<float> IHealthTools::CameraPeakingTime(IFile *file, int entry,unsign
 			file->treeBiFocal->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
+			
 
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -84,9 +80,8 @@ std::vector<float> IHealthTools::CameraPeakingTime(IFile *file, int entry,unsign
 			file->treeTest->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -106,9 +101,8 @@ std::vector<float> IHealthTools::CameraPeakingTime(IFile *file, int entry,unsign
 			file->treeForced->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -129,13 +123,12 @@ std::vector<float> IHealthTools::CameraPeakingTime(IFile *file, int entry,unsign
 
 	return pkTime;
 }
-std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd,float fTiltLow,float fTiltHigh){
+std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd){
 
 	IEvent *event = 0;
 	std::vector<float> hv ;
 	unsigned long long timeStamp;
-	float tiltAngle;
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
 	std::vector<float> amplitude = std::vector<float>(nPixelsCamera);
 	
@@ -152,10 +145,9 @@ std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry,unsigned
 			file->treeHLED->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle() - event->GetHorizon();
 			//cout<<"HV: "<<hv[0]<<endl;
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.2 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.2){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -175,9 +167,8 @@ std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry,unsigned
 			file->treeBiFocal->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle() - event->GetHorizon();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -197,9 +188,8 @@ std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry,unsigned
 			file->treeTest->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle() - event->GetHorizon();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -219,9 +209,8 @@ std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry,unsigned
 			file->treeForced->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle() - event->GetHorizon();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -248,8 +237,7 @@ std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry, std::st
 	Event *event = 0;
 	std::vector<float> hv ;
 	unsigned long long timeStamp;
-	float tiltAngle;
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
 	std::vector<float> amplitude = std::vector<float>(nPixelsCamera);
 	
@@ -318,7 +306,7 @@ std::vector<float> IHealthTools::CameraAmplitude(IFile *file, int entry, std::st
 std::vector<float> IHealthTools::CameraAmplitude(std::vector<std::vector<int>>traces, int iTWStart, int iTWEnd){
 
 	
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
 	std::vector<float> amplitude = std::vector<float>(nPixelsCamera);
 	
@@ -335,13 +323,12 @@ std::vector<float> IHealthTools::CameraAmplitude(std::vector<std::vector<int>>tr
 	return amplitude;
 }
 
-std::vector<float> IHealthTools::CameraPedestal(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd,float fTiltLow,float fTiltHigh){
+std::vector<float> IHealthTools::CameraPedestal(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd){
 
 	IEvent *event = 0;
 	std::vector<float> hv ;
 	unsigned long long timeStamp;
-	float tiltAngle;
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
 	std::vector<float> pedestal = std::vector<float>(nPixelsCamera);
 	
@@ -358,10 +345,9 @@ std::vector<float> IHealthTools::CameraPedestal(IFile *file,int entry,unsigned l
 			file->treeHLED->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
-			//cout<<"Tilt Angle: "<<tiltAngle<<endl;
+		
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -381,9 +367,8 @@ std::vector<float> IHealthTools::CameraPedestal(IFile *file,int entry,unsigned l
 			file->treeBiFocal->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -403,9 +388,8 @@ std::vector<float> IHealthTools::CameraPedestal(IFile *file,int entry,unsigned l
 			file->treeTest->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -425,9 +409,8 @@ std::vector<float> IHealthTools::CameraPedestal(IFile *file,int entry,unsigned l
 			file->treeForced->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -450,13 +433,12 @@ std::vector<float> IHealthTools::CameraPedestal(IFile *file,int entry,unsigned l
 	return pedestal;
 }
 
-std::vector<float> IHealthTools::CameraCharge(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd,float fTiltLow,float fTiltHigh){
+std::vector<float> IHealthTools::CameraCharge(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd){
 	IEvent *event = 0;
 	std::vector<float> hv ;
 	unsigned long long timeStamp;
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
-	float tiltAngle;
 
 	std::vector<float> charge = std::vector<float>(nPixelsCamera);
 	
@@ -474,10 +456,10 @@ std::vector<float> IHealthTools::CameraCharge(IFile *file,int entry,unsigned lon
 			file->treeHLED->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
+			
 			//cout<<"HV: "<<hv[0]<<endl;
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -497,9 +479,9 @@ std::vector<float> IHealthTools::CameraCharge(IFile *file,int entry,unsigned lon
 			file->treeBiFocal->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -519,9 +501,9 @@ std::vector<float> IHealthTools::CameraCharge(IFile *file,int entry,unsigned lon
 			file->treeTest->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -541,9 +523,8 @@ std::vector<float> IHealthTools::CameraCharge(IFile *file,int entry,unsigned lon
 			file->treeForced->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -566,13 +547,13 @@ std::vector<float> IHealthTools::CameraCharge(IFile *file,int entry,unsigned lon
 }
 
 
-std::vector<float> IHealthTools::CameraPedestalRMS(IFile *file, int entry, unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd,float fTiltLow,float fTiltHigh){
+std::vector<float> IHealthTools::CameraPedestalRMS(IFile *file, int entry, unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string treeName, float voltage, unsigned long long *eventTime,int iTWStart, int iTWEnd){
 	
 	IEvent *event = 0;
 	std::vector<float> hv ;
 	unsigned long long timeStamp;
-	int nPixelsCamera = 512;
-	float tiltAngle;
+	int nPixelsCamera = 256;
+
 
 	std::vector<float> pedestalRMS = std::vector<float>(nPixelsCamera);
 	
@@ -590,10 +571,10 @@ std::vector<float> IHealthTools::CameraPedestalRMS(IFile *file, int entry, unsig
 			file->treeHLED->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
+			
 			//cout<<"HV: "<<hv[0]<<endl;
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -613,9 +594,9 @@ std::vector<float> IHealthTools::CameraPedestalRMS(IFile *file, int entry, unsig
 			file->treeBiFocal->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<=0.1 ){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -635,9 +616,9 @@ std::vector<float> IHealthTools::CameraPedestalRMS(IFile *file, int entry, unsig
 			file->treeTest->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -657,9 +638,9 @@ std::vector<float> IHealthTools::CameraPedestalRMS(IFile *file, int entry, unsig
 			file->treeForced->GetEntry(entry);
 			timeStamp = event->GetTBTime();
 			hv = event->Gethv();
-			tiltAngle = event->GetTiltAngle();
 			
-			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 && IsTiltInRange(tiltAngle,fTiltLow,fTiltHigh)){
+			
+			if(timeStamp>=lTimeStart && timeStamp<=lTimeEnd && (TMath::Abs(hv[0]-voltage))<0.1 ){
 				*eventTime = timeStamp;
 				for(int j= 0; j<nPixelsCamera; j++){
 					p = new Pulse(event->GetSignalValue(j),iTWStart,iTWEnd);
@@ -682,7 +663,7 @@ std::vector<float> IHealthTools::CameraPedestalRMS(IFile *file, int entry, unsig
 }
 
 bool IHealthTools::IsBadEvent(std::vector<std::vector<int>> traces, int iTWStart, int iTWEnd, int nPixelsTolerance, int nSamplesTolerance){
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
 	int nTraceSamplesBad = 0;
 	int nPixelsBad = 0;
@@ -714,7 +695,7 @@ bool IHealthTools::IsBadEvent(std::vector<std::vector<int>> traces, int iTWStart
 }
 
 bool IHealthTools::IsBadEvent(IFile *file,int entry, std::string treeName, int iTWStart, int iTWEnd, int nPixelsTolerance, int nSamplesTolerance){
-	int nPixelsCamera = 512;
+	int nPixelsCamera = 256;
 
 	int nTraceSamplesBad = 0;
 	int nPixelsBad = 0;

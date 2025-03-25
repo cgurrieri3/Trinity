@@ -25,7 +25,6 @@ private:
 	int timeFWHM;/**< An int with the Full width at half max of the pulse*/
 	int timeFW;/**< An int wit the full width of the pulse*/
 	float pedestalRMS;/**< A float with the RMS of the pedestal values*/
-        float pedestalRMSError;/**< A float with the error on RMS of the pedestal values*/
 	Double_t timeIntegration;/**< A double with how many samples to use for integration*/
 	vector<Int_t> trace;/**< A std::vector with the trace to be analyzed*/
 
@@ -41,7 +40,6 @@ private:
 	 * 
 	 * */
 	void CalcPedestal(Int_t nSamplesPedestal);
-        void CalcPedestalError(Int_t nSamplesPedestal);
 	/**
 	 * A private member used to calculate the amplitude. The peaking time is used and the pedestal obtained from CalcPedestal(Int_t nSamplesPedestal) is subtracted.
 	 * 
@@ -143,12 +141,6 @@ public:
 	 * @return a float with the value of the pedestalRMS
 	 * */
 	float GetPedestalRMS();
-        /**
-	 * Public method to get the value stored in pedestalRMSError member
-	 * 
-	 * @return a float with the value of the pedestalRMSError
-	 * */
-	float GetPedestalRMSError();
 	/**
 	 * Public method to get the value stored in amplitude member
 	 * 

@@ -6,6 +6,7 @@ IFile::IFile(std::string filename,std::string mode){
 }
 
 void IFile::GetTrees(){
+	//gets all trees in root file
 	treeHLED = (TTree*)ITFile->Get("HLED");
 	treeBiFocal = (TTree*)ITFile->Get("BiFocal");
 	treeForced = (TTree*)ITFile->Get("Forced");
@@ -13,6 +14,7 @@ void IFile::GetTrees(){
 }
 
 int IFile::GetTreeID(std::string treeName){
+	//matches treeName to known trees and assigns it an ID
 	std::transform(treeName.begin(),treeName.end(),treeName.begin(),::toupper);
 	int treeID = 0;
 

@@ -35,10 +35,8 @@ Pulse::Pulse(ReadConfiguration *config, vector<Int_t> samples){
 	timeFWHM = 0;
 	timeFW = 0;
 	pedestalRMS = 0;
-        pedestalRMSError = 0;
 
 	CalcPedestal(config->nSamplesPedestal);
-        CalcPedestalError(config->nSamplesPedestal);
 	
 	if(config->amplitudeExtraction){
 		FindPeakTime(config->timeWindowStart, config->timeWindowEnd);
@@ -62,10 +60,8 @@ Pulse::Pulse(vector<Int_t> samples){
 	timeFWHM = 0;
 	timeFW = 0;
 	pedestalRMS = 0;
-        pedestalRMSError = 0;
 
 	CalcPedestal(100);
-        CalcPedestalError(100);
 	
 	FindPeakTime(200, 300);
 	FindPeak();
@@ -86,10 +82,8 @@ Pulse::Pulse(vector<Int_t> samples, Int_t tStart, Int_t tEnd, int nSamples, bool
 	timeFWHM = 0;
 	timeFW = 0;
 	pedestalRMS = 0;
-        pedestalRMSError = 0;
 
 	CalcPedestal(100);
-        CalcPedestalError(100);
 	
 	FindPeakTime(tStart, tEnd);
 	FindPeak();
@@ -112,10 +106,8 @@ Pulse::Pulse(vector<float> samples, Int_t tStart, Int_t tEnd, int nSamples, bool
 	timeFWHM = 0;
 	timeFW = 0;
 	pedestalRMS = 0;
-        pedestalRMSError = 0;
 
 	CalcPedestal(100);
-        CalcPedestalError(100);
 	
 	FindPeakTime(tStart, tEnd);
 	FindPeak();
@@ -180,18 +172,6 @@ void Pulse::CalcPedestal(Int_t nSamplesPedestal){
 }
 
 
-void Pulse::CalcPedestalError(int nSamplesPedestal) {
-    double varianceSum = 0;
-    for (int i = 0; i < nSamplesPedestal; i++) {
-        varianceSum += (trace[i] - pedestal) * (trace[i] - pedestal);
-    }
-    double sampleVariance = varianceSum / nSamplesPedestal;
-
-    // Standard error of the RMS
-    pedestalRMSError = sqrt(sampleVariance) / sqrt(2 * nSamplesPedestal);
-}
-
-
 void Pulse::CalcAmplitude(){
 	amplitude = pedestal - amplitude;
 	if(amplitude<0){
@@ -240,10 +220,6 @@ Double_t Pulse::GetPedestal(){
 
 float Pulse::GetPedestalRMS(){
 	return pedestalRMS;
-}
-
-float Pulse::GetPedestalRMSError(){
-	return pedestalRMSError;
 }
 
 int Pulse::GetAmplitude(){

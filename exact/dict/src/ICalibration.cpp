@@ -14,7 +14,7 @@ ICalibration::ICalibration(const std::string& filename)
     // Read data lines and populate the vectors
     while (std::getline(file, line)) {
         std::istringstream iss(line);
-       //std::cout << line << endl;
+        //std::cout << line << endl;
         double pixelID, amplitude, errAmplitude, charge, errCharge;
         iss >> pixelID >> amplitude >> errAmplitude >> charge >> errCharge;
         amplitudes.push_back(amplitude);
@@ -66,9 +66,8 @@ std::vector<double> ICalibration::GetVOffsetPx(){
 }
 
 double ICalibration::GetMeasurementFromFile(int pixelID, double sipmTemp, double OperatingVol, std::string filename, std::string measurement, std::string biasVoltageRef){
-
+	
     std::transform(biasVoltageRef.begin(), biasVoltageRef.end(), biasVoltageRef.begin(), ::toupper);
-
     if(biasVoltageRef.compare("ABS")==0){
         OperatingVol = OperatingVol - VOffsetPx[pixelID]/1000.0;
     }else if(biasVoltageRef.compare("REL")==0){

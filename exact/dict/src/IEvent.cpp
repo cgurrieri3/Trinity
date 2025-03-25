@@ -11,33 +11,28 @@ IEvent::IEvent(){
     closestTimestamp1 = 0;
     closestTimestamp2 = 0;*/
 
-    latitude = 0.0f;
-    longitude = 0.0f;
-    altitude = 0;
+
     sunAzimuth = 0.0f;
     sunElevation = 0.0f;
     moonAzimuth = 0.0f;
     moonElevation = 0.0f;
-    horizon = 0.0f;
-    azimuth = 0.0f;
+    moonIllumination = 0.0f;
+    CameraRA = 0.0f;
+    CameraDEC = 0.0f;
 
     TrigEvent = 0;
-    TempFlag = 0;
-    emon1 = 0;
-    emon2 = 0;
-    hv.resize(8, 0.0f);
-    hvc.resize(8, 0.0f);
-    ucTemp.resize(32, 0.0f);
-    CpuTemp = 0;
-    CoboTemp = 0;
-    RadTemp = 0;
-    lvpsVol = 0.0f;
-    pumpVol = 0.0f;
-    lvpsCur = 0;
-    pumpCur = 0;
-    siabMPWR.resize(32, 0);
-    hvSW.resize(32, 0);
-    sipmTemp.resize(32, 0.0f);
+    ASADcurr =0.0f;
+    TBcurr=0.0f;
+    hv.resize(4, 0.0f);
+    hvc.resize(4, 0.0f);
+    ucTemp.resize(16, 0.0f);
+    siabMPWR.resize(16, 0);
+    hvSW.resize(16, 0);
+    sipmTemp.resize(16, 0.0f);
+    siabCurr.resize(16,0.0f);
+    outsideTempature = 0.0f;
+    humidity=0.0f;
+
 }
 
 // void IEvent::LoadFromFile(const std::string& filename1, const std::string& filename2) {
@@ -129,103 +124,165 @@ IEvent::IEvent(){
 //     file2.close();
 // }
 
-void IEvent::SetParametersFromTimestamp(int timestamp,std::vector<std::vector<std::string>> data, std::vector<std::vector<std::string>> data2) {
+void IEvent::SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg,std::vector<float> SunAzi_arg, std::vector<float> SunEle_arg, std::vector<float> MoonAzi_arg, std::vector<float> MoonEle_arg, std::vector<float> MoonIll_arg,std::vector<float> CamRA_arg,std::vector<float> CamDEC_arg ) {
+
+//creating vector with m and b values for SIPM Temp
+	std::string SIPMfilen  = "/storage/hive/project/phy-otte/nlew3/exact/data/SiPMTempatureCorrections.csv";
+	std::ifstream SIPMfile(SIPMfilen);
+	std::string line1;
+    std::vector<std::vector<float>> SIPMdata;
+
+   // Skip the first row
+    std::getline(SIPMfile, line1);
+
+    while (std::getline(SIPMfile, line1)) {
+        std::stringstream ss(line1);
+        std::string cell;
+        std::vector<float> row;
+
+        // Skip the first column
+        std::getline(ss, cell, ',');
+
+        // Read only the next 2 columns
+        for (int i = 0; i < 2; ++i) {
+            if (std::getline(ss, cell, ',')) {
+                row.push_back(stof(cell));
+            }
+        }
+
+        SIPMdata.push_back(row);
+    }	 
+
+//creating vector with m and b values for UC Temp
+    std::string UCfilen  = "/storage/hive/project/phy-otte/nlew3/exact/data/UCTempatureCorrections.csv";
+    std::ifstream UCfile(UCfilen);
+    std::string line2;
+    std::vector<std::vector<float>> UCdata;
+
+   // Skip the first row
+    std::getline(UCfile, line2);
+
+    while (std::getline(UCfile, line2)) {
+        std::stringstream ss(line2);
+        std::string cell;
+        std::vector<float> row;
+
+        // Skip the first column
+        std::getline(ss, cell, ',');
+
+        // Read only the next 2 columns
+        for (int i = 0; i < 2; ++i) {
+            if (std::getline(ss, cell, ',')) {
+                row.push_back(stof(cell));
+            }
+        }
+
+        UCdata.push_back(row);
+    }
+
+	// Just set the Parmeters from the arguments of the function
+
+    for (int j = 0; j < hv_arg.size(); ++j) {
+        hv[j] = hv_arg[j];
+    }
+    for (int j = 0; j < hvc_arg.size(); ++j) {
+        hvc[j] = hvc_arg[j];
+    }
+    for (int j = 0; j < UCtemps_arg.size(); ++j) { 
+	float UCy = UCdata[j][0] * UCtemps_arg[j] +  UCdata[j][1];
+	std::string str_UCy = std::to_string(UCy);	
+	 ucTemp[j] = UCy;
+	//ucTemp[j] = UCtemps_arg[j];
+    }
+    for (int j = 0; j < MUSICpower_arg.size(); ++j) {
+        siabMPWR[j] = MUSICpower_arg[j];
+    }
+    for (int j = 0; j < HVswitch_arg.size(); ++j) {
+        hvSW[j] = HVswitch_arg[j];
+    }
+    for (int j = 0; j < sipmTemp_arg.size(); ++j) {	
+		float SIPMy = SIPMdata[j][0] * sipmTemp_arg[j] +  SIPMdata[j][1];
+		std::string str_SIPMy = std::to_string(SIPMy);	
+        sipmTemp[j] = SIPMy;
+
+    }
+
+
+    ASADcurr = ASADcurr_arg[0];
+    
+
+    for (int j = 0; j < siabCurr_arg.size(); ++j) {
+        siabCurr[j] = siabCurr_arg[j];
+    }
+
+   TBcurr = TBCurr_arg[0];
+
+    outsideTempature = OutTemp_arg[0]; 
+    humidity= Humid_arg[0];
+
+					
+    sunAzimuth = SunAzi_arg[0];
+    sunElevation = SunEle_arg[0];
+    moonAzimuth = MoonAzi_arg[0];
+    moonElevation = MoonEle_arg[0];
+    moonIllumination = MoonIll_arg[0];
+    CameraRA = CamRA_arg[0];
+    CameraDEC = CamDEC_arg[0];
+
     // Find closest timestamp in the first file
-    int closestTimestamp1 = findClosestTimestamp(data, timestamp);
+    //int closestTimestamp1 = findClosestTimestamp(data, timestamp);
    /* if (closestTimestamp1 != timestamp) {
         std::cout << "Given timestamp not found in the first file. Closest timestamp is: " << closestTimestamp1 << std::endl;
     }*/
 
     // Find closest timestamp in the second file
-    int closestTimestamp2 = findClosestTimestamp(data2, timestamp);
+    //int closestTimestamp2 = findClosestTimestamp(data2, timestamp);
     /*if (closestTimestamp2 != timestamp) {
         std::cout << "Given timestamp not found in the second file. Closest timestamp is: " << closestTimestamp2 << std::endl;
     }*/
 
     // Set parameters from the first file
-    for (int i = 0; i < data.size(); ++i) {
-        if (std::stoi(data[i][0]) == closestTimestamp1) {
-            latitude = std::stof(data[i][1]);
-            longitude = std::stof(data[i][2]);
-            altitude = std::stoi(data[i][3]);
-            sunAzimuth = std::stof(data[i][4]);
-            sunElevation = std::stof(data[i][5]);
-            moonAzimuth = std::stof(data[i][6]);
-            moonElevation = std::stof(data[i][7]);
-            horizon = std::stof(data[i][8]);
-            azimuth = std::stof(data[i][9]);
-            break;
-        }
-    }
+    // for (int i = 0; i < data.size(); ++i) {
+    //     if (std::stoi(data[i][0]) == closestTimestamp1) {
+    //         latitude = std::stof(data[i][1]);
+    //         longitude = std::stof(data[i][2]);
+    //         altitude = std::stoi(data[i][3]);
+    //         sunAzimuth = std::stof(data[i][4]);
+    //         sunElevation = std::stof(data[i][5]);
+    //         moonAzimuth = std::stof(data[i][6]);
+    //         moonElevation = std::stof(data[i][7]);
+    //         horizon = std::stof(data[i][8]);
+    //         azimuth = std::stof(data[i][9]);
+    //         break;
+    //     }
+    // }
 
-    // Set parameters from the second file
-    for (int i = 0; i < data2.size(); ++i) {
-        if (std::stoi(data2[i][0]) == closestTimestamp2) {
-            TrigEvent = std::stoi(data2[i][1]);
-            TempFlag = std::stoi(data2[i][2]);
-            emon1 = std::stoi(data2[i][3]);
-            emon2 = std::stoi(data2[i][4]);
-            for (int j = 0; j < 8; ++j) {
-                hv[j] = std::stof(data2[i][j + 5]);
-            }
-            for (int j = 0; j < 8; ++j) {
-                hvc[j] = std::stof(data2[i][j + 13]);
-            }
-            for (int j = 0; j < 32; ++j) {
-                ucTemp[j] = std::stof(data2[i][j + 21]);
-            }
-            CpuTemp = std::stoi(data2[i][53]);
-            CoboTemp = std::stoi(data2[i][54]);
-            RadTemp = std::stoi(data2[i][55]);
-            lvpsVol = std::stof(data2[i][56]);
-            pumpVol = std::stof(data2[i][58]);
-            lvpsCur = std::stoi(data2[i][57]);
-            pumpCur = std::stoi(data2[i][59]);
-            for (int j = 0; j < 32; ++j) {
-                siabMPWR[j] = std::stoi(data2[i][j + 60]);
-            }
-            for (int j = 0; j < 32; ++j) {
-                hvSW[j] = std::stoi(data2[i][j + 91]);
-            }
-            for (int j = 0; j < 32; ++j) {
-                sipmTemp[j] = std::stof(data2[i][j + 122]);
-            }
-            break;
-        }
-    }
+    // // Set parameters from the second file
+    // for (int i = 0; i < data2.size(); ++i) {
+    //     if (std::stoi(data2[i][0]) == closestTimestamp2) {
+    //         TrigEvent = std::stoi(data2[i][1]);
+    //         for (int j = 0; j < 4; ++j) {
+    //             hv[j] = std::stof(data2[i][j + 2]);
+    //         }
+    //         for (int j = 0; j < 4; ++j) {
+    //             hvc[j] = std::stof(data2[i][j + 6]);
+    //         }
+    //         for (int j = 0; j < 16; ++j) {
+    //             ucTemp[j] = std::stof(data2[i][j + 10]);
+    //         }
+    //         for (int j = 0; j < 16; ++j) {
+    //             siabMPWR[j] = std::stoi(data2[i][j + 26]);
+    //         }
+    //         for (int j = 0; j < 16; ++j) {
+    //             hvSW[j] = std::stoi(data2[i][j + 42]);
+    //         }
+    //         for (int j = 0; j < 16; ++j) {
+    //             sipmTemp[j] = std::stof(data2[i][j + 58]);
+    //         }
+    //         break;
+    //     }
 }
 
-void IEvent::SetTelescopePointing (int timestamp,std::vector<std::vector<std::string>> data){
-
-    int nearTimeStamp = findClosestTimestamp(data, timestamp);
-    bool isFound = false;
-    int i = 0;
-
-   while(!isFound && i<data.size()){
-        if (std::stoi(data[i][0]) == nearTimeStamp) {
-            tiltAngle = std::stof(data[i][3]);
-            isFound = true;
-        }
-        i++;
-    }
-
-}
-
-void IEvent::SetTelescopePointingRaw(int timestamp,std::vector<std::vector<std::string>> data){
-
-    int nearTimeStamp = findClosestTimestamp(data, timestamp);
-    bool isFound = false;
-    int i = 0;
-
-   while(!isFound && i<data.size()){
-        if (std::stoi(data[i][0]) == nearTimeStamp) {
-            tiltAngleRaw = std::stof(data[i][1]);
-            isFound = true;
-        }
-        i++;
-    }
-
-}
 
 int IEvent::GetclosestTimestamp1() const {
     return 0;
@@ -235,17 +292,6 @@ int IEvent::GetclosestTimestamp2() const {
     return 0;
 }
 
-float IEvent::GetLatitude() const {
-    return latitude;
-}
-
-float IEvent::GetLongitude() const {
-    return longitude;
-}
-
-int IEvent::GetAltitude() const {
-    return altitude;
-}
 
 float IEvent::GetSunAzimuth() const {
     return sunAzimuth;
@@ -263,29 +309,15 @@ float IEvent::GetMoonElevation() const {
     return moonElevation;
 }
 
-float IEvent::GetHorizon() const {
-    return horizon;
+float IEvent::GetMoonIlluminaiton() const {
+    return moonIllumination;
 }
 
-float IEvent::GetAzimuth() const {
-    return azimuth;
-}
 
 int IEvent::GetTrigEvent() const {
     return TrigEvent;
 }
 
-int IEvent::GetTempFlag() const {
-    return TempFlag;
-}
-
-int IEvent::GetEmon1() const {
-    return emon1;
-}
-
-int IEvent::GetEmon2() const {
-    return emon2;
-}
 
 const std::vector<float>& IEvent::Gethv() const {
     return hv;
@@ -299,33 +331,6 @@ const std::vector<float>& IEvent::GetUCTemp() const {
     return ucTemp;
 }
 
-int IEvent::GetCpuTemp() const {
-    return CpuTemp;
-}
-
-int IEvent::GetCoboTemp() const {
-    return CoboTemp;
-}
-
-int IEvent::GetRadTemp() const {
-    return RadTemp;
-}
-
-float IEvent::GetlvpsVol() const {
-    return lvpsVol;
-}
-
-float IEvent::GetpumpVol() const {
-    return pumpVol;
-}
-
-int IEvent::GetlvpsCur() const {
-    return lvpsCur;
-}
-
-int IEvent::GetpumpCur() const {
-    return pumpCur;
-}
 
 const std::vector<int>& IEvent::GetsiabMPWR() const {
     return siabMPWR;
@@ -338,6 +343,29 @@ const std::vector<int>& IEvent::GethvSW() const {
 const std::vector<float>& IEvent::GetSiPMTemp() const {
     return sipmTemp;
 }
+
+const std::vector<float>& IEvent::GetSIABCurrent() const {
+    return siabCurr;
+}
+
+float IEvent::GetASADCurrent() const{
+    return ASADcurr;
+}
+
+float IEvent::GetTBCurrent() const{
+    return TBcurr;
+}
+
+float IEvent::GetOutsideTempature() const{
+    return outsideTempature;
+}
+
+float IEvent::GetHumidity() const{
+    return humidity;
+}
+
+
+
 
 int IEvent::findClosestTimestamp(const std::vector<std::vector<std::string>>& data, int timestamp) const {
     int closestTimestamp = std::stoi(data[0][0]);
@@ -383,27 +411,4 @@ IEvent::~IEvent(){
 
 }
 
-float IEvent::GetTiltAngle() const{
-    return tiltAngle;
-}
 
-float IEvent::GetTiltAngleRaw() const{
-    return tiltAngleRaw;
-}
-
-void IEvent::SetRunNumber(int n) {
-    runNumber = n;
-}
-
-int IEvent::GetRunNumber() const{
-    return runNumber;
-}
-
-
-void IEvent::SetRevTimeTB(unsigned long long tTime){
-    rTimeTB = tTime;
-}
-
-unsigned long long IEvent::GetRevTimeTB() const{
-    return rTimeTB;
-}

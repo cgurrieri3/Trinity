@@ -59,9 +59,10 @@ std::string IUtilities::ConvertUnixToUTCfromFile(long long unixTimestampInNanose
     return oss.str();
 }
 
+
 int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,int musicID){
 	int iStartPixel, iEndPixel;
-
+	//looks for pixels in specified music ID if none start from pixel#0
 	if(musicID != -1){
 		iStartPixel = musicID*8;
 		iEndPixel = musicID*8+8;
@@ -72,6 +73,7 @@ int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,int musicID){
 
 	int max = 0;
 	int maxID = 0;
+	//looks for the pixel with highest amplitude
 	for(int i = iStartPixel; i<iEndPixel; i++){
 		if(amplitude[i]>max){
 			max = amplitude[i];
@@ -88,7 +90,7 @@ int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,std::vector<int> r
 
 	int max = 0;
 	int maxID = 0;
-
+	//If no region of interest pixels specified look for highest amplitude out of pixels starting from pixel#0 -> amplitude.size()
 	if(roiPixels.size() == 0){
 		iStartPixel = 0;
 		iEndPixel = amplitude.size();
@@ -99,6 +101,7 @@ int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,std::vector<int> r
 				maxID = i;
 			}
 		}
+	//if roi pixels specified looks for pixel with highest amplitude
 	}else{
 		for(int i = 0; i<roiPixels.size(); i++){
 			if(amplitude[roiPixels[i]]>max){
@@ -112,7 +115,7 @@ int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,std::vector<int> r
 
 float IUtilities::GetMaximum(std::vector<float>amplitude,int musicID){
 	int iStartPixel, iEndPixel;
-
+	//if music ID is none  start from music #0
 	if(musicID != -1){
 		iStartPixel = musicID*8;
 		iEndPixel = musicID*8+8;
@@ -120,7 +123,7 @@ float IUtilities::GetMaximum(std::vector<float>amplitude,int musicID){
 		iStartPixel = 0;
 		iEndPixel = amplitude.size();
 	}
-
+	//find max amplitude out of vector
 	float max = 0;
 	int maxID = 0;
 	for(int i = iStartPixel; i<iEndPixel; i++){
@@ -139,7 +142,8 @@ float IUtilities::GetMaximum(std::vector<float>amplitude,std::vector<int> roiPix
 
 	float max = 0;
 	int maxID = 0;
-
+	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitde.size()
+	//returns max amplitude
 	if(roiPixels.size() == 0){
 		iStartPixel = 0;
 		iEndPixel = amplitude.size();
@@ -163,7 +167,8 @@ float IUtilities::GetMaximum(std::vector<float>amplitude,std::vector<int> roiPix
 
 int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,int musicID){
 	int iStartPixel, iEndPixel;
-
+	
+	//looks for pixels in specified music ID
 	if(musicID != -1){
 		iStartPixel = musicID*8;
 		iEndPixel = musicID*8+8;
@@ -171,7 +176,7 @@ int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,int musicID){
 		iStartPixel = 0;
 		iEndPixel = amplitude.size();
 	}
-
+	//returns min amplitude ID out of pixels in music
 	float min = 4096;
 	int minID = 0;
 	for(int i = iStartPixel; i<iEndPixel; i++){
@@ -187,7 +192,9 @@ int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,int musicID){
 int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,std::vector<int> roiPixels){
 	int iStartPixel, iEndPixel;
 
+	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitude.size()
 
+	//returns min amplitude ID out of pixels in roiPixels vector
 	float min = 4096;
 	int minID = 0;
 
@@ -215,7 +222,8 @@ int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,std::vector<int> r
 float IUtilities::GetMinimum(std::vector<float>amplitude,int musicID){
 	int iStartPixel, iEndPixel;
 
-	if(musicID != -1){
+	//looks for pixels in specified music ID if none start from pixel 0	
+	if(musicID != -2){
 		iStartPixel = musicID*8;
 		iEndPixel = musicID*8+8;
 	}else{
@@ -225,6 +233,7 @@ float IUtilities::GetMinimum(std::vector<float>amplitude,int musicID){
 
 	float min = 4096;
 	int minID = 0;
+	//returns min amplitude out of pixels in music
 	for(int i = iStartPixel; i<iEndPixel; i++){
 		if(amplitude[i]<min){
 			min = amplitude[i];
@@ -238,6 +247,8 @@ float IUtilities::GetMinimum(std::vector<float>amplitude,int musicID){
 float IUtilities::GetMinimum(std::vector<float>amplitude,std::vector<int> roiPixels){
 	int iStartPixel, iEndPixel;
 
+	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitde.size()
+	//returns min amplitude out of pixels in roiPixels vector
 
 	float min = 4096;
 	int minID = 0;
@@ -264,11 +275,14 @@ float IUtilities::GetMinimum(std::vector<float>amplitude,std::vector<int> roiPix
 }
 
 float IUtilities::GetPedestalAverage(std::vector<int> trace, int tWindow,int pad, bool isUnCorrelated){
+	//create window for which to view trace samples
 	std::vector<int> traceWindow = std::vector<int>(0);
 	std::vector<int>::iterator itr;
 	float average;
 	float sum=0;
 	int counter = 0;
+	//if isUnCorrelated is true, then following pad samples are skipped
+	//calculates sum of all trace values in vector
 	if(isUnCorrelated){
 		for(int i = 0; i+tWindow<trace.size(); i+=(tWindow+pad)){
 			traceWindow = std::vector<int>(trace.begin()+i,trace.begin()+i+tWindow);
@@ -276,19 +290,20 @@ float IUtilities::GetPedestalAverage(std::vector<int> trace, int tWindow,int pad
 			counter++;
 			traceWindow.clear();
 		}
+	//same as above expect pad samples not skipped
 	}else{
 		sum = std::accumulate(trace.begin(),trace.end(),0);
 		counter = 1;
 		tWindow = trace.size();
 	}
-
+	//returns average trace value
 	average = sum/(float)(counter*tWindow);
 	return average;
 }
 
 
 std::vector<std::string> IUtilities::GetFilesInDirectory(std::string dirname, std::string extension){
-
+	//looks through all files in directory with given extension
 	std::vector<std::string> files;
 	std::string fileName;
 	DIR *dir = opendir(dirname.c_str());
@@ -309,19 +324,22 @@ std::vector<std::string> IUtilities::GetFilesInDirectory(std::string dirname, st
 }
 
 int IUtilities::GetHVChannel(int pixelID){
-	int offset;
-	offset = pixelID/256;
-	while(pixelID>=128){
-		pixelID = pixelID%128;
-
-	}
-	int hVChannel = (pixelID/32);
-
-	return (hVChannel + offset*4);
+	// given pixelID calculates hVChannel # bottom left 1, top left 2, bottom right 3, top right 4
+	int hVChannel;
+	if ((pixelID >= 0 && pixelID <= 31) || (pixelID >= 64 && pixelID <= 95)) {
+		hVChannel = 1;
+    } else if ((pixelID >= 128 && pixelID <= 159) || (pixelID >= 192 && pixelID <= 223)) {
+		hVChannel = 2;
+	}else if ((pixelID >= 32 && pixelID <= 63) || (pixelID >= 96 && pixelID <= 127)) {
+		hVChannel = 3;
+	}else if ((pixelID >= 160 && pixelID <= 191) || (pixelID >= 224 && pixelID <= 255)) {
+		hVChannel = 4;
+    }
+	return hVChannel;
 }
 
 double IUtilities::Interpolate(double x1, double y1, double x2, double y2, double xNew){
-
+//uses linear interpolation between data points and returns slopes
 	double slope = (y2 - y1)/(x2 - x1);
     double offset = y2 - x2*slope;
 

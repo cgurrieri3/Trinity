@@ -5,7 +5,6 @@
 #include "Event.h"
 
 using namespace std;
-
 /**
  * \class IEvent
  * \brief Class that contains the raw data plus the auxilliary data
@@ -34,44 +33,32 @@ class IEvent : public Event{
 
 	private:
 		// Parameters from the first file
-		float latitude;/**< float containing geographic latitude of the balloon*/
-		float longitude;/**< float containing geographic longitude of the balloon*/
-		int altitude;/**< int containing the altitude of the balloon*/
 		float sunAzimuth;/**< float containing the azimuth of the Sun*/
 		float sunElevation;/**< float containing the elevation of the Sun*/
 		float moonAzimuth;/**< float containing the azimuth of the Moon*/
 		float moonElevation;/**< float containing the elevation of the Moon*/
-		float horizon;/**< float containing the location of the horizon in degrees*/
-		float azimuth;/**< float containing the azimuth pointing of the telescope*/
+		float moonIllumination;/**< float containing the elevation of the Moon*/
+		float CameraRA;/**< float containing the part of the sky in the FOV RA*/
+    	float CameraDEC;/**< float containing the part of the sky in the FOV DEC*/
+
 
 		// Parameters from the second file
 		int TrigEvent; /**< int containing the number of triggers in the run*/
-		int TempFlag; /**< int flipping between temperature of SiPM or MicroController (obsolete)*/
-		int emon1;/**< int with first emon reading*/
-		int emon2;/**< int with second emon reading*/
 		std::vector<float> hv; /**< std::vector of size 8 containing the setting of the 8 different high voltage channels*/
 		std::vector<float> hvc;/**< std::vector of size 8 containing the current of the * different high voltage channels*/
 		std::vector<float> ucTemp; /**< std::vector of size 32 containing the temperature for the 32 microControllers*/
-		int CpuTemp;/**< int containing the temperature of the CPU*/
-		int CoboTemp;/**< int containing the temperature of the CoBo*/
-		int RadTemp;/**< int containing the temperature of the radiator*/
-		float lvpsVol;/**< float containing the output voltage of the LVPS*/
-		float pumpVol;/**< float containing the ouptu voltage to the pumps*/
-		int lvpsCur;/**< int contiaing the output current of the LVPS*/
-		int pumpCur;/**< int containing the current of the pump*/
 		std::vector<int> siabMPWR;/**< std::vector<int> of the MUSIC power switch*/
 		std::vector<int> hvSW;/**< std::vector<int> of the High voltage power switch*/
 		std::vector<float> sipmTemp;/**< std::vector<float> of the temperature of the SiPM matrices*/
+		std::vector<float> siabCurr;
+		float ASADcurr;
+		float TBcurr;
 
-		// Tilt Sensor information
-		float tiltAngle;/**< float with the corrected tilt angle without voltage sag*/
-		float tiltAngleRaw;/**< float containing the raw tilt angle from state messages*/
+		// Parameters from the weather file
+		float outsideTempature;
+		float humidity;
 
-		//Run Number
-		int runNumber;/**< int containing the number of the run*/
 
-		//Revised Trigger Time
-		unsigned long long rTimeTB;/**< unsigned long long containing the revised TB Time**/
 
 
 	public:
@@ -85,22 +72,8 @@ class IEvent : public Event{
 		 * @param data A std::vector of strings with size row x cols from the .csv file containing the balloon infromation.
 		 * @param data2 A std::vector of strings containing the state message information.
 		 * */
-		void SetParametersFromTimestamp(int timestamp,std::vector<std::vector<std::string>> data,std::vector<std::vector<std::string>> data2);
-		/**
-		 * Public method to fill in the tiltAngle class members.
-		 * 
-		 * @param timestamp An int storing the time of trigger in seconds after a preset vlaue (May 13th)
-		 * @param data A std::vector of strings with size row x cols from the .csv file containing the tilt infromation.
-		 * */
-		void SetTelescopePointing(int timestamp, std::vector<std::vector<std::string>> data);
-		/**
-		 * Public method to fill in the tiltAngleRaw class members.
-		 * 
-		 * @param timestamp An int storing the time of trigger in seconds after a preset vlaue (May 13th)
-		 * @param data A std::vector of strings with size row x cols from the .csv file containing the tilt infromation.
-		 * 
-		 * */
-		void SetTelescopePointingRaw(int timestamp, std::vector<std::vector<std::string>> data);
+		//void SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg);
+		void SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg,std::vector<float> sunAzi_arg, std::vector<float> SunEle_arg, std::vector<float> MoonAzi_arg, std::vector<float> MoonEle_arg,std::vector<float> MoonIll_arg, std::vector<float> CamRA_arg, std::vector<float> CamDEC_arg);
 		/**
 		 * Public method to get the closest timestamp to the event in the auxilliary data file1.
 		 * 
@@ -113,24 +86,6 @@ class IEvent : public Event{
 		 * @return An int with the closest timestamp
 		 * */
 		int GetclosestTimestamp2() const;
-		/**
-		 * Public method to get the geographic latitute of the balloon at the time the event was recorded.
-		 * 
-		 * @return A float with the latitude in degrees
-		 * */
-		float GetLatitude() const;
-		/**
-		 * Public method to get the geographic longitude of the balloon at the time the event was recorded.
-		 * 
-		 * @return A float with the longitude in degrees
-		 * */
-		float GetLongitude() const;
-		/**
-		 * Public method to get the altitude of the balloon at the time the event was recorded.
-		 * 
-		 * @return An int with the altitude in meters
-		 * */
-		int GetAltitude() const;
 		/**
 		 * Public method to get the azimuth of the Sun's location in degrees
 		 * 
@@ -156,40 +111,18 @@ class IEvent : public Event{
 		 * */
 		float GetMoonElevation() const;
 		/**
-		 * Public method to get the horizon as seen from the balloon in degrees
+		 * Public method to get the illumination of the Moon in 0.xx
 		 * 
-		 * @return A float with the horizon location in degrees
+		 * @return A float with the  Moon in 0.xx
 		 * */
-		float GetHorizon() const;
-		/**
-		 * Public method to get the azimuth of the telescope's orientation in degrees
-		 * 
-		 * @return A float with the azimuthal orientation in degrees
-		 * */
-		float GetAzimuth() const;
+
+		float GetMoonIlluminaiton() const;
 		/**
 		 * Public method to get the number of triggered events in the run
 		 * 
 		 * @return An int with the number of triggered events
 		 * */
 		int GetTrigEvent() const;
-		/**
-		 * Public method to get if the temperature of in the log is of the microController or the SiPMs
-		 * (deprecated)
-		 * 
-		 * @return An int switch
-		 * */
-		int GetTempFlag() const;
-		/**
-		 * Public method to get the emon1 reading
-		 * 
-		 * @return An int with the emon reading in pW
-		 * */
-		int GetEmon1() const;
-		/**
-		 * @see GetEmon1()
-		 * */
-		int GetEmon2() const;
 		/**
 		 * Public method to get the std::vector of size 8 (typically) that contains the high voltage setting for each of the 8 channels.
 		 * 
@@ -213,48 +146,7 @@ class IEvent : public Event{
 		 * 
 		 * @return An int with the CPU temperature in C
 		 * */
-		int GetCpuTemp() const;
-		/**
-		 * Public method to get the temperature of the CoBo
-		 * 
-		 * @return An int with the CoBo temperature in C
-		 * */
-		int GetCoboTemp() const;
-		/**
-		 * Public method to get the temperature of the radiator
-		 * 
-		 * @return An int with the radiator temperature in C
-		 * */
-		int GetRadTemp() const;
-		/**
-		 * Public method to get the output voltage of the LVPS
-		 * 
-		 * @return A float with the output voltage in V
-		 * */
-		float GetlvpsVol() const;
-		/**
-		 * Public method to get the output voltage to the pumps
-		 * 
-		 * @return A float with the output voltage in V
-		 * */
-		float GetpumpVol() const;
-		/**
-		 * Public method to get the output current of the LVPS
-		 * 
-		 * @return An int with the output current in mA
-		 * */
-		int GetlvpsCur() const;
-		/**
-		 * Public method to get the output voltage of the pumps
-		 * 
-		 * @return An int with the current in mA
-		 * */
-		int GetpumpCur() const;
-		/**
-		 * Public method to get the switch setting for each of the 64 MUSICs
-		 * 
-		 * @return A std::vector<int> with the MUSIC power switch
-		 * */
+		
 		const std::vector<int>& GetsiabMPWR() const;
 		/**
 		 * Public method to get the HV switch setting for each of the 32 SiPM matrices
@@ -269,17 +161,23 @@ class IEvent : public Event{
 		 * */
 		const std::vector<float>& GetSiPMTemp() const;
 		/**
-		 * Public method to obtain the telescope tilt pointing angle after voltage sag corrections
+		 * Public method to get the SIAB current values
 		 * 
-		 * @return float with the angle from horizontal in degrees
+		 * @return An std::vector<float> with the SIAB of the 16 SiPMs in mA
 		 * */
-		float GetTiltAngle() const;
+		const std::vector<float>& GetSIABCurrent() const;
 		/**
-		 * Public method to obtain the telescope tilt pointing angle without any corrections
+		 * Public method to obtain the ASAD current
 		 * 
-		 * @return float with the angle from horizontal in degrees
+		 * @return float with the ASAD current value in  mA
 		 * */
-		float GetTiltAngleRaw() const;
+		float GetASADCurrent() const;
+		/**
+       	 	* Public method to obtain the TriggerBoard current
+		 * 
+		 * @return float with the TriggerBoard current value in  mA
+		 * */
+		float GetTBCurrent() const;
 		/**
 		 * Public method to find the closest time stamp position in the time vector
 		 * 
@@ -287,31 +185,10 @@ class IEvent : public Event{
 		 * @param eventTime An unsigned long long containing the time when the event was recorded in 10s of nano seconds.
 		 * @return An int with the position of the closest time stamp
 		 * */
+		float GetOutsideTempature() const;
+		float GetHumidity() const;
 		static int FindClosestTimestampIndex(std::vector<unsigned long long> timeArray, unsigned long long eventTime);
-		/**
-		 * Public method to recover the run number to which the event belongs to
-		 * 
-		 * @return An int with the run number
-		 * */
-		int GetRunNumber() const;
-		/**
-		 * Public method to set the runNumber member variable
-		 * 
-		 * @param n An int with the run number
-		 * */
-		void SetRunNumber(int n);
-		/**
-		 * Public method to set revised Trigger Time
-		 * 
-		 * @param tTime an unsigned long long for revised trigger time
-		 * */
-		void SetRevTimeTB(unsigned long long tTime);
-		/**
-		 * Public method to recover the revised TB Time to which the event belongs to
-		 * 
-		 * @return An unsigned long long with the revised time
-		 * */
-		unsigned long long GetRevTimeTB() const;
+			
 	private:
 		/**
 		 * Public method to find the closest time stamp in the data vector 

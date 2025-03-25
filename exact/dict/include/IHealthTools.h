@@ -74,30 +74,28 @@ class IHealthTools{
 		 * Optional parameters
 		 * @param iTWStart An int with the start of the time window for the trace analysis (10s of nanoseconds).\ Default is 200
 		 * @param iTWEnd An int with the end of the time window for the trace analysis (10s of nanoseconds).\ Default is 300
-		 * @param fTiltLow A float with the lower range for acceptable tilt angle in degrees w.r.t. the horizon. Default is -100
-		 * @param fTiltHigh A float with the lower range for acceptable tilt angle in degrees w.r.t. the horizon. Default is 100
 		 * 
 		 * @return std::vector<float> With the calculated pedestal for each of the traces in the event if accepted. If the event is not accepted, all entries in the vector are set to -1.
 		 * */
 
-		static std::vector<float> CameraPedestal(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float fTiltLow=-100,float fTiltHigh=100);
+		static std::vector<float> CameraPedestal(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300);
 		/**
 		 * Public method to calculate the pedestal RMS for each of the traces in the event
 		 * @see CameraPedestal
 		 * 
 		 * @return std::vector<float> With the calculated pedestal for each of the traces in the event if accepted. If the event is not accepted, all entries in the vector are set to -1.
 		 * */
-		static std::vector<float> CameraPedestalRMS(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float fTiltLow=-100,float fTiltHigh=100);
+		static std::vector<float> CameraPedestalRMS(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300);
 		/**
 		 * Public method to calculate the amplitude within the specified time window for each of the traces in the event
-		 * @see CameraPedestal(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float fTiltLow=-100,float fTiltHigh=100)
+		 * @see CameraPedestal(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300)
 		 * 
 		 * @return std::vector<float> With the calculated amplitude for each of the traces in the event if accepted. If the event is not accepted, all entries in the vector are set to -1.
 		 * */
-		static std::vector<float> CameraAmplitude(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float fTiltLow=-100,float fTiltHigh=100);
+		static std::vector<float> CameraAmplitude(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300);
 		/**
 		 * Public method to calculate the amplitude within the specified time window for each of the traces in the event
-		 * @see CameraPedestal(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float fTiltLow=-100,float fTiltHigh=100)
+		 * @see CameraPedestal(IFile *file, int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float)
 		 * 
 		 * * @param file IFile Object defined in ExACT. Contains the merged file and the 4 data Trees (HLED, BiFocal, Test, Forced)
 		 * @param entry An int with the entry (event number) to be extracted
@@ -122,14 +120,14 @@ class IHealthTools{
 		 * 
 		 * @return std::vector<float> With the calculated charge for each of the traces in the event if accepted. If the event is not accepted, all entries in the vector are set to -1.
 		 * */
-		static std::vector<float> CameraCharge(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float fTiltLow=-100,float fTiltHigh=100);
+		static std::vector<float> CameraCharge(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300);
 		/**
 		 * Public method to calculate the peaking time within the specified time window for each of the traces in the event
 		 * @see CameraPedestal
 		 * 
 		 * @return std::vector<float> With the peaking time amplitude for each of the traces in the event if accepted. If the event is not accepted, all entries in the vector are set to -1.
 		 * */
-		static std::vector<float> CameraPeakingTime(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300,float fTiltLow=-100,float fTiltHigh=100);
+		static std::vector<float> CameraPeakingTime(IFile *file,int entry,unsigned long long lTimeStart, unsigned long long lTimeEnd, std::string tree, float voltage, unsigned long long *eventTime,int iTWStart=200, int iTWEnd=300);
 		/**
 		 * Public method to identify if the digitized data from the camera constitutes a bad event. When the system overtriggers (the trigger rate is higher than the electronics can handle), the beginning of the traces overflows the digitizer. This is shown as a flat line pedestal. The method checks all the traces in an event to identify if it constitutes one of these overflowed events.
 		 * 
@@ -172,16 +170,7 @@ class IHealthTools{
 		 * @return bool With information if it is within the time range
 		 * */
 		static bool IsTimeInRange(unsigned long long lTime,unsigned long long lTimeStart, unsigned long long lTimeEnd);
-		/**
-		 * Private memeber to check if the tilt of the telescope is within range
-		 * 
-		 * @param ftilt A float with the tilt position of the telescope in degrees w.r.t. the horizon
-		 * @param fTiltLow A float with the lower range for acceptable tilt angle in degrees w.r.t. the horizon. Default is -100
-		 * @param fTiltHigh A float with the lower range for acceptable tilt angle in degrees w.r.t. the horizon. Default is 100
-		 * 
-		 * @return bool With information if it is within the tilt range
-		 * */
-		static bool IsTiltInRange(float ftilt,float fTiltLow,float fTiltHigh);
+
 
 };
 
