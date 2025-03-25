@@ -43,9 +43,11 @@ Functions
 
     get_max_acceptance(hist): Finds the maximum acceptance position in the sky acceptance histogram.
     find_68_contour(hist, max_az, max_el): Finds the 68% confidence contour using OpenCV's contour-finding algorithm.
+    find_90_contour(hist, max_az, max_el): Finds the 90% confidence contour using OpenCV's contour-finding algorithm.
     azel_to_radec_astropy(az, el, event_time, observer): Converts azimuth and elevation coordinates to RA and Dec using the astropy library. 
     azel_to_radec_ephem(az, el, event_time, observer): Converts azimuth and elevation coordinates to RA and Dec using the ephem library
     radec_to_galactic(ra, dec, event_time): Converts RA-Dec to Galactic coordinates.
+    max_abs_difference(arr, value): finds the maximum absolute difference between each element in an array and a given value
 
 How to Use
 
