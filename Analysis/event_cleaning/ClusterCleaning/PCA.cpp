@@ -2,7 +2,6 @@
 #include <iostream>
 
 
-
 PCA::PCA(int features): numFeatures(features), matrix(0, features), covarianceMatrix(features) {}
 
 // Add a new row to the dataset

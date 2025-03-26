@@ -288,8 +288,8 @@ int main(int argc, char **argv){
                             // Print eigenvalues
                             eigenVals = pca.GetEigenValues();
                             // eigenVals->assign(EValues.GetMatrixArray(), EValues.GetMatrixArray() + EValues.GetNrows());
-                            std::cout << "Eigenvalues:\n";
-                            eigenVals.Print();
+                            // std::cout << "Eigenvalues:\n";
+                            // eigenVals.Print();
                             
                             // Print eigenvectors
                             eigenVecs = pca.GetEigenVectors();
@@ -297,8 +297,8 @@ int main(int argc, char **argv){
                             // for (int i = 0; i < 2; ++i)
                             //     for (int j = 0; j < 2; ++j)
                             //         (*eigenVecs)[i][j] = EVectors(i, j);
-                            std::cout << "Eigenvectors:\n";
-                            eigenVecs.Print();
+                            // std::cout << "Eigenvectors:\n";
+                            // eigenVecs.Print();
 
                             
                             // // Get and print sigmas
@@ -315,12 +315,12 @@ int main(int argc, char **argv){
                             double r1 = sqrt(eigenVals[0]);
                             double r2 = sqrt(eigenVals[1]);
                             double EllipicRatio = r2/r1;
-                            cout << "LW" << r1 << "," << r2 << ", ratio:" <<  EllipicRatio << endl;
+                            cout << "LW " << r1 << "," << r2 << ", ratio:" <<  EllipicRatio << endl;
                             //sleep(15);
                             if (EllipicRatio <=  LWRatioCutOff/100.0){
                                 double conc = AmpCameraTimeBin[MaxPixelIDTimeBin.back()]/Cleaned_total_amp;
                                 CleanedPlot(c_cleaned, hcam_intial, hcam_cut,hcam_connected, hcam_cleaned, AvgAmplitudePerEvent.back(), MaxPixelIDTimeBin.back(), conc, eigenVals, eigenVecs, sigmas, Cleaned_count, Cleaned_total_amp);
-                                
+                                // sleep(15);
                                 std::string hcam_cleanedtitle=Form("File# %i, Event# %i",f,EventCounter);
                                 hcam_cleaned->SetName(hcam_cleanedtitle.c_str());
                                 savePlot(c_cleaned,hcam_cleaned,outDir,folString, file,hcam_cleanedtitle );
@@ -853,27 +853,11 @@ int findMUSICPair(int MUSICID){
 vector<int> FindNeighborPixels(int FirstTrigMusic)
 {
     vector<int> vNeighbor;
-
-    //std::cout<<"here" <<FirstTrigMusic<< endl;
-    int FirstTrigPix = findMUSICIndex(FirstTrigMusic+1) * 8;
-    //std::cout <<  FirstTrigPix << endl;
-
+    int FirstTrigPix = findMUSICIndex(FirstTrigMusic) * 8;
+    // std::cout <<  "Music triggered first pixel: " <<  FirstTrigPix << endl;
 
     for (int i=0; i<8; i++){
         vNeighbor.push_back(FirstTrigPix+i);
-
-    }
-
-    int MUSICPairID=findMUSICPair(FirstTrigMusic);
-    //cout << "Music ID trigg: " << FirstTrigMusic << " Pair Music: " << MUSICPairID << endl;
-
-    FirstTrigPix = findMUSICIndex(MUSICPairID+1) * 8;
-    //std::cout <<  FirstTrigPix << endl;
-
-
-    for (int i=0; i<8; i++){
-        vNeighbor.push_back(FirstTrigPix+i);
-
     }
     
     return vNeighbor;
@@ -881,16 +865,14 @@ vector<int> FindNeighborPixels(int FirstTrigMusic)
 
 // Function to find MUSIC index of an element in the array
 int findMUSICIndex(int MUSIC) {
-    // Define the array of MUSICs order
-    int MUSICs[] = {17, 18, 1, 2, 25, 26, 9, 10, 19, 20, 3, 4, 27, 28, 11, 12, 
-               21, 22, 5, 6, 29, 30, 13, 14, 23, 24, 7, 8, 31, 32, 15, 16};
+    // Define the array of MUSICs order as seen on the mapping
+    int MUSICs[] = {17, 16, 1, 0, 25, 24, 9, 8, 19, 18, 3, 2, 27, 26, 11, 10, 
+               21, 20, 5, 4, 29, 28, 13, 12, 23, 22, 7, 6, 31, 30, 15, 14};
                
     // Using std::find to locate the element in the array
     auto it = std::find(std::begin(MUSICs), std::end(MUSICs), MUSIC);
 
-    // Check if element was found
-    // if (MUSIC == 17){
-    //     return 1;
+
     if (it == std::end(MUSICs) && *(std::end(MUSICs)) != MUSIC) {
         // Calculate the index using pointer arithmetic
         //cout<<"hey" << endl;
@@ -918,7 +900,7 @@ void getSIABTriggeredInfo(Event *event,std::vector<int>& Max_pixel, std::vector<
 
     TrigMus = event->GetROIMusicID();
     //std::cout << "TrigMus size: " <<  << std::endl;
-    //std::cout << "Triggered MUSIC: " << TrigMus[0] << "," << TrigMus[1]<< std::endl;
+    // std::cout << "Triggered MUSIC: " << TrigMus[0] << "," << TrigMus[1]<< std::endl;
 
     newTrigPix = FindNeighborPixels(TrigMus[0]);
     
@@ -1178,7 +1160,7 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     // meanx = COG[0];
     // meany = COG[1];
     // cout << "MEAN " << meanx << "," << meany << endl;
-
+    
     
     // gets the eigenvalues to sign for the eigenvalue posistion 
     // Eigenvec (E1 is eigenvalue)
@@ -1186,24 +1168,48 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     // x E1x E2x
     // y E1y E2y
     //
-    std::vector<double> arrowPos; //Pick up here
-    for (int i=0; i<2;i++){
-        for (int j=0; j<2;j++){
-            double value = 1*sqrt(eigenVals[i]);
-            if (eigenVecs[j][i] < 0){
-                value = value * -1;
-            }
-            arrowPos.push_back(value);
-        }
-    }
+    cout << "P1:" << eigenVecs[0][0] << "p2:" << eigenVecs[1][0] << "tan it: " << atan( eigenVecs[1][0]/eigenVecs[0][0]) << endl;
+    double angledeg = atan(eigenVecs[1][0]/eigenVecs[0][0])*(180.0/3.141592653589793238463);
+    double anglerad = atan(eigenVecs[1][0]/eigenVecs[0][0]);
+    cout << "ANGLE: "<< anglerad << ", " << angledeg << endl;
+    
+    // std::vector<double> arrowPos; //Pick up here
+    // for (int i=0; i<2;i++){
+    //     for (int j=0; j<2;j++){
 
+    //         double value = 1*sqrt(eigenVals[i]);
+    //         if (i == 1) {
+    //             if (j == 0){ 
+    //                 value = value*cos(angle+90.0);
+    //             } else if (j == 1){
+    //                 value = value*sin(angle+90.0);
+    //             }
+    //         } else{
+    //             if (j == 0){ 
+    //                 value = value*cos(angle);
+    //             } else if (j == 1){
+    //                 value = value*sin(angle);
+    //             }
+    //         }
+            
+            
+    //         // if (eigenVecs[j][i] < 0){
+    //             //     value = value * -1;
+    //             // }
+    //             arrowPos.push_back(value);
+    //         }
+    //     }
+    double r1 = sqrt(eigenVals[0]);
+    double r2 = sqrt(eigenVals[1]);
+        
     ///cout << "HEY" << endl;
     //cout << firstEigenVectorValue(0,0) << ".," << secondEigenVectorValue(0,1) << endl;
     //TArrow* arrow = new TArrow(meanx, meany, meanx + (eigenVecs[0][1])*sqrt(eigenVals[0]), meany + (eigenInfo[0][3])*sqrt(eigenVals[0]), 0.01, ">"); // "|>" option gives an arrowhead
-    TArrow* arrow = new TArrow(meanx - 2*arrowPos[0], meany - 2*arrowPos[1], meanx + 2*arrowPos[0], meany + 2*arrowPos[1], 0.01, "|"); // "|>" option gives an arrowhead
+    // TArrow* arrow = new TArrow(meanx - 2*arrowPos[0], meany - 2*arrowPos[1], meanx + 2*arrowPos[0], meany + 2*arrowPos[1], 0.01, "|"); // "|>" option gives an arrowhead
+    TArrow* arrow = new TArrow(meanx - 2*(r1*cos(anglerad)), meany - 2*(r1*sin(anglerad)), meanx + 2*(r1*cos(anglerad)), meany + 2*(r1*sin(anglerad)), 0.01, "|"); // "|>" option gives an arrowhead
     //double xyeigen=eigenVals[1] + eigenInfo[2][0];
     
-    TArrow* arrow1 = new TArrow(meanx- 2*arrowPos[2], meany - 2*arrowPos[3], meanx + 2*arrowPos[2], meany + 2*arrowPos[3], 0.01, "|"); // "|>" option gives an arrowhead
+    TArrow* arrow1 = new TArrow(meanx - 2*(r2*cos(anglerad+1.5708)), meany - 2*(r2*sin(anglerad+1.5708)), meanx + 2*(r2*cos(anglerad+1.5708)), meany + 2*(r2*sin(anglerad+1.5708)), 0.01, "|"); // "|>" option gives an arrowhead
     //TArrow* arrow1 = new TArrow(meanx, meany, meanx + (eigenVecs[1][1]+eigenInfo[2][2])*sqrt(xyeigen), meany + (eigenInfo[1][3]+eigenInfo[2][3])*sqrt(xyeigen), 0.01, ">"); // "|>" option gives an arrowhead
 
     // TArrow* arrow1 = new TArrow(meanx, meany, meanx + (eigenVecs[1][1])*sqrt(eigenVals[1]), meany + (eigenInfo[1][3])*sqrt(eigenVals[1]), 0.01, ">"); // "|>" option gives an arrowhead
@@ -1222,11 +1228,8 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     
     //double r1 = sqrt(pow((eigenVecs[0][0])*sqrt(eigenVals[0]),2) + pow((eigenVecs[1][0])*sqrt(eigenVals[0]),2));
     //double r2 = sqrt(pow((eigenVecs[0][1])*sqrt(eigenVals[1]),2) + pow((eigenVecs[1][1])*sqrt(eigenVals[1]),2));
-    double r1 = sqrt(eigenVals[0]);
-    double r2 = sqrt(eigenVals[1]);
     double EllipicRatio = r2/r1;
     // double r2 = sqrt(abs(xyeigen));
-    int angledirection = 0;
     // if ((vectorx1pos < 0 && vectory1pos < 0)){
     //     angledirection = 90;
     // } else if ((vectorx1pos > 0 && vectory1pos < 0) || (vectorx1pos < 0 && vectory1pos > 0)){
@@ -1235,11 +1238,9 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     // else if ((vectorxpos < 0 && vectorypos < 0) || (vectorxpos > 0 && vectorypos > 0) ) {
     //     angledirection = 0;
     // }
-    double angle = angledirection+(atan(arrowPos[1]/arrowPos[0]))*(180.0/3.141592653589793238463);
-    cout << angle << endl;
     // double Length
     // double Width = sqrt()
-    TEllipse* ell = new TEllipse(meanx, meany, sqrt(pow(arrowPos[0],2)+pow(arrowPos[1],2)),sqrt(pow(arrowPos[2],2)+pow(arrowPos[3],2)),0,360,angle);
+    TEllipse* ell = new TEllipse(meanx, meany,r1,r2,0,360,angledeg);
     ell->SetFillColorAlpha(kGreen,0.00);
     ell->Draw("SAME");
     //TLatex *subtitle = new TLatex();
