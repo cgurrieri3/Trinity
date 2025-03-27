@@ -162,10 +162,6 @@ int main(int argc, char **argv){
             std::string filenameTitle = fileNamesVec[f];
             filenameTitle = filenameTitle.substr(97,5);
 
-            //cout << filenameTitle << endl;
-            //std::replace(filenameTitle.begin(), filenameTitle.end(), ':', '_');
-            //cout << filenameTitle << endl;
-            //sleep(15);
 
             // Create histograms 
             TH2F* hcam_intial = new TH2F("hcam_intial", Form("Calibrated Image --File# %i-- Event# %i ", f ,EventCounter), 16, -0.5, 15.5, 16, -0.5, 15.5);
@@ -265,10 +261,6 @@ int main(int argc, char **argv){
                         }
 
                         if(Cleaned_count >= PixelSurviveCutOff){
-                            // This vector is to store all the eigenvalue information for the vector and is filled a certian way
-                            // [[ eigenvalue1, eigenvector1x, eigenvector2x, eigenvector3x ],
-                            //  [ eigenvalue2, eigenvector1y, eigenvector2y, eigenvector3y ]]
-                            //  [ eigenvalue3, eigenvector1z, eigenvector2z, eigenvector3z ]]
                             TVectorD eigenVals;
                             TMatrixD eigenVecs; 
                             eigenVals.ResizeTo(2);
@@ -300,22 +292,13 @@ int main(int argc, char **argv){
                             // std::cout << "Eigenvectors:\n";
                             // eigenVecs.Print();
 
-                            
                             // // Get and print sigmas
-                            sigmas = pca.GetSigmas();
-
-                            
-                            // double sthing = sqrt(pow((sigmas[0]-sigmas[1]),2) +pow(2*sigmas[2],2));
-                            // double Length = sqrt((sigmas[0] + sigmas[1] + sthing)/2);
-                            // double Width =  sqrt((sigmas[0] + sigmas[1] - sthing)/2);
-                            // cout << "Length: "<< Length << ", Width: " << Width << endl;
-                            
-                            //sleep(5); //Left off here- get the new method into all the stuff below
+                            sigmas = pca.GetSigmas();                            
 
                             double r1 = sqrt(eigenVals[0]);
                             double r2 = sqrt(eigenVals[1]);
                             double EllipicRatio = r2/r1;
-                            cout << "LW " << r1 << "," << r2 << ", ratio:" <<  EllipicRatio << endl;
+                            // cout << "LW " << r1 << "," << r2 << ", ratio:" <<  EllipicRatio << endl;
                             //sleep(15);
                             if (EllipicRatio <=  LWRatioCutOff/100.0){
                                 double conc = AmpCameraTimeBin[MaxPixelIDTimeBin.back()]/Cleaned_total_amp;
@@ -341,12 +324,8 @@ int main(int argc, char **argv){
                                 FindBin(MaxPixelIDTimeBin.back(), &nx, &ny);
                                 pixeldist->Fill(nx, ny, 1);
                                 // COGgraphweighted->Fill(CenterOfGravity[0],CenterOfGravity[1]);
-
                                 //sleep(15);
                             }
-
-                            
-                            
                         } else {
                         zeroentries += 1;
                         }
@@ -409,20 +388,6 @@ int main(int argc, char **argv){
     latex->DrawLatex(0.3, 0.81, Form("Events # Survived: %i",entries));
     
     savePlot(c_cleaned,hcam_srvedist,outDir,folString,file, "Number_Size");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // hcam_srvedist->Write("hcam_srvedistTH2F");
-    // file->Close();
     c_cleaned->Clear();
 
     delete hcam_srvedist;
@@ -441,20 +406,6 @@ int main(int argc, char **argv){
     hcam_allAmpdist->Draw();
 
     savePlot(c_cleaned,hcam_allAmpdist,outDir,folString, file, "Size instance");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // hcam_allAmpdist->Write("hcam_allAmpdistTH1D");
-    // file->Close();
     delete hcam_allAmpdist;
 
 
@@ -468,20 +419,6 @@ int main(int argc, char **argv){
     ERhist->Draw();
 
     savePlot(c_cleaned,ERhist,outDir,folString,file, "ERhist");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // ERhist->Write("ERhistTH1D");
-    // file->Close();
     delete ERhist;
 
     c_cleaned->cd(0);
@@ -492,20 +429,6 @@ int main(int argc, char **argv){
     LW_surviving_dist->Draw("COLZ");
 
     savePlot(c_cleaned,LW_surviving_dist,outDir,folString,file, "LW_surviving_dist");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // LW_surviving_dist->Write("LW_surviving_distTH2F");
-    // file->Close();
     delete LW_surviving_dist;
 
 
@@ -517,20 +440,6 @@ int main(int argc, char **argv){
     LW_CONC->Draw("COLZ");
 
     savePlot(c_cleaned, LW_CONC,outDir,folString,file, "LW_CONC_dist");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // LW_CONC->Write("LW_CONCTH2F");
-    // file->Close();
     delete LW_CONC;
 
     c_cleaned->cd(0);
@@ -541,20 +450,6 @@ int main(int argc, char **argv){
     SIZE_CONC->Draw("COLZ");
 
     savePlot(c_cleaned,SIZE_CONC,outDir,folString,file, "SIZE_CONC_dist");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // SIZE_CONC->Write("SIZE_CONCTH2F");
-    // file->Close();
     delete SIZE_CONC;
 
     c_cleaned->cd(0);
@@ -565,21 +460,6 @@ int main(int argc, char **argv){
     CONC_surviving_dist->Draw("COLZ");
 
     savePlot(c_cleaned,CONC_surviving_dist,outDir,folString,file, "CONC_surviving_dist");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-
-    // CONC_surviving_dist->Write("CONC_surviving_distTH2F");
-    // file->Close();
     delete CONC_surviving_dist;
 
     c_cleaned->cd(0);
@@ -600,20 +480,6 @@ int main(int argc, char **argv){
     // legend->Draw();
     DrawMUSICBoundaries();
     savePlot(c_cleaned,COGgraph,outDir,folString,file, "COG");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // COGgraph->Write("COGTH2F");
-    // file->Close();
     delete COGgraph;
     delete COGgraphweighted;
 
@@ -624,20 +490,6 @@ int main(int argc, char **argv){
     pixeldist->Draw("COLZ");  // "A" for axes, "P" for points
     DrawMUSICBoundaries();
     savePlot(c_cleaned,pixeldist,outDir,folString,file, "pixeldist");
-    // file = new TFile(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
-    //     outDir.c_str(),
-    //     folString.c_str(),
-    //     TriggeredChannelAmpCutOff,
-    //     TimeBinAll,
-    //     CorePixelAmpCutOff, 
-    //     SaturatedPixelCutoff,
-    //     FlasherEventsCutOff,
-    //     PixelSurviveCutOff,
-    //     LWRatioCutOff,
-    //     rmTopRow
-    //     ), "UPDATE");
-    // pixeldist->Write("pixeldistth2F");
-    // file->Close();
     delete pixeldist;
 
     
@@ -1039,28 +891,6 @@ Double_t Median(vector<int> v)
 }
  
  
-// void drawEllipse(std::vector<std::vector<Double_t>> eigenInfo, double center_x, double center_y){
-//     // get the 4 points
-//     p1x = center_x + (eigenVecs[0][1])*sqrt(eigenVals[0])
-//     p1y = center_y + (eigenInfo[0][3])*sqrt(eigenVals[0])
-    
-//     p2x = center_x + (eigenVecs[1][1]+eigenInfo[2][2])*sqrt(xyeigen)
-//     p2y = center_y + (eigenInfo[1][3]+eigenInfo[2][3])*sqrt(xyeigen)
-
-//     // fit to the for points
-
-//     // make the D matrix D= [n x 6] = [xx,xy,yy,x,y,1]
-//     // Make C 
-//     // S = DTD
-
-//     // eigenvalue and vectors 
-
-//     // get positive one 
-//     // a= positive eiegenvalue eigenvector
-
-//     // get a and b or ellipse and plot
-
-// }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Function to plot hcam using data from a CSV file
@@ -1145,15 +975,7 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     DrawMUSICBoundaries();
     // hcam4->GetXaxis()->SetRangeUser(-5, 16.6);  // Set wider range for X-axis
     // hcam4->GetYaxis()->SetRangeUser(-5, 16.6);  // Set wider range for Y-axis
-    //cout << "HEY" << endl;
-    // Extract the first eigenvector
-    // TVectorD firstEigenvector = eigenvectors->GetColLwb(0); 
-    // // Extract the first eigenvalue
-    // double firstEigenVectorValue = (*firstEigenvector)[0];
-    //double firstEigenVectorValue = eigenvectors->GetMatrixArray();
-    //double secondEigenVectorValue = eigenvectors->Print(0,1);
-    // int nx, ny;
-    // FindBin(maxpixelnumberTimeBin, &nx, &ny);
+
     double meanx = hcam4->GetMean(1);
     double meany = hcam4->GetMean(2);
     cout << "MEAN " << meanx << "," << meany << endl;
@@ -1168,52 +990,19 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     // x E1x E2x
     // y E1y E2y
     //
-    cout << "P1:" << eigenVecs[0][0] << "p2:" << eigenVecs[1][0] << "tan it: " << atan( eigenVecs[1][0]/eigenVecs[0][0]) << endl;
+    // Gets the angle between the eigenvectors of the first principle
+    // cout << "P1:" << eigenVecs[0][0] << "p2:" << eigenVecs[1][0] << "tan it: " << atan( eigenVecs[1][0]/eigenVecs[0][0]) << endl;
     double angledeg = atan(eigenVecs[1][0]/eigenVecs[0][0])*(180.0/3.141592653589793238463);
     double anglerad = atan(eigenVecs[1][0]/eigenVecs[0][0]);
-    cout << "ANGLE: "<< anglerad << ", " << angledeg << endl;
+    // cout << "ANGLE: "<< anglerad << ", " << angledeg << endl;
     
-    // std::vector<double> arrowPos; //Pick up here
-    // for (int i=0; i<2;i++){
-    //     for (int j=0; j<2;j++){
-
-    //         double value = 1*sqrt(eigenVals[i]);
-    //         if (i == 1) {
-    //             if (j == 0){ 
-    //                 value = value*cos(angle+90.0);
-    //             } else if (j == 1){
-    //                 value = value*sin(angle+90.0);
-    //             }
-    //         } else{
-    //             if (j == 0){ 
-    //                 value = value*cos(angle);
-    //             } else if (j == 1){
-    //                 value = value*sin(angle);
-    //             }
-    //         }
-            
-            
-    //         // if (eigenVecs[j][i] < 0){
-    //             //     value = value * -1;
-    //             // }
-    //             arrowPos.push_back(value);
-    //         }
-    //     }
+    // get the size of the major and minor axis of the ellipse / Length and Width of the shower
     double r1 = sqrt(eigenVals[0]);
     double r2 = sqrt(eigenVals[1]);
         
-    ///cout << "HEY" << endl;
-    //cout << firstEigenVectorValue(0,0) << ".," << secondEigenVectorValue(0,1) << endl;
-    //TArrow* arrow = new TArrow(meanx, meany, meanx + (eigenVecs[0][1])*sqrt(eigenVals[0]), meany + (eigenInfo[0][3])*sqrt(eigenVals[0]), 0.01, ">"); // "|>" option gives an arrowhead
-    // TArrow* arrow = new TArrow(meanx - 2*arrowPos[0], meany - 2*arrowPos[1], meanx + 2*arrowPos[0], meany + 2*arrowPos[1], 0.01, "|"); // "|>" option gives an arrowhead
     TArrow* arrow = new TArrow(meanx - 2*(r1*cos(anglerad)), meany - 2*(r1*sin(anglerad)), meanx + 2*(r1*cos(anglerad)), meany + 2*(r1*sin(anglerad)), 0.01, "|"); // "|>" option gives an arrowhead
-    //double xyeigen=eigenVals[1] + eigenInfo[2][0];
-    
     TArrow* arrow1 = new TArrow(meanx - 2*(r2*cos(anglerad+1.5708)), meany - 2*(r2*sin(anglerad+1.5708)), meanx + 2*(r2*cos(anglerad+1.5708)), meany + 2*(r2*sin(anglerad+1.5708)), 0.01, "|"); // "|>" option gives an arrowhead
-    //TArrow* arrow1 = new TArrow(meanx, meany, meanx + (eigenVecs[1][1]+eigenInfo[2][2])*sqrt(xyeigen), meany + (eigenInfo[1][3]+eigenInfo[2][3])*sqrt(xyeigen), 0.01, ">"); // "|>" option gives an arrowhead
-
-    // TArrow* arrow1 = new TArrow(meanx, meany, meanx + (eigenVecs[1][1])*sqrt(eigenVals[1]), meany + (eigenInfo[1][3])*sqrt(eigenVals[1]), 0.01, ">"); // "|>" option gives an arrowhead
-    // TArrow* arrow2 = new TArrow(meanx, meany, meanx + (eigenInfo[2][2])*sqrt(eigenInfo[2][0]), meany + (eigenInfo[2][3])*sqrt(eigenInfo[2][0]), 0.01, ">"); // "|>" option gives an arrowhead
+    
     arrow->SetLineColor(kRed); // Optional: Set the color of the arrow
     //arrow->SetLineWidth(1);    // Optional: Set the width of the arrow
     arrow->Draw("SAME");             // Draw the arrow on the same canvas
@@ -1222,24 +1011,9 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     //arrow1->SetLineWidth(1);    // Optional: Set the width of the arrow
     arrow1->Draw("SAME");             // Draw the arrow on the same canvas
 
-    // arrow2->SetLineColor(kGreen); // Optional: Set the color of the arrow
-    // //arrow1->SetLineWidth(1);    // Optional: Set the width of the arrow
-    // arrow2->Draw();             // Draw the arrow on the same canvas
-    
-    //double r1 = sqrt(pow((eigenVecs[0][0])*sqrt(eigenVals[0]),2) + pow((eigenVecs[1][0])*sqrt(eigenVals[0]),2));
-    //double r2 = sqrt(pow((eigenVecs[0][1])*sqrt(eigenVals[1]),2) + pow((eigenVecs[1][1])*sqrt(eigenVals[1]),2));
+
     double EllipicRatio = r2/r1;
-    // double r2 = sqrt(abs(xyeigen));
-    // if ((vectorx1pos < 0 && vectory1pos < 0)){
-    //     angledirection = 90;
-    // } else if ((vectorx1pos > 0 && vectory1pos < 0) || (vectorx1pos < 0 && vectory1pos > 0)){
-    //     angledirection = 90;
-    // }
-    // else if ((vectorxpos < 0 && vectorypos < 0) || (vectorxpos > 0 && vectorypos > 0) ) {
-    //     angledirection = 0;
-    // }
-    // double Length
-    // double Width = sqrt()
+
     TEllipse* ell = new TEllipse(meanx, meany,r1,r2,0,360,angledeg);
     ell->SetFillColorAlpha(kGreen,0.00);
     ell->Draw("SAME");
@@ -1254,22 +1028,7 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     areaEllipse,
     Cleaned_total_amp,
     conc));
-    // subtitle->DrawLatex(0.3, 0.92, Form("Pixels: %i  Area:%.2f",Cleaned_count,areaEllipse));
-    // subtitle->DrawLatex(0.6, 0.92, Form("Size: %.2f", Cleaned_total_amp));
-    // subtitle->DrawLatex(0.8, 0.92, Form("Conc: %.2f", conc));
 
-
-    //c_cleaned->cd(4)->SetRange(-10, -10, 10, 10);
-    // c_cleaned->ForceUpdate();
-    //c_cleaned->cd(1);
-    // delete arrow;
-    // delete arrow1;
-    // delete ell;
-    
-    //c_cleaned->cd(3);
-    //hcam_additional->SetMinimum(0);
-    //gPad->Modified();
-    //gPad->Update();
 }
 
 // Function to open a lookup table for the neighbors of each pixel ////////////////////////////
