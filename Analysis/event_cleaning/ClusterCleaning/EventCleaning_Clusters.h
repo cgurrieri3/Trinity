@@ -89,7 +89,7 @@ std::string neighborDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAna
 std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlatFieldCalibration/Output/";
 std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
 // std::string dataDir = "/storage/hive/project/phy-otte/sstepanoff3/Data/";
-std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/ClusterCleaning/Output/";
+std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
 // std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/EventCleaning/ClusterCleaning/Output/";
 
 
@@ -115,12 +115,12 @@ void getPixelInfo(Event *ev, std::vector<double>& AmplitudeValues, std::vector<i
 std::vector<std::string> read_directory( const std::string& path = std::string());
 void removeDuplicates(std::vector<int>& arr);
 void removeDuplicates(std::vector<double>& arr);
-void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp);
+void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, int maxMUSICnumber, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp);
 Double_t Median(vector<int> v);
 std::vector<double> readFileToVector(const std::string& filename);
 void savePlot(TCanvas* c_cleaned,TH1* hist, std::string outDir,std::string folString, TFile* file,std::string plotname);
 void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp, std::vector<double> *COG);
-int convertADC2PE(int ADC_counts);
+double convertADC2PE(int ADC_counts);
 double convertADC2PE(double ADC_counts);
 int checkTopRow(int value);
 std::vector<double> generateRandomNumbers();
@@ -149,14 +149,14 @@ std::vector <std::string> read_directory(const std::string& path){
 	return result;
 }
 
-int convertADC2PE(int ADC_counts){
-    int ADCtoPEratio = 24;
-    return ADC_counts/ADCtoPEratio;
+double convertADC2PE(int ADC_counts){
+    int ADCtoPEratio = 24.1;
+    return (ADC_counts*1.0)/ADCtoPEratio;
 }
 
 double convertADC2PE(double ADC_counts){
-    double ADCtoPEratio = 24;
-    return ADC_counts/ADCtoPEratio;
+    double ADCtoPEratio = 24.1;
+    return (ADC_counts*1.0)/ADCtoPEratio;
 }
 
 void removeDuplicates(std::vector<int>& arr) {

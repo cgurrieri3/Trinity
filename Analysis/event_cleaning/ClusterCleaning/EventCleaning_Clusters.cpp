@@ -250,7 +250,7 @@ int main(int argc, char **argv){
                         int Cleaned_count=0;
                         double Cleaned_total_amp=0;
                         for (std::vector<int>::size_type i =0; i < surviving_pixels_final.size();i++){
-                            cout << "Pixel: " << surviving_pixels_final[i] << " Pixel Peak Time: " << local_peak_time << " local min time: " << local_peak_time << endl;
+                            // cout << "Pixel: " << surviving_pixels_final[i] << " Pixel Peak Time: " << local_peak_time << " local min time: " << local_peak_time << endl;
                             
                             Cleaned_count +=1;
                             Cleaned_total_amp += AmpCameraTimeBin[surviving_pixels_final[i]];
@@ -300,10 +300,14 @@ int main(int argc, char **argv){
                             double EllipicRatio = r2/r1;
                             // cout << "LW " << r1 << "," << r2 << ", ratio:" <<  EllipicRatio << endl;
                             //sleep(15);
-                            if (EllipicRatio <=  LWRatioCutOff/100.0){
+                            // if (std::find(surviving_pixels_final.begin(), surviving_pixels_final.end(), MaxPixelIDTimeBin.back()) != surviving_pixels_final.end()) { 
+                            //     cout << "HERE" << endl;
+                            // }
+                            // sleep(15);
+                            if (EllipicRatio <=  LWRatioCutOff/100.0 && std::find(surviving_pixels_final.begin(), surviving_pixels_final.end(), MaxPixelIDTimeBin.back()) != surviving_pixels_final.end() ){
                                 double conc = AmpCameraTimeBin[MaxPixelIDTimeBin.back()]/Cleaned_total_amp;
-                                CleanedPlot(c_cleaned, hcam_intial, hcam_cut,hcam_connected, hcam_cleaned, AvgAmplitudePerEvent.back(), MaxPixelIDTimeBin.back(), conc, eigenVals, eigenVecs, sigmas, Cleaned_count, Cleaned_total_amp);
-                                // sleep(15);
+                                CleanedPlot(c_cleaned, hcam_intial, hcam_cut,hcam_connected, hcam_cleaned, AvgAmplitudePerEvent.back(), MaxPixelIDTimeBin.back(),MaxMUSICID.back(), conc, eigenVals, eigenVecs, sigmas, Cleaned_count, Cleaned_total_amp);
+                                // sleep(60);
                                 std::string hcam_cleanedtitle=Form("File# %i, Event# %i",f,EventCounter);
                                 hcam_cleaned->SetName(hcam_cleanedtitle.c_str());
                                 savePlot(c_cleaned,hcam_cleaned,outDir,folString, file,hcam_cleanedtitle );
@@ -324,7 +328,7 @@ int main(int argc, char **argv){
                                 FindBin(MaxPixelIDTimeBin.back(), &nx, &ny);
                                 pixeldist->Fill(nx, ny, 1);
                                 // COGgraphweighted->Fill(CenterOfGravity[0],CenterOfGravity[1]);
-                                //sleep(15);
+                                // sleep(15);
                             }
                         } else {
                         zeroentries += 1;
@@ -483,7 +487,7 @@ int main(int argc, char **argv){
     delete COGgraph;
     delete COGgraphweighted;
 
-    c_cleaned->cd(0);
+    c_cleaned->cd(0); 
     pixeldist->SetStats(0);
     pixeldist->GetXaxis()->SetTitleOffset(1.2); // Adjust X-axis title offset
     pixeldist->GetYaxis()->SetTitleOffset(1.5); // Adjust Y-axis title offset
@@ -525,13 +529,13 @@ void NeighborhoodCheckerHelper(int ID, std::vector<int>& IDSelected, std::vector
             if (ID == IDSelected[i] ){
                 cleaned_pixels.push_back(IDSelected[i]);
 
-                cout << "ID selected: " << ID << endl;
+                // cout << "ID selected: " << ID << endl;
                 // check recursilely the board side of these pixels
                 // Removes the ID that has been seleceted in the array so that the loops end
                 
 
                 for (int arrayID: GetNeighborArray(ID,Form("%sneighborbroadside.csv",neighborDir.c_str()))) {
-                    cout << "ArrayID: NCH: " << arrayID << endl;
+                    // cout << "ArrayID: NCH: " << arrayID << endl;
                     NeighborhoodCheckerHelper(arrayID,IDSelected,AmplitudesSelected,cleaned_pixels,visited_ids);
                 }
             }
@@ -552,9 +556,9 @@ void TriggeredPixelNeighborhoodChecker(std::vector<double> AmplitudesSelected,st
     // get the Trigger pixels neighbors
     cleaned_pixels.push_back(triggeredpixel);
     for (int arrayID : GetNeighborArray(triggeredpixel,Form("%sneighborbroadside.csv",neighborDir.c_str()))) {
-        cout << "arrayID: Triggered() " << arrayID << endl;
+        // cout << "arrayID: Triggered() " << arrayID << endl;
         NeighborhoodCheckerHelper(arrayID,IDSelected,AmplitudesSelected,cleaned_pixels,visited_ids);
-        cout << "completed ID: "<< endl;
+        // cout << "completed ID: "<< endl;
     }
 
 
@@ -588,10 +592,10 @@ void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp, std::vector<double> *COG){
             std::vector<double> randomNumbers;
             for (double w = 0; w < weight; w++){
                 randomNumbers = generateRandomNumbers();
-                cout << "nx: " << nx <<  " ny: " << ny << endl;
-                cout << "rand 1: " << nx + randomNumbers[0] << " rand 2: " << ny + randomNumbers[1] << endl;
+                // cout << "nx: " << nx <<  " ny: " << ny << endl;
+                // cout << "rand 1: " << nx + randomNumbers[0] << " rand 2: " << ny + randomNumbers[1] << endl;
                 std::vector<double> data = {nx + randomNumbers[0], ny+randomNumbers[1]};
-                cout << "COG " << weight << "total" << totalAmp << endl;
+                // cout << "COG " << weight << "total" << totalAmp << endl;
                 
                 pca.AddRow(data);  
             }
@@ -706,7 +710,7 @@ vector<int> FindNeighborPixels(int FirstTrigMusic)
 {
     vector<int> vNeighbor;
     int FirstTrigPix = findMUSICIndex(FirstTrigMusic) * 8;
-    // std::cout <<  "Music triggered first pixel: " <<  FirstTrigPix << endl;
+    // std::cout <<  "Pixel location: " <<  findMUSICIndex(FirstTrigMusic) << endl;
 
     for (int i=0; i<8; i++){
         vNeighbor.push_back(FirstTrigPix+i);
@@ -717,48 +721,38 @@ vector<int> FindNeighborPixels(int FirstTrigMusic)
 
 // Function to find MUSIC index of an element in the array
 int findMUSICIndex(int MUSIC) {
-    // Define the array of MUSICs order as seen on the mapping
-    int MUSICs[] = {17, 16, 1, 0, 25, 24, 9, 8, 19, 18, 3, 2, 27, 26, 11, 10, 
-               21, 20, 5, 4, 29, 28, 13, 12, 23, 22, 7, 6, 31, 30, 15, 14};
-               
-    // Using std::find to locate the element in the array
-    auto it = std::find(std::begin(MUSICs), std::end(MUSICs), MUSIC);
 
-
-    if (it == std::end(MUSICs) && *(std::end(MUSICs)) != MUSIC) {
-        // Calculate the index using pointer arithmetic
-        //cout<<"hey" << endl;
-        return -1;
-    }  
-    return std::distance(std::begin(MUSICs), it);
+    std::vector<int> MUSICs = {3,2,11,10,19,18,27,26,7,6,15,14,23,22,31,30,1,0,9,8,17,16,25,24,5,4,13,12,21,20,29,28};
+    // cout << "This is the value to multiple by 8: " << MUSICs[MUSIC] << " at this music: "<< MUSIC << endl;
+    return MUSICs[MUSIC];
 
 }
 
 
 void getSIABTriggeredInfo(Event *event,std::vector<int>& Max_pixel, std::vector<double>& Max_Amp, std::vector<int>& Max_MUSIC, std::vector<int>& peak_time,std::vector<double>& Avg_Amp, std::vector<double>& Max_Amp_Time_Bin, std::vector<int>& Max_pixel_Time_Bin){ 
     std::vector<Int_t> newTrigPix; // vector for storing triggered pixels
-	std::vector<Int_t> TrigMus; // vector for storing triggered MUSICs
 	// std::vector<int> amplitude;
-
+    
     //int maxAmplitudeIndexCount = 0;
-   
-            
+    
+    
 	// Create vectors to store max amplitude and index of the pixel with max amplitude values and corresponding channel indices
     std::vector<double> maxAmplitudes;
     std::vector<int> maxAmplitudeIndices; 
     std::vector<float> maxpeaktime;
     std::vector<float> maxAmplitudeTimeBin;
-
-
-    TrigMus = event->GetROIMusicID();
-    //std::cout << "TrigMus size: " <<  << std::endl;
+    
+    
+	// std::vector<Int_t> TrigMus; // vector for storing triggered MUSICs
+    // TrigMus = event->GetROIMusicID();
+    // std::cout << "TrigMus size: " <<  << std::endl;
     // std::cout << "Triggered MUSIC: " << TrigMus[0] << "," << TrigMus[1]<< std::endl;
 
-    newTrigPix = FindNeighborPixels(TrigMus[0]);
+    newTrigPix = FindNeighborPixels((event->GetROIMusicID())[0]);
     
     
-    //std::cout << "newTrigPix size: " << newTrigPix.size()<< std::endl;
-    //std::cout << "First pixel of the triggered MUSIC: " << newTrigPix[0]<< std::endl;
+    // std::cout << "newTrigPix size: " << newTrigPix.size()<< std::endl;
+    // std::cout << "First pixel of the triggered MUSIC: " << newTrigPix[0]<< std::endl;
     Pulse *pulse;
     for (size_t k = 0; k < newTrigPix.size(); k++) {
         //std::cout<<newTrigPix[k] << std::endl;
@@ -768,11 +762,12 @@ void getSIABTriggeredInfo(Event *event,std::vector<int>& Max_pixel, std::vector<
         std::vector<int> trace;     
         if (newTrigPix[k] >= 0 && newTrigPix[k] <= MaxNofChannels) {            	
             maxAmplitudes.push_back(convertADC2PE(pulse->GetAmplitude()));
+            // cout << "before ADC: " << pulse->GetAmplitude() <<" converted " << convertADC2PE(pulse->GetAmplitude()) << endl;
             maxpeaktime.push_back(pulse->GetTimePeak());
             trace = event->GetSignalValue(newTrigPix[k]);
-            maxAmplitudeTimeBin.push_back(convertADC2PE(ped - trace[TimeBinAll]));
+            maxAmplitudeTimeBin.push_back(ped - convertADC2PE(trace[TimeBinAll]));
 
-            maxAmplitudeIndices.push_back(newTrigPix[k]);
+            maxAmplitudeIndices.push_back(newTrigPix[k]); 
             //cout << "ID: : "<<newTrigPix[k] << " trace value " << trace[TimeBinAll] << endl;
         }
         else {
@@ -784,6 +779,7 @@ void getSIABTriggeredInfo(Event *event,std::vector<int>& Max_pixel, std::vector<
     int triggeredpixelindex = std::distance(maxAmplitudes.begin(), std::max_element(maxAmplitudes.begin(), maxAmplitudes.end()));
     int triggeredpixelindexTimeBin = std::distance(maxAmplitudeTimeBin.begin(), std::max_element(maxAmplitudeTimeBin.begin(), maxAmplitudeTimeBin.end()));
     double maxVal = maxAmplitudes[triggeredpixelindex];
+    // cout << "MAX VALUE: "<< maxVal << endl; 
     int maxTime = maxpeaktime[triggeredpixelindex];
     double maxValTimeBin =  maxAmplitudeTimeBin[triggeredpixelindexTimeBin];
     //cout << "index: " << triggeredpixelindexTimeBin << endl; 
@@ -798,11 +794,11 @@ void getSIABTriggeredInfo(Event *event,std::vector<int>& Max_pixel, std::vector<
         if (k == newTrigPix[triggeredpixelindex]) {
                 Max_Amp.push_back(maxVal);
                 Max_pixel.push_back(k);
-                Max_MUSIC.push_back(TrigMus[0]); // use with caution this only gets the ROI music ID
+                Max_MUSIC.push_back((event->GetROIMusicID())[0]); // use with caution this only gets the ROI music ID
                 peak_time.push_back(maxTime);
         } 
         if (k == maxAmplitudeIndices[triggeredpixelindexTimeBin]){
-                //std::cout << "Triggered MUSIC: " << TrigMus[0] <<" Pixel: "  << k << ", Amplitude " << maxValTimeBin<<std::endl;
+                // std::cout << "Triggered MUSIC: " << (event->GetROIMusicID())[0] <<" Pixel: "  << k << ", Amplitude " << maxValTimeBin<<std::endl;
                 Max_Amp_Time_Bin.push_back(maxValTimeBin);
                 Max_pixel_Time_Bin.push_back(k);
         }
@@ -894,7 +890,7 @@ Double_t Median(vector<int> v)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Function to plot hcam using data from a CSV file
-void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp) {
+void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, int maxMUSICnumber, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp) {
    
     // Plot hcam using the data from the CSV file
     c_cleaned->cd(1);
@@ -915,7 +911,7 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     subtitle->SetNDC(); // Set to Normalized Device Coordinates (NDC)
     subtitle->SetTextSize(0.03);
     subtitle->DrawLatex(0.1, 0.92, Form("Average Amplitude Whole Camera: %.2f",avg_amp));
-    subtitle->DrawLatex(0.7, 0.12, Form("Triggered Pixel: %i",maxpixelnumberTimeBin));
+    subtitle->DrawLatex(0.55, 0.12, Form("Triggered MUSIC: %i  Triggered Pixel: %i",maxMUSICnumber,maxpixelnumberTimeBin));
     DrawMUSICBoundaries();
 
     //hcam1->SetMinimum(0);
