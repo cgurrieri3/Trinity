@@ -305,8 +305,16 @@ int main(int argc, char **argv){
                             // }
                             // sleep(15);
                             if (EllipicRatio <=  LWRatioCutOff/100.0 && std::find(surviving_pixels_final.begin(), surviving_pixels_final.end(), MaxPixelIDTimeBin.back()) != surviving_pixels_final.end() ){
+                                double meanx1 = hcam_cleaned->GetMean(1);
+                                double meany1 = hcam_cleaned->GetMean(2);
+                                COGgraph->Fill(meanx1,meany1);
+
+                                std::vector<double> M3LongVar = getM3Long(meanx1, meany1, surviving_pixels_final,AmpCameraTimeBin);
+                                // cout << "M3Long outside: " << M3LongVar[0] << endl;
+                                // cout << "M3Long outside: " << M3LongVar[1] << endl;
+
                                 double conc = AmpCameraTimeBin[MaxPixelIDTimeBin.back()]/Cleaned_total_amp;
-                                CleanedPlot(c_cleaned, hcam_intial, hcam_cut,hcam_connected, hcam_cleaned, AvgAmplitudePerEvent.back(), MaxPixelIDTimeBin.back(),MaxMUSICID.back(), conc, eigenVals, eigenVecs, sigmas, Cleaned_count, Cleaned_total_amp);
+                                CleanedPlot(c_cleaned, hcam_intial, hcam_cut,hcam_connected, hcam_cleaned, AvgAmplitudePerEvent.back(), MaxPixelIDTimeBin.back(),MaxMUSICID.back(), conc, eigenVals, eigenVecs, sigmas, Cleaned_count, Cleaned_total_amp, M3LongVar);
                                 // sleep(60);
                                 std::string hcam_cleanedtitle=Form("File# %i, Event# %i",f,EventCounter);
                                 hcam_cleaned->SetName(hcam_cleanedtitle.c_str());
@@ -320,15 +328,10 @@ int main(int argc, char **argv){
                                 SIZE_CONC->Fill(conc,Cleaned_total_amp);
                                 hcam_allAmpdist->Fill(Cleaned_total_amp);
                                 
-                                double meanx1 = hcam_cleaned->GetMean(1);
-                                double meany1 = hcam_cleaned->GetMean(2);
-                                COGgraph->Fill(meanx1,meany1);
-
                                 int nx, ny;
                                 FindBin(MaxPixelIDTimeBin.back(), &nx, &ny);
                                 pixeldist->Fill(nx, ny, 1);
-                                // COGgraphweighted->Fill(CenterOfGravity[0],CenterOfGravity[1]);
-                                // sleep(15);
+                                sleep(15);
                             }
                         } else {
                         zeroentries += 1;
@@ -638,6 +641,51 @@ void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp, std::vector<double> *COG){
     // sleep(5);
 }
 
+std::vector<double> getM3Long(double xcog,double ycog, std::vector<double> sur_pix, std::vector<double> amps){
+    // N = Max number of pixels survived
+    // i = pixel index
+    // x = pixel x location
+    // x cog = x comp. Center of Gravity
+    // q = charge of that pixel (start with amplitude for us)
+    std::vector<double> M3Long = {0.0,0.0};
+    int psize = sur_pix.size();
+
+    // cout << "xcog: " << xcog << " ycog: "<< ycog << endl;
+    
+    std::vector<double> randomNumbers;
+    for(int p = 0; p < psize; p++) {
+        // randomNumbers = generateRandomNumbers();
+        int nx, ny;
+        FindBin(sur_pix[p], &nx, &ny);
+        double p1x = std::pow((nx*1.0 - xcog*1.0),3.0);
+        // cout << ny << endl;
+        // cout << (ny*1.0 - ycog*1.0) << endl;
+        double p1y = std::pow((ny*1.0 - ycog*1.0),3.0);
+        double p2x = amps[sur_pix[p]]*p1x;
+        double p2y = amps[sur_pix[p]]*p1y;
+        // cout << amps[sur_pix[p]] << endl;
+
+        M3Long[0] = M3Long[0] + p2x;
+        M3Long[1] = M3Long[1] + p2y;
+        // cout << "M3 summingx: " << M3Long[0] << endl;
+        // cout << "M3 summingy: " << M3Long[1] << endl;
+    }
+    // cout << "M3 summing2x: " << M3Long[0] << endl;
+    // cout << "M3 summing2y: " << M3Long[1] << endl;
+    // cout << psize << endl;
+    double p3x = M3Long[0] / psize;
+    double p3y = M3Long[1] / psize;
+    if (p3x < 0){
+        M3Long[0] = -1*std::pow(p3x*-1.0,0.333333333);
+    }
+    if (p3y < 0){
+        M3Long[1] = -1*std::pow(p3y*-1.0,0.333333333);
+    }
+    // cout << "M3Long Complete: " << M3Long[0] << endl;
+    // cout << "M3Long Complete: " << M3Long[1] << endl;
+    return M3Long;
+}
+
 std::vector<double> generateRandomNumbers() {
     // Define the random number generator and distribution
     std::random_device rd;
@@ -890,7 +938,7 @@ Double_t Median(vector<int> v)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Function to plot hcam using data from a CSV file
-void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, int maxMUSICnumber, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp) {
+void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, int maxMUSICnumber, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp,std::vector<double> M3LongVar) {
    
     // Plot hcam using the data from the CSV file
     c_cleaned->cd(1);
@@ -911,7 +959,7 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     subtitle->SetNDC(); // Set to Normalized Device Coordinates (NDC)
     subtitle->SetTextSize(0.03);
     subtitle->DrawLatex(0.1, 0.92, Form("Average Amplitude Whole Camera: %.2f",avg_amp));
-    subtitle->DrawLatex(0.55, 0.12, Form("Triggered MUSIC: %i  Triggered Pixel: %i",maxMUSICnumber,maxpixelnumberTimeBin));
+    subtitle->DrawLatex(0.35, 0.12, Form("Triggered MUSIC: %i  Triggered Pixel: %i",maxMUSICnumber,maxpixelnumberTimeBin));
     DrawMUSICBoundaries();
 
     //hcam1->SetMinimum(0);
@@ -1018,12 +1066,14 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     subtitle->SetTextSize(0.03);
     
     double areaEllipse = (3.8/16) * (3.8/16) * (Cleaned_count); // area of an ellipse
-    subtitle->DrawLatex(0.1, 0.92, Form("LW:%.2f Pixels:%i Area:%.2f Size:%.2f Conc:%.2f",
+    subtitle->DrawLatex(0.01, 0.92, Form("LW:%.2f Pixels:%i Area:%.2f Size:%.2f Conc:%.2f M3Long:(%.2f,  %.2f)",
     EllipicRatio,
     Cleaned_count,
     areaEllipse,
     Cleaned_total_amp,
-    conc));
+    conc,
+    M3LongVar[0],
+    M3LongVar[1]));
 
 }
 
