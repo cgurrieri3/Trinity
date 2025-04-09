@@ -18,7 +18,7 @@
 const int TriggeredChannelAmpCutOff = 8; // Cut off for the triggered music channel
 const int TimeBinAll = 239; // Difference between triggered pixel time bin and the pixels around it time bin difference more that 1 risk saving cross talk events
 const int CorePixelAmpCutOff = 8; // (200ish ADC) // Cut off for the pixels surrounding the triggered music channel
-const int SaturatedPixelCutoff = 1; // 0 removed saturated pixels max channels from being cleaned. 1 allows them to be cleaned (changed from 0 on 2/26/2025)
+const int SaturatedPixelCutoff = 256; // 0 removed saturated pixels max channels from being cleaned. 1 allows them to be cleaned (changed from 0 on 2/26/2025)
 const int FlasherEventsCutOff = 15; // (350 ish ADC ) Average amplitude across the camera ~1200 is  Flasher event
 const int PixelSurviveCutOff = 3; //How many pixels need to survive cleaning to plot 
 const int LWRatioCutOff = 60 ; // length width How elliptical you require the events to be after the Principle Compomnent Analysis (helps removed crosstalk events.) 
@@ -112,7 +112,7 @@ int main(int argc, char **argv){
     std::vector<double> CalibratedHLEDperPixel = readFileToVector(Form("%s%s_Calibration_Factor.csv", CalibrationFactorDir.c_str(), folString.c_str()));
 
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
-    //for(int f = 90; f<100; f++){
+    // for(int f = 112; f<113; f++){
         // try {
         if (!isBranchPresentInFile(fileNamesVec[f], "Test")) {
             continue; // Skip to the next branch if not present
