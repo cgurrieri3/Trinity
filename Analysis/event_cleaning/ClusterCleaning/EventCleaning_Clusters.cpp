@@ -112,7 +112,7 @@ int main(int argc, char **argv){
     std::vector<double> CalibratedHLEDperPixel = readFileToVector(Form("%s%s_Calibration_Factor.csv", CalibrationFactorDir.c_str(), folString.c_str()));
 
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
-    // for(int f = 112; f<113; f++){
+    //for(int f = 90; f<100; f++){
         // try {
         if (!isBranchPresentInFile(fileNamesVec[f], "Test")) {
             continue; // Skip to the next branch if not present
@@ -514,6 +514,30 @@ int main(int argc, char **argv){
         ));
 
     delete c_cleaned;
+    system(Form("chmod 660 %s",Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
+        outDir.c_str(),
+        folString.c_str(),
+        TriggeredChannelAmpCutOff,
+        TimeBinAll,
+        CorePixelAmpCutOff, 
+        SaturatedPixelCutoff,
+        FlasherEventsCutOff,
+        PixelSurviveCutOff,
+        LWRatioCutOff,
+        rmTopRow
+        )));
+    system(Form("chmod 660 %s",Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.pdf",
+        outDir.c_str(),
+        folString.c_str(),
+        TriggeredChannelAmpCutOff,
+        TimeBinAll,
+        CorePixelAmpCutOff, 
+        SaturatedPixelCutoff,
+        FlasherEventsCutOff,
+        PixelSurviveCutOff,
+        LWRatioCutOff,
+        rmTopRow
+        )));
 return 0;
 }
 
