@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import os
 import ephem
 import matplotlib.pyplot as plt
@@ -20,7 +21,7 @@ elevation = 3048  # Elevation of Frisco Peak
 #start_date = datetime(2024, 4, 17).replace(tzinfo=timezone.utc, hour=0, minute=0, second=0, microsecond=0) # Current UTC time
 
 # Get the current UTC date
-current_utc_date = datetime.utcnow().date()
+current_utc_date = datetime.now(timezone.utc) #datetime.utcnow().date() deprecated
 # Set the time to 00:00:00
 start_date = datetime.combine(current_utc_date, time())
 
@@ -61,7 +62,7 @@ def moon_position_over_time(latitude, longitude, start_date, interval_minutes):
 
     # Find the time of Moonset (negative slope crossing y=0)
     moonset_index = next(
-        (i for i in range(1, len(moon_altitudes)) if moon_altitudes[i] < 0 and moon_altitudes[i - 1] >= 0), None)
+        (i for i in range(1, len(moon_altitudes)) if moon_altitudes[i] < -3 and moon_altitudes[i - 1] >= -3), None)
     time_of_moonset = moon_times[moonset_index] if moonset_index is not None else None
 
     return moon_times, moon_altitudes, time_of_max_altitude, time_of_moonrise, time_of_moonset
@@ -95,7 +96,7 @@ def sun_position_over_time(latitude, longitude, start_date, interval_minutes):
     time_of_sunrise = sun_times[sunrise_index] if sunrise_index is not None else None
 
     # Finding the time of critical sunrise time (positive slope crossing y=-15)
-    sunrise_crit_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > -15 and sun_altitudes[i - 1] <= -15), None)
+    sunrise_crit_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > -18 and sun_altitudes[i - 1] <= -18), None)
     time_of_sunrise_crit = sun_times[sunrise_crit_index] if sunrise_crit_index is not None else None
 
     # Find the time of sunset (negative slope crossing y=0)
@@ -131,14 +132,14 @@ ax.plot(sun_times, sun_altitudes, label='Sun Altitude', color=sun_color, marker=
 time_list = []
 # Highlight points with dangerous light levels
 for i in range(len(moon_altitudes) - 1):
-    if moon_altitudes[i] < moon_altitudes[i - 1] and moon_altitudes[i] > 0:
+    if moon_altitudes[i] < moon_altitudes[i - 1] and moon_altitudes[i] > -3:
         '''
         ax.axvspan(sun_times[i], sun_times[i + 1], color='grey', alpha=0.05)
         '''
         time_list.append(sun_times[i])
 
 for i in range(len(sun_altitudes) - 1):
-    if sun_altitudes[i] > -15 and not (moon_altitudes[i] < moon_altitudes[i - 1] and moon_altitudes[i] > 0):
+   if sun_altitudes[i] > -18 and not ((moon_altitudes[i] < moon_altitudes[i - 1] and moon_altitudes[i] > -3) and sun_times[i] < time_of_sunset_crit):
         '''
         ax.axvspan(sun_times[i], sun_times[i + 1], color='grey', alpha=0.05)
         '''
@@ -172,41 +173,39 @@ index = ['Times']
 df = pd.DataFrame(data, index=index)
 df_sorted = df.apply(lambda x: pd.to_datetime(x).sort_values(), axis=1)
 
-if not ((time_of_sunset_crit) < time_of_moonset < (time_of_sunrise_crit)):
-    start_time = (time_of_sunset_crit)
+if not ((time_of_sunset_crit) < time_of_moonset < (time_of_sunrise_crit)): #if sun doesn't set before moon
+    start_time = (time_of_sunset_crit) #start time is sunset + 1.5hr
+    #print(1)
 else:
-    start_time = time_of_moonset
+    start_time = time_of_moonset #otherwise, start at moonset, all good here.
+    #print(2)
+    #print(start_time)
 
-if not ((time_of_sunset_crit) < time_of_max_altitude < (time_of_sunrise_crit)):
-    end_time = (time_of_sunrise_crit)
+if not ((time_of_sunset_crit) < time_of_max_altitude < (time_of_sunrise_crit)): #if moon peak not between sunrise and sunset
+    end_time = (time_of_sunrise_crit) #end at sunrise - 1.5hr
+    #print(3)
 else:
-    end_time = time_of_max_altitude
-
-if start_time == (time_of_sunset_crit) and end_time == time_of_max_altitude:
-    if (time_of_sunset_crit) < time_of_moonset < (time_of_sunrise_crit):
+    if start_time > time_of_max_altitude: #if ending at sunrise - 1.5hr
+        end_time = time_of_sunrise_crit
+    else:
+        end_time = time_of_max_altitude #otherwise, end at moon peak
+        #print(4)
+        #print(end_time)
+if start_time == (time_of_sunset_crit) and end_time == time_of_max_altitude: #start = sunset + 1.5hr, end = moon peak: this is the block we should fix
+    #print(5)
+    if (time_of_sunset_crit) < time_of_moonset < (time_of_sunrise_crit): #if moon sets between sunset and  sunrise
         start_time_2 = time_of_moonset
-        end_time_2 = (time_of_sunrise_crit)
+        end_time_2 = (time_of_sunrise_crit) #return these instead?
+        if (end_time_2 - start_time_2) < timedelta(minutes=95):
+            print("Observation window too short.")
+        #return start_time_2, end_time_2 #NEW
+    #print(start_time)
+    #print(end_time)
+    #return start_time, end_time
 
-if start_time > end_time == time_of_max_altitude:
-    start_time_2 = start_time
-    start_time = time_of_sunset_crit
-    end_time_2 = time_of_sunrise_crit
-
-if not (start_time_2 == None and end_time_2 == None):
-    if start_time_2 > end_time_2:
-        start_time_2 = None
-        end_time_2 = None
-
-if not (start_time_2 == None and end_time_2 == None):
-    if (end_time_2 - start_time_2) < timedelta(minutes=45):
-        end_time_2 = None
-        start_time_2 = None
-    elif (end_time - start_time) < timedelta(minutes=45):
-        start_time = start_time_2
-        end_time = end_time_2
-        end_time_2 = None
-        start_time_2 = None
-
+if start_time_2 and end_time_2:
+    start_time = start_time_2
+    end_time = end_time_2
 
 
 # Improve chart labels
@@ -311,17 +310,18 @@ logging.info(f"Sunset Time: {time_of_sunset.strftime('%m-%d %H:%M')}")
 logging.info(f"\033[1mStart Time: {start_time.strftime('%m-%d %H:%M')}\033[0m")   # "\033[1m" and "\033[0m" make the text bold
 logging.info(f"\033[1mEnd Time: {end_time.strftime('%m-%d %H:%M')}\033[0m")   # "\033[1m" and "\033[0m" make the text bold
 
-if not (start_time_2 == None and end_time_2 == None):
-    logging.info(f"\033[1mStart Time 2: {start_time_2.strftime('%m-%d %H:%M')}\033[0m")   # "\033[1m" and "\033[0m" make the text bold
-    logging.info(f"\033[1mEnd Time 2: {end_time_2.strftime('%m-%d %H:%M')}\033[0m")   # "\033[1m" and "\033[0m" make the text bold
+#if not (start_time_2 == None and end_time_2 == None):
+#    logging.info(f"\033[1mStart Time 2: {start_time_2.strftime('%m-%d %H:%M')}\033[0m")   # "\033[1m" and "\033[0m" make the text bold
+#    logging.info(f"\033[1mEnd Time 2: {end_time_2.strftime('%m-%d %H:%M')}\033[0m")   # "\033[1m" and "\033[0m" make the text bold
 
 
 # Write to text file for trinity.py
-with open("eon_times.txt", "w") as file:
+with open("eon_times.txt", "w") as file: #Changed
     file.write(f"Moonrise Time: {time_of_moonrise}\n")
     file.write(f"Moonset Time: {time_of_moonset}\n")
     file.write(f"Sunrise Time: {time_of_sunrise}\n")
     file.write(f"Sunset Time: {time_of_sunset}\n")
+    '''
     if not (start_time_2 == None and end_time_2 == None):
         if start_date < end_time:
             file.write(f"Start Time: {start_time.strftime}\n")
@@ -329,11 +329,13 @@ with open("eon_times.txt", "w") as file:
         elif start_time_2 < (time_of_sunrise - timedelta(minutes=90)) and start_time_2 > (time_of_sunset + timedelta(minutes=90)):
             file.write(f"Start Time 2: {start_time_2}\n")
             file.write(f"End Time 2: {end_time_2}\n")
-    else:
-        file.write(f"Start Time: {start_time.strftime}\n")
-        file.write(f"End Time: {end_time}\n")
+    '''
+    data_quality_start = start_time - (timedelta(minutes=32)) #Added -32 min for data quality check start time
+    #file.write(f"Data Quality Start Time: {data_quality_start.strftime('%Y-%m-%d %H:%M:%S')}\n")
+    file.write(f"Start Time: {start_time.strftime('%Y-%m-%d %H:%M:%S')}\n") #Changed
+    file.write(f"End Time: {end_time}\n")
 
-print("Times have been written to eon_times.txt")
+print("Times have been written to eon_times.txt") #Changed
 
 
 
@@ -369,8 +371,9 @@ if illumination >= 90:
     legend_elements = [
     Patch(color='blue', alpha = 0.5, label='NGC 1068 Obs. Window'),
     Patch(color='purple', alpha=0.5, label='TXS 0506+056 Obs. Window'),
-    Patch(facecolor='green', label = f'Obs. Start Time: {start_time.strftime("%H:%M")} UTC'),
-    Patch(facecolor='red', label = f'Obs. End Time: {end_time.strftime("%H:%M")} UTC'),
+    Patch(facecolor='darkslateblue', label = f'Data Qual. Extrigs Start Time: {data_quality_start.strftime("%H:%M")} UTC'),
+    Patch(facecolor='green', label = f'Obs. Extrigs Start Time: {start_time.strftime("%H:%M")} UTC'),
+    Patch(facecolor='red', label = f'Obs. Extrigs End Time: {end_time.strftime("%H:%M")} UTC'),
     Patch(color='grey', alpha = 0.5, label = 'Moon Position Relative'),
     Patch(color='orange', alpha=0.5, label = 'Sun Position Relative'),
     Patch(color='white', label = f'Moonphase: {illumination}%')
@@ -390,12 +393,16 @@ else:
     #text3 = ax.text(0.784, 0.06, 'Moon Phase = ' + str(illumination) + '%', color='black', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
     #text4 = ax.text(0.784, 0.1795, 'Trinity Start Time', color='green', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
     #text5 = ax.text(0.784, 0.12, 'Trinity End Time', color='Red', fontsize=8, ha='left', va='top', transform=ax.transAxes, bbox=dict(facecolor='white', alpha=1, edgecolor='grey'))
-    plt.axvline(x=start_time - timedelta(minutes=10), color='green', linestyle='--', linewidth=2, alpha=1)
-    plt.axvline(x=end_time + timedelta(minutes=10), color='red', linestyle='--', linewidth=2, alpha=1)
+    plt.axvline(x=start_time, color='green', linestyle='--', linewidth=2, alpha=1)
+    plt.axvline(x=end_time, color='red', linestyle='--', linewidth=2, alpha=1)
+    plt.axvline(x=data_quality_start, color='darkslateblue', linestyle='--', linewidth=1, alpha=1)
 
-    if not (start_time_2 == None and end_time_2 == None):
-        plt.axvline(x=start_time_2 - timedelta(minutes=10), color='green', linestyle='--', linewidth=2, alpha=0.5)
-        plt.axvline(x=end_time_2, color='red', linestyle='--', linewidth=2, alpha=0.5)
+
+
+#    if not (start_time_2 == None and end_time_2 == None):
+#        plt.axvline(x=start_time_2, color='green', linestyle='--', linewidth=2, alpha=0.5)
+#        plt.axvline(x=end_time_2, color='red', linestyle='--', linewidth=2, alpha=0.5)
+
 
     for i in range(len(moon_altitudes) - 1):
         if not (sun_times[i] in time_list):
@@ -403,13 +410,15 @@ else:
 
 #Adding custom legend entries
     legend_elements = [
-        Patch(color='blue', alpha = 0.5, label='NGC 1068 Obs. Window'),
-        Patch(color='purple', alpha=0.5, label='TXS 0506+056 Obs. Window'),
-        Patch(facecolor='green', label = f'Obs. Start Time: {start_time.strftime("%H:%M")} UTC'),
-        Patch(facecolor='red', label = f'Obs. End Time: {end_time.strftime("%H:%M")} UTC'),
-        Patch(color='grey', alpha = 0.5, label = 'Moon Position Relative'),
-        Patch(color='orange', alpha=0.5, label = 'Sun Position Relative'),
-        Patch(color='white', label = f'Moonphase: {illumination}%')
+         Patch(color='blue', alpha = 0.5, label='NGC 1068 Obs. Window'),
+         Patch(color='purple', alpha=0.5, label='TXS 0506+056 Obs. Window'),
+         Patch(facecolor='darkslateblue', label = f'Data Qual. Extrigs Start Time: {data_quality_start.strftime("%H:%M")} UTC'),
+         Patch(facecolor='green', label = f'Obs. Start Time: {start_time.strftime("%H:%M")} UTC'),
+         Patch(facecolor='red', label = f'Obs. End Time: {end_time.strftime("%H:%M")} UTC'),
+         Patch(color='grey', alpha = 0.5, label = 'Moon Position Relative'),
+         Patch(color='orange', alpha=0.5, label = 'Sun Position Relative'),
+         Patch(color='white', label = f'Moonphase: {illumination}%'),
+
     ]
 
 
@@ -430,7 +439,7 @@ next_day_utc = current_utc_date + timedelta(days=1)
 #print(next_day_utc)
 file_date=next_day_utc.strftime('%Y%m%d')
 
-plt.savefig(f'schedule_{file_date}.pdf', format='pdf')
+plt.savefig(f'Agnelina_schedule_{file_date}.pdf', format='pdf')
 #plt.savefig(f'schedule_20240418.pdf',format='pdf')
 
 try:
