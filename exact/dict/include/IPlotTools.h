@@ -1,5 +1,5 @@
 #include<iostream>
-
+#include <vector>
 
 class IPlotTools{
 	/**
@@ -41,11 +41,15 @@ class IPlotTools{
 		 * 
 		 * @return An int witht the MUSIC ID.
 		 * */
-		static int GetMUSICCursorID(int x, int y);
+		static int FindMUSIC(int nx, int ny);
+		static int FindSIAB(int nx, int ny);
 		/**
 		 * A method used to draw the trigger cell boundaries grouping the pixels connected to the same discriminator together
 		 * 
 		 * */
 		static void DrawMUSICBoundaries();
-
+	private:
+		inline static int MaxNofChannels = 256;
+		inline static std::vector<int> mapMUSIC = {17,16,1,0,25,24,9,8,19,18,3,2,27,26,11,10,21,20,5,4,29,28,13,12,23,22,7,6,31,30,15,14};
+		inline static std::vector<int> mapSIAB = {12,12,8,8,4,4,0,0,13,13,9,9,5,5,1,1,14,14,10,10,6,6,2,2,15,15,11,11,7,7,3,3};
 };
