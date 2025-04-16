@@ -63,7 +63,7 @@ void DrawMUSICBoundaries();
 	std::string folStr = argv[1];
 	std::string fileStr = argv[2];
 	std::string treeStr = argv[3];*/
-void amplots(std::string folStr, std::string fileStr, std::string treeStr){
+void amplots_Trinity(std::string folStr, std::string fileStr, std::string treeStr){
 	//assembles the directory where merged .root data files are saved; assumes that each date (folString) contains a directory "RawDataMerged" where the merged files are saved
 	std::string fileName = Form("%s%s/RawDataMerged/CoBo0_AsAd0_%s_0000.root",dataDir.c_str(),folStr.c_str(),fileStr.c_str());
 	cout << "Loading file: " << fileName << endl;
