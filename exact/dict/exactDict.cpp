@@ -36,6 +36,7 @@
 
 // Header files passed as explicit arguments
 #include "BiFocal.h"
+#include "CEvent.h"
 #include "Event.h"
 #include "ExtractedData.h"
 #include "GoldPlated.h"
@@ -291,7 +292,7 @@ namespace ROOT {
       ::IUtilities *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::IUtilities));
       static ::ROOT::TGenericClassInfo 
-         instance("IUtilities", "IUtilities.h", 15,
+         instance("IUtilities", "IUtilities.h", 17,
                   typeid(::IUtilities), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &IUtilities_Dictionary, isa_proxy, 4,
                   sizeof(::IUtilities) );
@@ -1264,6 +1265,7 @@ namespace {
   void TriggerDictionaryInitialization_exactDict_Impl() {
     static const char* headers[] = {
 "BiFocal.h",
+"CEvent.h",
 "Event.h",
 "ExtractedData.h",
 "GoldPlated.h",
@@ -1282,11 +1284,11 @@ nullptr
     static const char* includePaths[] = {
 "dict",
 "./inc/",
-"/storage/hive/project/phy-otte/sstepanoff3/NolanExact/exact/dict/include",
+"/storage/hive/project/phy-otte/sstepanoff3/exact/dict/include",
 "./dict/cling",
 "./",
 "/storage/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/include/",
-"/storage/hive/project/phy-otte/sstepanoff3/NolanExact/exact/",
+"/storage/hive/project/phy-otte/sstepanoff3/exact/",
 nullptr
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(
@@ -1317,6 +1319,7 @@ class __attribute__((annotate("$clingAutoload$ISiPM.h")))  ISiPM;
 #define _BACKWARD_BACKWARD_WARNING_H
 // Inline headers
 #include "BiFocal.h"
+#include "CEvent.h"
 #include "Event.h"
 #include "ExtractedData.h"
 #include "GoldPlated.h"

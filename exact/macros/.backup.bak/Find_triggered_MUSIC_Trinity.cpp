@@ -30,7 +30,7 @@ void SetBranches(Event *evD);
 void FindMusic(std::string filename);
 
 
-void Find_triggered_MUSIC(std::string filename,std::string treeString){
+void Find_triggered_MUSIC_Trinity(std::string filename,std::string treeString){
 	LoadEvents(filename, treeString);
 	// open file
 	//file = new IFile(filename);

@@ -46,9 +46,9 @@ std::string IUtilities::ConvertUnixToUTCfromFile(long long unixTimestampInNanose
     std::chrono::nanoseconds ns = std::chrono::duration_cast<std::chrono::nanoseconds>(sinceEpoch);
 
     // Calculate the hours, minutes, and seconds
-    int hours = ns.count() / 3600000000000;
-    int minutes = (ns.count() % 3600000000000) / 60000000000;
-    int seconds = (ns.count() % 60000000000) / 1000000000;
+    // int hours = ns.count() / 3600000000000;
+    // int minutes = (ns.count() % 3600000000000) / 60000000000;
+    // int seconds = (ns.count() % 60000000000) / 1000000000;
     int nanoseconds = ns.count() % 1000000000;
 
 
@@ -59,8 +59,27 @@ std::string IUtilities::ConvertUnixToUTCfromFile(long long unixTimestampInNanose
     return oss.str();
 }
 
+float IUtilities::convertADC2PE(float ADC){
+    float PE = (ADC*1.0)/ADCtoPEratio;
+    return PE;
+}
+
+std::vector<float> IUtilities::convertADC2PE(std::vector<float> ADC){
+	int vectorEnd = ADC.size();
+	std::vector<float> PE(vectorEnd);
+    for(int i= 0; i<vectorEnd;i++){
+		PE[i] = (ADC[i]*1.0)/ADCtoPEratio;
+	}
+	return PE;
+}
+
+int IUtilities::GetMUSICPosition(int musicID){
+	musicID = MUSICs[musicID];
+	return musicID;
+}
 
 int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,int musicID){
+	musicID = MUSICs[musicID];
 	int iStartPixel, iEndPixel;
 	//looks for pixels in specified music ID if none start from pixel#0
 	if(musicID != -1){
@@ -84,36 +103,38 @@ int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,int musicID){
 	return maxID;
 }
 
-int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,std::vector<int> roiPixels){
-	int iStartPixel, iEndPixel;
+//SPB2 Only Trinity Demononstartor does not have ROI Pixels
+// int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,std::vector<int> roiPixels){
+// 	int iStartPixel, iEndPixel;
 
 
-	int max = 0;
-	int maxID = 0;
-	//If no region of interest pixels specified look for highest amplitude out of pixels starting from pixel#0 -> amplitude.size()
-	if(roiPixels.size() == 0){
-		iStartPixel = 0;
-		iEndPixel = amplitude.size();
+// 	int max = 0;
+// 	int maxID = 0;
+// 	//If no region of interest pixels specified look for highest amplitude out of pixels starting from pixel#0 -> amplitude.size()
+// 	if(roiPixels.size() == 0){
+// 		iStartPixel = 0;
+// 		iEndPixel = amplitude.size();
 
-		for(int i = iStartPixel; i<iEndPixel; i++){
-			if(amplitude[i]>max){
-				max = amplitude[i];
-				maxID = i;
-			}
-		}
-	//if roi pixels specified looks for pixel with highest amplitude
-	}else{
-		for(int i = 0; i<roiPixels.size(); i++){
-			if(amplitude[roiPixels[i]]>max){
-				max = amplitude[roiPixels[i]];
-				maxID = roiPixels[i];
-			}
-		}
-	}
-	return maxID;
-}
+// 		for(int i = iStartPixel; i<iEndPixel; i++){
+// 			if(amplitude[i]>max){
+// 				max = amplitude[i];
+// 				maxID = i;
+// 			}
+// 		}
+// 	//if roi pixels specified looks for pixel with highest amplitude
+// 	}else{
+// 		for(int i = 0; i<roiPixels.size(); i++){
+// 			if(amplitude[roiPixels[i]]>max){
+// 				max = amplitude[roiPixels[i]];
+// 				maxID = roiPixels[i];
+// 			}
+// 		}
+// 	}
+// 	return maxID;
+// }
 
 float IUtilities::GetMaximum(std::vector<float>amplitude,int musicID){
+	musicID = MUSICs[musicID];
 	int iStartPixel, iEndPixel;
 	//if music ID is none  start from music #0
 	if(musicID != -1){
@@ -125,47 +146,49 @@ float IUtilities::GetMaximum(std::vector<float>amplitude,int musicID){
 	}
 	//find max amplitude out of vector
 	float max = 0;
-	int maxID = 0;
+	// int maxID = 0;
 	for(int i = iStartPixel; i<iEndPixel; i++){
 		if(amplitude[i]>max){
 			max = amplitude[i];
-			maxID = i;
+			// maxID = i;
 		}
 	}
 
 	return max;
 }
 
-float IUtilities::GetMaximum(std::vector<float>amplitude,std::vector<int> roiPixels){
-	int iStartPixel, iEndPixel;
+//SPB2 Only Trinity Demononstartor does not have ROI Pixels
+// float IUtilities::GetMaximum(std::vector<float>amplitude,std::vector<int> roiPixels){
+// 	int iStartPixel, iEndPixel;
 
 
-	float max = 0;
-	int maxID = 0;
-	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitde.size()
-	//returns max amplitude
-	if(roiPixels.size() == 0){
-		iStartPixel = 0;
-		iEndPixel = amplitude.size();
+// 	float max = 0;
+// 	int maxID = 0;
+// 	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitde.size()
+// 	//returns max amplitude
+// 	if(roiPixels.size() == 0){
+// 		iStartPixel = 0;
+// 		iEndPixel = amplitude.size();
 
-		for(int i = iStartPixel; i<iEndPixel; i++){
-			if(amplitude[i]>max){
-				max = amplitude[i];
-				maxID = i;
-			}
-		}
-	}else{
-		for(int i = 0; i<roiPixels.size(); i++){
-			if(amplitude[roiPixels[i]]>max){
-				max = amplitude[roiPixels[i]];
-				maxID = roiPixels[i];
-			}
-		}
-	}
-	return max;
-}
+// 		for(int i = iStartPixel; i<iEndPixel; i++){
+// 			if(amplitude[i]>max){
+// 				max = amplitude[i];
+// 				maxID = i;
+// 			}
+// 		}
+// 	}else{
+// 		for(int i = 0; i<roiPixels.size(); i++){
+// 			if(amplitude[roiPixels[i]]>max){
+// 				max = amplitude[roiPixels[i]];
+// 				maxID = roiPixels[i];
+// 			}
+// 		}
+// 	}
+// 	return max;
+// }
 
 int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,int musicID){
+	musicID = MUSICs[musicID];
 	int iStartPixel, iEndPixel;
 	
 	//looks for pixels in specified music ID
@@ -189,37 +212,39 @@ int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,int musicID){
 	return minID;
 }
 
-int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,std::vector<int> roiPixels){
-	int iStartPixel, iEndPixel;
+//SPB2 Only Trinity Demononstartor does not have ROI Pixels
+// int IUtilities::GetMinimumPixelID(std::vector<float>amplitude,std::vector<int> roiPixels){
+// 	int iStartPixel, iEndPixel;
 
-	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitude.size()
+// 	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitude.size()
 
-	//returns min amplitude ID out of pixels in roiPixels vector
-	float min = 4096;
-	int minID = 0;
+// 	//returns min amplitude ID out of pixels in roiPixels vector
+// 	float min = 4096;
+// 	int minID = 0;
 
-	if(roiPixels.size() == 0){
-		iStartPixel = 0;
-		iEndPixel = amplitude.size();
+// 	if(roiPixels.size() == 0){
+// 		iStartPixel = 0;
+// 		iEndPixel = amplitude.size();
 
-		for(int i = iStartPixel; i<iEndPixel; i++){
-			if(amplitude[i]<min){
-				min = amplitude[i];
-				minID = i;
-			}
-		}
-	}else{
-		for(int i = 0; i<roiPixels.size(); i++){
-			if(amplitude[roiPixels[i]]<min){
-				min = amplitude[roiPixels[i]];
-				minID = roiPixels[i];
-			}
-		}
-	}
-	return minID;
-}
+// 		for(int i = iStartPixel; i<iEndPixel; i++){
+// 			if(amplitude[i]<min){
+// 				min = amplitude[i];
+// 				minID = i;
+// 			}
+// 		}
+// 	}else{
+// 		for(int i = 0; i<roiPixels.size(); i++){
+// 			if(amplitude[roiPixels[i]]<min){
+// 				min = amplitude[roiPixels[i]];
+// 				minID = roiPixels[i];
+// 			}
+// 		}
+// 	}
+// 	return minID;
+// }
 
 float IUtilities::GetMinimum(std::vector<float>amplitude,int musicID){
+	musicID = MUSICs[musicID];
 	int iStartPixel, iEndPixel;
 
 	//looks for pixels in specified music ID if none start from pixel 0	
@@ -232,47 +257,48 @@ float IUtilities::GetMinimum(std::vector<float>amplitude,int musicID){
 	}
 
 	float min = 4096;
-	int minID = 0;
+	// int minID = 0;
 	//returns min amplitude out of pixels in music
 	for(int i = iStartPixel; i<iEndPixel; i++){
 		if(amplitude[i]<min){
 			min = amplitude[i];
-			minID = i;
+			// minID = i;
 		}
 	}
 
 	return min;
 }
 
-float IUtilities::GetMinimum(std::vector<float>amplitude,std::vector<int> roiPixels){
-	int iStartPixel, iEndPixel;
+//SPB2 Only Trinity Demononstartor does not have ROI Pixels
+// float IUtilities::GetMinimum(std::vector<float>amplitude,std::vector<int> roiPixels){
+// 	int iStartPixel, iEndPixel;
 
-	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitde.size()
-	//returns min amplitude out of pixels in roiPixels vector
+// 	//if no roiPixels specified starts sequentially from pixel#0 -> pixel#amplitde.size()
+// 	//returns min amplitude out of pixels in roiPixels vector
 
-	float min = 4096;
-	int minID = 0;
+// 	float min = 4096;
+// 	int minID = 0;
 
-	if(roiPixels.size() == 0){
-		iStartPixel = 0;
-		iEndPixel = amplitude.size();
+// 	if(roiPixels.size() == 0){
+// 		iStartPixel = 0;
+// 		iEndPixel = amplitude.size();
 
-		for(int i = iStartPixel; i<iEndPixel; i++){
-			if(amplitude[i]<min){
-				min = amplitude[i];
-				minID = i;
-			}
-		}
-	}else{
-		for(int i = 0; i<roiPixels.size(); i++){
-			if(amplitude[roiPixels[i]]<min){
-				min = amplitude[roiPixels[i]];
-				minID = roiPixels[i];
-			}
-		}
-	}
-	return min;
-}
+// 		for(int i = iStartPixel; i<iEndPixel; i++){
+// 			if(amplitude[i]<min){
+// 				min = amplitude[i];
+// 				minID = i;
+// 			}
+// 		}
+// 	}else{
+// 		for(int i = 0; i<roiPixels.size(); i++){
+// 			if(amplitude[roiPixels[i]]<min){
+// 				min = amplitude[roiPixels[i]];
+// 				minID = roiPixels[i];
+// 			}
+// 		}
+// 	}
+// 	return min;
+// }
 
 float IUtilities::GetPedestalAverage(std::vector<int> trace, int tWindow,int pad, bool isUnCorrelated){
 	//create window for which to view trace samples
@@ -284,7 +310,7 @@ float IUtilities::GetPedestalAverage(std::vector<int> trace, int tWindow,int pad
 	//if isUnCorrelated is true, then following pad samples are skipped
 	//calculates sum of all trace values in vector
 	if(isUnCorrelated){
-		for(int i = 0; i+tWindow<trace.size(); i+=(tWindow+pad)){
+		for(std::size_t i = 0; i+tWindow<trace.size(); i+=(tWindow+pad)){
 			traceWindow = std::vector<int>(trace.begin()+i,trace.begin()+i+tWindow);
 			sum += std::accumulate(traceWindow.begin(),traceWindow.end(),0);
 			counter++;
@@ -301,6 +327,54 @@ float IUtilities::GetPedestalAverage(std::vector<int> trace, int tWindow,int pad
 	return average;
 }
 
+float IUtilities::GetEventAverageAmplitude(std::vector<float> amplitude){
+	int iStartPixel = 0;
+	int iEndPixel = amplitude.size();
+	float average;
+	float sum = 0;
+	int counter = 0;
+	//looks for the pixel with highest amplitude
+	for(int i = iStartPixel; i<iEndPixel; i++){
+		sum += amplitude[i];
+		counter++;
+	}
+	average = sum/counter;
+	return average;
+}
+
+float IUtilities::GetEventAmplitudeSum(std::vector<float> amplitude){
+	int iStartPixel = 0;
+	int iEndPixel = amplitude.size();
+	float sum = 0;
+	//looks for the pixel with highest amplitude
+	for(int i = iStartPixel; i<iEndPixel; i++){
+		sum += amplitude[i];
+	}
+	return sum;
+}
+
+std::vector<int> IUtilities::GetSaturatedPixels(std::vector<std::vector<int>> trace){
+	std::vector<int> saturation;
+	int counter = 0;
+	for(std::size_t i = 0; i<trace.size(); i++){
+		
+		int signalStart = 230;
+		int signalEnd = 250;
+		counter = 0;
+		for(int j = signalStart; j<signalEnd; j++){
+			if(trace[i][j] <= 1){
+				counter++;
+			}
+		}
+
+		if(counter>0) {
+			saturation.push_back(1);
+		} else {
+			saturation.push_back(0);
+		}
+	}
+	return saturation;
+}
 
 std::vector<std::string> IUtilities::GetFilesInDirectory(std::string dirname, std::string extension){
 	//looks through all files in directory with given extension
@@ -320,12 +394,65 @@ std::vector<std::string> IUtilities::GetFilesInDirectory(std::string dirname, st
 		}
 
 	}
+	std::sort(files.begin(), files.end());
 	return files;
+}
+
+// Function to check if a branch exists in a ROOT file
+bool IUtilities::isBranchPresentInFile(const std::string fileName, const std::string treeName) {
+    // Open the ROOT file
+    TFile* file = TFile::Open(fileName.c_str(), "READ");
+    if (!file || file->IsZombie()) {
+        std::cerr << "Error: Could not open the .root file: " << fileName << std::endl;
+        delete file;
+        return false;
+    }
+
+    // Check if the tree exists
+    bool treeExists = (file->Get(treeName.c_str()) != nullptr);
+    if (!treeExists) {
+        std::cout << "Tree '" << treeName << "' is not present in the file. Skipping..." << std::endl;
+    }
+
+    // Clean up
+    file->Close();
+    delete file;
+
+    return treeExists; // Return whether the tree exists
+}
+
+
+void IUtilities::removeDuplicates(std::vector<double>& arr) {
+    // Sort the array
+    std::sort(arr.begin(), arr.end());
+
+    // Use std::unique to remove duplicates
+    auto last = std::unique(arr.begin(), arr.end());
+
+    // Resize the vector to remove the undefined tail elements
+    arr.erase(last, arr.end());
+}
+
+std::vector<double> IUtilities::readFileToVector(const std::string filename) {
+    std::vector<double> result;
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return result; // Return empty vector if file can't be opened
+    }
+
+    double value;
+    while (file >> value) {
+        result.push_back(value);
+    }
+
+    file.close();
+    return result;
 }
 
 int IUtilities::GetHVChannel(int pixelID){
 	// given pixelID calculates hVChannel # bottom left 1, top left 2, bottom right 3, top right 4
-	int hVChannel;
+	int hVChannel = -1;
 	if ((pixelID >= 0 && pixelID <= 31) || (pixelID >= 64 && pixelID <= 95)) {
 		hVChannel = 1;
     } else if ((pixelID >= 128 && pixelID <= 159) || (pixelID >= 192 && pixelID <= 223)) {
