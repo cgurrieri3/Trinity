@@ -19,7 +19,8 @@ longitude = -113.2883  # Longitude Frisco Peak
 elevation = 3048  # Elevation of Frisco Peak
 interval_minutes = 1  # Adjust the interval as needed
 
-datetime_today = datetime(2024, 9, 15) #datetime.utcnow() # - timedelta(hours=6)
+# datetime_today = datetime(2024, 9, 15) #datetime.utcnow() # - timedelta(hours=6)
+datetime_today = datetime.now(timezone.utc)
 day_today = datetime_today.date()
 time_today = datetime_today.time()
 
@@ -246,10 +247,10 @@ def create_file(user_input='nope'):
 # Check current time
 
 def check_current_time():
-    df = pd.read_csv('EON_time.txt',header=None) 
+    df = pd.read_csv('/data/TrinityLabComputer/obs_prgm/EON_time.txt',header=None) 
     df.columns = ['UTC DateTime']
     df['UTC DateTime'] = pd.to_datetime(df['UTC DateTime'])
-    row_titles = [ 'Sunrise', 'Sunset','Moonrise', 'Moonset', 'Start Extrigs',  'Cutoff']
+    row_titles = ['Sunrise', 'Sunset','Moonrise', 'Moonset', 'Start Extrigs', 'Cutoff']
     df.index = row_titles
     cutoff_row = df.loc['Cutoff']
     cutoff_time = cutoff_row['UTC DateTime']
@@ -259,8 +260,9 @@ def check_current_time():
     moon_times, moon_altitudes, time_of_moonrise, time_of_moonset, time_of_max_altitude = moon_position_over_time(latitude, longitude, start_date, interval_minutes)
     sun_times, sun_altitudes, time_of_sunrise, time_of_sunset, time_of_sunrise_crit, time_of_sunset_crit = sun_position_over_time(latitude, longitude, start_date, interval_minutes)
     times_list = get_times(sun_altitudes, sun_times, moon_altitudes, moon_times)
-    endtime, start_time = get_endtime(time_of_sunrise_crit, time_of_sunset_crit, time_of_moonset, time_of_max_altitude)
+    start_time, end_time = get_endtime(time_of_sunrise_crit, time_of_sunset_crit, time_of_moonset, time_of_max_altitude) # switched from endtime, start_time
 
+    #print(start_time)
     #print(sunset_time)
     def curr_est_offset():
         tz_est = pytz.timezone('US/Eastern')
@@ -272,6 +274,7 @@ def check_current_time():
     current_date = datetime_today.date() 
     time_today_dt = datetime.combine(current_date, time_today)
 
+    #print(start_time)
     if (start_time - timedelta(minutes=32) < time_today_dt and time_today_dt < cutoff_time): # and not (current_utc_time.strftime("%Y-%m-%d %H:%M") in times_list):   #and current_utc_time > sunset_time:
 
         lets.communicate(f'TIME: TIME - The time is safe cutoff is {cutoff_time-timedelta(hours =curr_est_offset())} in ET')
@@ -280,6 +283,7 @@ def check_current_time():
     else:
         lets.communicate('TIME: Current time UNSAFE')
         return 0
+        
 
 
 
