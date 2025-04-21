@@ -40,7 +40,7 @@ class ISiPM{
 		 * 
 		 * @param values A std::vector of size nPixels that contains the optical corss-talk values for each SiPM in the camera.
 		 * */
-		void SetOptXTalk(std::vector<double> values);
+		//void SetOptXTalk(std::vector<double> values);
 		/**
 		 * Public method to set the temperature correction value for each of the SiPMs in the camera. 
 		 * Note: Temperature correction is calculated as a dividing factor, it should be used to divide any of both To PE conversions.
@@ -73,7 +73,8 @@ class ISiPM{
 		 * 
 		 * @return a std::vector<double> of size nPixels with the optical cross-talk values
 		 * */
-		std::vector<double> GetOptXTalk();
+		
+    //std::vector<double> GetOptXTalk();
 		/**
 		 * Public method to get the temperature correction as stored in the object
 		 * 
@@ -95,7 +96,7 @@ class ISiPM{
 
 	private:
 		std::vector <double> gain; /**< A std::vector containing the gain values for all the pixels*/
-		std::vector <double> optXTalk;/**< A std::vector containing the optical cross-talk values for all the pixels*/
+		//std::vector <double> optXTalk;/**< A std::vector containing the optical cross-talk values for all the pixels*/
 		std::vector <double> gainTCorrection;/**< A std::vector containing the temperature correction values for all the pixels*/
 		std::vector <double> amplToPE;/**< A std::vector containing the amplitude in ADC to photo-electron values for all the pixels*/
 		std::vector <double> chgToPE;/**< A std::vector containing the charge in ADC to photo-electron values for all the pixels*/

@@ -85,7 +85,7 @@ int AddSiPMInfoToEvents(std::string inputFileName) {
     std::vector<float> sipmTemp;
     std::vector<double> absoluteGain(256);
     std::vector<double> tempCorrection(256);
-    std::vector<double> optXTalk(256);        
+    //std::vector<double> optXTalk(256);        
     std::vector<double> amplitudeToPE(256);
     std::vector<double> chargeToPE(256);
 

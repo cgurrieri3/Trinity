@@ -5,7 +5,7 @@ ISiPM::ISiPM(){
 }
 ISiPM::ISiPM(int nPixels){
 	gain = std::vector<double>(nPixels, 0);
-	optXTalk = std::vector<double>(nPixels, 0);;
+	//optXTalk = std::vector<double>(nPixels, 0);;
 	gainTCorrection = std::vector<double>(nPixels, 0);;
 	amplToPE = std::vector<double>(nPixels, 0);;
 	chgToPE = std::vector<double>(nPixels, 0);;
@@ -18,9 +18,9 @@ ISiPM::~ISiPM(){
 void ISiPM::SetGain(std::vector<double> values){
 	gain = values;
 }
-void ISiPM::SetOptXTalk(std::vector<double> values){
+/*void ISiPM::SetOptXTalk(std::vector<double> values){
 	optXTalk = values;
-}
+}*/
 void ISiPM::SetTCorrection(std::vector<double> values){
 	gainTCorrection = values;
 }
@@ -34,9 +34,9 @@ void ISiPM::SetChgToPE(std::vector<double> values){
 std::vector<double> ISiPM::GetGain(){
 	return gain;
 }
-std::vector<double> ISiPM::GetOptXTalk(){
+/*std::vector<double> ISiPM::GetOptXTalk(){
 	return optXTalk;
-}
+}*/
 std::vector<double> ISiPM::GetTCorrection(){
 	return gainTCorrection;
 }
