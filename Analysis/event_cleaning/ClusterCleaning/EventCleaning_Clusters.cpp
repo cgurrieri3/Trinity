@@ -316,6 +316,8 @@ int main(int argc, char **argv){
                                 double conc = AmpCameraTimeBin[MaxPixelIDTimeBin.back()]/Cleaned_total_amp;
                                 CleanedPlot(c_cleaned, hcam_intial, hcam_cut,hcam_connected, hcam_cleaned, AvgAmplitudePerEvent.back(), MaxPixelIDTimeBin.back(),MaxMUSICID.back(), conc, eigenVals, eigenVecs, sigmas, Cleaned_count, Cleaned_total_amp, M3LongVar);
                                 // sleep(60);
+                        
+
                                 std::string hcam_cleanedtitle=Form("File# %i, Event# %i",f,EventCounter);
                                 hcam_cleaned->SetName(hcam_cleanedtitle.c_str());
                                 savePlot(c_cleaned,hcam_cleaned,outDir,folString, file,hcam_cleanedtitle );
@@ -914,6 +916,7 @@ void savePlot(TCanvas* c_cleaned,TH1* hist,std::string outDir,std::string folStr
         ), "UPDATE");
 
     std::string histName = hist->GetName();
+    std::string txtName = histName + "parameters";
     c_cleaned->Write(plotname.c_str());  // Save the canvas with a specific name
      if (TH2* hist2F = dynamic_cast<TH2*>(hist)) {
         histName = histName + "TH2";
@@ -924,8 +927,29 @@ void savePlot(TCanvas* c_cleaned,TH1* hist,std::string outDir,std::string folStr
 
     } 
     hist->Write(histName.c_str());
-    //file->Write(plotname.c_str());
+    
+    // get and write the parameters to a text file
+    std::ifstream inputFile("output_variables.txt");
+    if (inputFile.is_open()) {
+        std::string fileContent((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
+        inputFile.close();
+        // Create a TObjString to store the content
+        TObjString* textContent = new TObjString(fileContent.c_str());
+        
+        textContent->Write(txtName.c_str(), TObject::kOverwrite);
+
+        delete textContent;
+    }
     file->Close();
+
+    // Delete the text file after use
+    if (std::remove("output_variables.txt") != 0) {
+        std::cerr << "Error deleting output_variables.txt" << std::endl;
+    } else {
+        std::cout << "output_variables.txt successfully deleted." << std::endl;
+    }
+
+    //file->Write(plotname.c_str());
     c_cleaned->Print(Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.pdf",
         outDir.c_str(),
         folString.c_str(),
@@ -938,6 +962,8 @@ void savePlot(TCanvas* c_cleaned,TH1* hist,std::string outDir,std::string folStr
         LWRatioCutOff,
         rmTopRow
     ));
+
+
 }
  
 //pixmeans is vector of vectors of 256 pixels, pixMeans[1] is the average HLED amplitude per pixel divided by median of all 256 pixels
@@ -1098,6 +1124,21 @@ void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F
     conc,
     M3LongVar[0],
     M3LongVar[1]));
+
+    // Open a text file to write variables
+    std::ofstream outputFile("output_variables.txt");
+    if (outputFile.is_open()) {
+        outputFile << "LWRatio: " << EllipicRatio << "\n";
+        outputFile << "Cleaned_count: " << Cleaned_count << "\n";
+        outputFile << "AreaEllipse: " << areaEllipse << "\n";
+        outputFile << "Cleaned_total_amp: " << Cleaned_total_amp << "\n";
+        outputFile << "Conc: " << conc << "\n";
+        outputFile << "M3LongVar: (" << M3LongVar[0] << ", " << M3LongVar[1] << ")\n";
+        outputFile.close();
+    } else {
+        std::cerr << "Unable to open file for writing." << std::endl;
+    }
+
 
 }
 
