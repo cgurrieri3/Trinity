@@ -118,7 +118,7 @@ def check_files_external(intial_files):
 	try:
 		updated_files=int(check_num_files_directory(results))
 	except: 
-		lets.log("Data Error where Int for File infomation not registared")
+		lets.communicate("Data Error where Int for File infomation not registared")
 		return 0, intial_files
 	
 	if time_difference.total_seconds() < 1020 and file_size != '0':
