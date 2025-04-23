@@ -109,7 +109,7 @@ int main(int argc, char **argv){
     int hledentries = 0;
 
     // Load in the Calibration factors from the HLED branch in the file of CalibrationFactor.cpp
-    std::vector<double> CalibratedHLEDperPixel = readFileToVector(Form("%s%s_Calibration_Factor.csv", CalibrationFactorDir.c_str(), folString.c_str()));
+    std::vector<double> CalibratedHLEDperPixel = readFileToVector(Form("%s%s_GainCalibration_Factor.csv", CalibrationFactorDir.c_str(), folString.c_str()));
 
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
     //for(int f = 90; f<100; f++){
