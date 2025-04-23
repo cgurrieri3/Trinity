@@ -115,7 +115,12 @@ def check_files_external(intial_files):
 	
 	lets.communicate(f'File Information: [#: {files}, time since last: {time_difference.total_seconds()}s, size = {file_size}] ')
 	#check files is just always increasing 
-	updated_files=int(check_num_files_directory(results))
+	try:
+		updated_files=int(check_num_files_directory(results))
+	except: 
+		lets.log("Data Error where Int for File infomation not registared")
+		return 0, intial_files
+	
 	if time_difference.total_seconds() < 1020 and file_size != '0':
 		# print(f'CM: DA on run {int(updated_files)}')
 		# log_file(f'DA on run {int(updated_files)} ')
