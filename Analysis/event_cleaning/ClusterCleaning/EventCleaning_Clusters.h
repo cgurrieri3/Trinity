@@ -86,7 +86,7 @@ TCanvas *c_PCA=0;
 int MaxNofChannels = 256;
 
 std::string neighborDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/ClusterCleaning/neighbors/";
-std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlatFieldCalibration/Output/";
+std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/GainCalibration/Output/";
 std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
 // std::string dataDir = "/storage/hive/project/phy-otte/sstepanoff3/Data/";
 std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
