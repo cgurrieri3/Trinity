@@ -12,6 +12,7 @@
 #include <chrono>
 #include <TFile.h>
 #include <fstream>
+#include <sys/stat.h>
 
 
 class IUtilities{
@@ -248,6 +249,19 @@ class IUtilities{
 		static bool isBranchPresentInFile(const std::string fileName, const std::string treeName);
 
 		/**
+		* Public method to set the permissions of a given file to `rwxrwx---` (octal 0770). for standardization
+		*
+		* This function uses `chmod` to change the permissions of the specified file,
+		* granting read, write, and execute permissions to the owner and group, and no
+		* permissions to others.
+		*
+		* @param filename A string containing the path to the file whose permissions will be changed.
+		* 
+		* @note This function prints a message to `stdout` or `stderr` based on the success or failure of the operation.
+		*/
+		static void setFilePermissions(const std::string& filename);
+
+		/**
 		* Public method to remove duplicate values from a vector of doubles.
 		* 
 		* @param arr A reference to a vector of doubles from which duplicate values will be removed.
@@ -265,6 +279,20 @@ class IUtilities{
 		*         if the file cannot be opened.
 		*/
 		static std::vector<double> readFileToVector(const std::string filename);
+		
+		/**
+		* Public method to write a vector of doubles to a specified file.
+		* 
+		* Each element in the vector is written to the file separated by spaces.
+		* If an element is NaN, it is replaced with `1.0` before writing.
+		* The function also sets the file permissions to `rwxrwx---` (0770) upon successful write.
+		* 
+		* @param vec A `std::vector<double>` containing the values to write to the file.
+		* @param filename A string with the path to the output file.
+		* 
+		* @note Prints a message to `stdout` on success or `stderr` on failure.
+		*/
+		static void writeVectorToFile(const std::vector<double>& vec, const std::string& filename);
 
 		/**
 		 * Public method to obtain the High Voltage channel to which the pixel ID is connected
@@ -290,6 +318,20 @@ class IUtilities{
 		 * @return A double with the y coordinate corresponding to xNew
 		 * */
 		static double Interpolate(double x1, double y1, double x2, double y2, double xNew);
+
+		/**
+		* Public method to compute the median of a vector of doubles.
+		*
+		* The function creates a temporary copy of the input vector to avoid modifying the original data.
+		* It then sorts the temporary vector and returns the median value:
+		* - If the number of elements is odd, returns the middle element.
+		* - If the number of elements is even, returns the average of the two middle elements.
+		*
+		* @param v A `std::vector<double>` containing the data to compute the median from.
+		* 
+		* @return The median value as a `Double_t`.
+		*/
+		static Double_t Median(std::vector<double> v);
 
 	private:
 		// Music mapping from the ROIMUSIC as the index and elements are the postion on the camera for determining pixels
