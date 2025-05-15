@@ -333,6 +333,8 @@ class IUtilities{
 		*/
 		static Double_t Median(std::vector<double> v);
 
+		static float GetADCtoPEratio(){return ADCtoPEratio;}
+
 	private:
 		// Music mapping from the ROIMUSIC as the index and elements are the postion on the camera for determining pixels
 		inline static std::vector<int> MUSICs = {3,2,11,10,19,18,27,26,7,6,15,14,23,22,31,30,1,0,9,8,17,16,25,24,5,4,13,12,21,20,29,28};
