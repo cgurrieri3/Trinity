@@ -1,6 +1,7 @@
 //R__LOAD_LIBRARY(libExACT.so)
 //#include "libExACT.so"
 #include "PCA.h"
+#include "PlotHelp.h"
 #include <set>
 #include <TH1.h>
 #include <TTree.h>
@@ -12,6 +13,7 @@
 #include <sstream>
 #include <TPaletteAxis.h>
 #include <TEllipse.h>
+#include <IUtilities.h>
 #include <TObjString.h>
 #include <TH2F.h>
 #include <TROOT.h>
@@ -57,6 +59,8 @@
 #include <TPaveText.h>
 #include <random>
 #include <utility>
+#include <CEvent.h>
+#include <IPlotTools.h>
 
 // Define variables (global)
 std::vector<double> MaxAmplitudePixel;
@@ -68,12 +72,21 @@ std::vector<int> MaxPixelIDTimeBin;
 std::vector<double> AvgAmplitudePerEvent;
 std::vector<double> CameraAmplitudeAtTimeBin;
 
-
+IUtilities *util;
+IPlotTools *plottools;
+CEvent *cev;
+PlotHelp *plothelp;
 
 TTree *tree = 0;
 TTree *treeHLED = 0;
 Event *ev;
 Event *evHLED;
+
+
+TH2F* hcam_panel1=0;
+TH2F* hcam_panel2=0;
+TH2F* hcam_panel3=0;
+TH2F* hcam_panel4=0;
 TH2F* COGgraph=0;
 TH2F* COGgraphweighted=0;
 TH2F* pixeldist=0;
@@ -92,74 +105,32 @@ std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
 std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
 // std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/EventCleaning/ClusterCleaning/Output/";
 
+const int TriggeredChannelAmpCutOff = 200; // (200 ADC/8 PE) Cut off for the triggered music channel
+const int TimeBinAll = 239; // Difference between triggered pixel time bin and the pixels around it time bin difference more that 1 risk saving cross talk events
+const int CorePixelAmpCutOff = 200; // (200ish ADC/8PE) // Cut off for the pixels surrounding the triggered music channel
+const int SaturatedPixelCutoff = 256; // 0 removed saturated pixels max channels from being cleaned. 1 allows them to be cleaned (changed from 0 on 2/26/2025)
+const int FlasherEventsCutOff = 800; // (350 ish ADC/15 PE ) Average amplitude across the camera ~1200 is  Flasher event
+const int PixelSurviveCutOff = 3; //How many pixels need to survive cleaning to plot 
+const int LWRatioCutOff = 50 ; // length width How elliptical you require the events to be after the Principle Compomnent Analysis (helps removed crosstalk events.) 
+const int rmTopRow = 1 ; // removed the top row of the camera (sky) 0 = remove, 1 = dont remove 
 
-// Initialize functions
-std::vector<int> GetNeighborArray(int id, std::string filename);
-void NeighborCheck(int pixelID, std::vector<int>& ampattime, std::vector<int>& correctPixelIDs, std::set<int>& addedIDs, const std::vector<double>& AmplitudeValues, const std::vector<int>& peakTimeValues, int& firstPixID,std::vector<double>& PedVal);
-void TriggeredPixelNeighborhoodChecker(std::vector<double> AmplitudesSelected,std::vector<int>& IDSelected, int triggeredpixel,std::vector<double>& cleaned_pixels);
-void NeighborhoodCheckerHelper(int ID, std::vector<int>& IDSelected, std::vector<double> AmplitudesSelected,std::vector<double>& cleaned_pixels, std::vector<int>& visited_ids);
-void SaveAmplitudesToCSV(const std::string& fileName, int eventIndex, double allAmplitudes);
-Bool_t HandleInput();
-void NeighborCheckHelper(int arrayID, std::vector<int>& ampattime, std::vector<int>& correctPixelIDs, std::set<int>& addedIDs, const std::vector<double>& AmplitudeValues, const std::vector<int>& peakTimeValues, int& firstPixID,std::vector<double>& PedVal);
 void SetBranches(Event *evD);
 void SetBranchesHLED(Event *evD);
 void LoadEvents(std::string filename, std::string treeString);
 void LoadEventsHLED(string NameofFile, std::string treeString);
-void FindBin(int pixelID, int *nx, int *ny);
-void DrawMUSICBoundaries();
-vector<int> FindNeighborPixels(int FirstTrigMusic);
-int findMUSICIndex(int MUSIC);
-int findMUSICPair(int MUSICID);
-void getSIABTriggeredInfo(Event *ev,std::vector<int>& Max_pixel, std::vector<double>& Max_Amp, std::vector<int>& Max_MUSIC, std::vector<int>& peak_time,std::vector<double>& Avg_Amp, std::vector<double>& Max_Amp_Time_Bin, std::vector<int>& Max_pixel_Time_Bin);
-void getPixelInfo(Event *ev, std::vector<double>& AmplitudeValues, std::vector<int>& peakTimeValues, std::vector<double>& PedestalValues, int* SC, int* totalAPE, std::vector<std::vector<int>>& traceValues);
-std::vector<std::string> read_directory( const std::string& path = std::string());
 void removeDuplicates(std::vector<int>& arr);
 void removeDuplicates(std::vector<double>& arr);
-void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, int maxMUSICnumber, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp,std::vector<double> M3LongVar);
+void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, int maxMUSICnumber, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp);
 Double_t Median(vector<int> v);
 std::vector<double> readFileToVector(const std::string& filename);
 void savePlot(TCanvas* c_cleaned,TH1* hist, std::string outDir,std::string folString, TFile* file,std::string plotname);
-void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp, std::vector<double> *COG);
-std::vector<double> getM3Long(double xcog,double ycog, std::vector<double> sur_pix, std::vector<double> amps);
-double convertADC2PE(int ADC_counts);
-double convertADC2PE(double ADC_counts);
-int checkTopRow(int value);
+void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp);
+double StartPanel4(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs);
+void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, double EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs);
+std::vector<double> getM3Long(double xcog,double ycog, std::vector<int> sur_pix, std::vector<float> amps);
 std::vector<double> generateRandomNumbers();
-bool isBranchPresentInFile(const std::string& fileName, const std::string& treeName);
 
 
-// get files sorted
-std::vector <std::string> read_directory(const std::string& path){
-	std::vector <std::string> result;
-	dirent* de;
-	DIR* dp;
-	errno = 0;
-	dp = opendir( path.empty() ? "." : path.c_str() );
-	if (dp)
-	{
-	while (true)
-		{
-		errno = 0;
-		de = readdir( dp );
-		if (de == NULL) break;
-		
-		result.push_back( Form("%s%s",path.c_str(),de->d_name) );
-		}
-	closedir( dp );
-	std::sort( result.begin(), result.end() );
-	}
-	return result;
-}
-
-double convertADC2PE(int ADC_counts){
-    int ADCtoPEratio = 24.1;
-    return (ADC_counts*1.0)/ADCtoPEratio;
-}
-
-double convertADC2PE(double ADC_counts){
-    double ADCtoPEratio = 24.1;
-    return (ADC_counts*1.0)/ADCtoPEratio;
-}
 
 void removeDuplicates(std::vector<int>& arr) {
     // Sort the array
@@ -210,43 +181,7 @@ void SetBranchesHLED(Event *evD)
     treeHLED->SetBranchAddress("Events", &evHLED);
 }
 
-//Draws red boxes to make obvious which pixels are associated with the same MUSIC chip
-void DrawMUSICBoundaries()
-{
-	//creates TBox object, makes fill transparent and border red, and draws box to active canvas
-	TBox *b = new TBox(-0.5,-0.5,1.5,3.5);
-	b->SetFillStyle(0);
-	b->SetLineColor(kRed);
-	b->Draw();
-	//Adds a box for each MUSIC chip/position
-	for(int i=1; i < MaxNofChannels/8; i++)
-	{
-		TBox *bn = (TBox*)b->Clone();
-		bn->SetX1((i%8)*2-0.5);
-		bn->SetX2((i%8)*2+1.5);
-		bn->SetY1((i/8)*4-0.5);
-		bn->SetY2((i/8)*4+3.5);
-		bn->Draw();
-	}
-    delete b;
-}
 
-void FindBin(int pixelID, int *nx, int *ny)
-{
-	// Calculate the SIAB number (0 to 15)
-	int SIAB_Number = pixelID / 16;
-
-        // Calculate the pixel number within the SIAB (0 to 15)
-	int SIAB_Pixel_Number = pixelID % 16;
-
-        // Calculate the row and column within the SIAB (0 to 3 for both)
-	int SIAB_Pixel_Row = SIAB_Pixel_Number % 4;
-	int SIAB_Pixel_Col = SIAB_Pixel_Number / 4;
-
-        // Calculate the overall row and column	
-	*nx = SIAB_Number % 4 * 4 + SIAB_Pixel_Col;
-	*ny = SIAB_Number / 4 * 4 + SIAB_Pixel_Row;
-}
 
 // Function to check if a branch exists in a ROOT file
 bool isBranchPresentInFile(const std::string& fileName, const std::string& treeName) {

@@ -1,0 +1,10 @@
+LD_LIBRARY_PATH=/storage/hive/project/phy-otte/nlew3/exact/dict
+export LD_LIBRARY_PATH=/usr/lib/oracle/21/client64/lib:/usr/local/lib:$LD_LIBRARY_PATH
+export EXACT_DIR=/storage/hive/project/phy-otte/nlew3/exact
+
+
+LD_LIBRARY_PATH=/storage/hive/project/phy-otte/sstepanoff3/exact/dict
+export LD_LIBRARY_PATH=/usr/lib/oracle/21/client64/lib:/usr/local/lib:$LD_LIBRARY_PATH
+export EXACT_DIR=/storage/hive/project/phy-otte/sstepanoff3/exact
+
+./FileMerge 1 20250124 20250126
