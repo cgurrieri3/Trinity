@@ -63,7 +63,7 @@ Pulse::Pulse(vector<Int_t> samples){
 
 	CalcPedestal(100);
 	
-	FindPeakTime(200, 300);
+	FindPeakTime(230, 250);
 	FindPeak();
 	CalcAmplitude();
 		//cout<<amplitude<<" ";
