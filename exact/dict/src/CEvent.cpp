@@ -78,6 +78,7 @@ void CEvent::SetPanel2(TH2F* hcam_panel2, int CorePixelAmpCutOff) {
 }
 
 void CEvent::SetPanel3(TH2F* hcam_panel3, std::string neighborDir) {
+    hcam_panel3->Scale(IUtilities::GetADCtoPEratio());
     std::vector<int> PixelPeakTimes = PeakTimeBin;
     int TriggeredPixelPeakTime = PixelPeakTimes[MaxAmplitdePixelID];
     // std::cout << "Triggered Pixel Peak Time: " << TriggeredPixelPeakTime << std::endl;
@@ -112,9 +113,8 @@ void CEvent::SetPanel3(TH2F* hcam_panel3, std::string neighborDir) {
             hcam_panel3->SetBinContent(nx + 1, ny + 1, 0);
             }
         }
-    // hcam_panel3->Scale(1.0/IUtilities::GetADCtoPEratio());
+    hcam_panel3->Scale(1.0/IUtilities::GetADCtoPEratio());
     hcam_panel3->Draw("colz");
-    // hcam_panel3->Scale(IUtilities::GetADCtoPEratio());
     // hcam_panel3->SetMinimum(200);
     IPlotTools::DrawMUSICBoundaries();
 }
