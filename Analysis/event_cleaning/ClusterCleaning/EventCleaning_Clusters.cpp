@@ -89,10 +89,10 @@ int main(int argc, char **argv){
             for (int k = 0; k < MaxNofChannels; k++) {
                 if (EventCounter < nEntries) {
                     pulse = new Pulse(ev->GetSignalValue(k));
-                    pulse1 = new Pulse(ev->GetSignalValue(k),239,239,512,true);
+                    pulse1 = new Pulse(ev->GetSignalValue(k),TimeBinAll,TimeBinAll,512,true);
                 } else {
                     pulse = new Pulse(evHLED->GetSignalValue(k));
-                    pulse1 = new Pulse(evHLED->GetSignalValue(k),239,239,512,true);
+                    pulse1 = new Pulse(evHLED->GetSignalValue(k),TimeBinAll,TimeBinAll,512,true);
                 }
                 // pulse = new Pulse(ev->GetSignalValue(k));
                 Amplitudes.push_back(pulse->GetAmplitude());
