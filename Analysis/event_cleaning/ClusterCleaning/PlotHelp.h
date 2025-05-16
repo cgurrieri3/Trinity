@@ -27,15 +27,15 @@ class PlotHelp {
         void AddtoCOGy(double COGy); // Distribution of Total Amplitude of surviving pixels
         void AddtoTriggeredPixelsID(int id); // Distribution of Total Amplitude of surviving pixels
 
-        void PlothSize(TCanvas* c_cleaned);
-        void PlothSizeConc(TCanvas* c_cleaned);
-        void PlothSizeSPC(TCanvas* c_cleaned);
-        void PlothLW(TCanvas* c_cleaned);
-        void PlothLWConc(TCanvas* c_cleaned);
-        void PlothLWSPC(TCanvas* c_cleaned);
-        void PlothSPCConc(TCanvas* c_cleaned);
-        void PlothCOG(TCanvas* c_cleaned);
-        void PlothTPID(TCanvas* c_cleaned);
+        void PlothSize(TCanvas* c, std::string pdf);
+        void PlothSizeConc(TCanvas* c, std::string pdf);
+        void PlothSizeSPC(TCanvas* c, std::string pdf);
+        void PlothLW(TCanvas* c, std::string pdf);
+        void PlothLWConc(TCanvas* c, std::string pdf);
+        void PlothLWSPC(TCanvas* c, std::string pdf);
+        void PlothSPCConc(TCanvas* c, std::string pdf);
+        void PlothCOG(TCanvas* c, std::string pdf);
+        void PlothTPID(TCanvas* c, std::string pdf);
 
         void AddTotalEvent(int i) {TotalEvents += i; }
         void AddHLEDEvent(int i) {HLEDEvents += i; }
@@ -60,5 +60,23 @@ class PlotHelp {
         int HLEDEvents = 0;
         int CleanedEvents = 0;
         int SurvivingEvents = 0;
+
+        // plot help with step size, min and max for TH*
+        int SIZEstep =15;
+        float SIZEmin = -0.05;
+        float SIZEmax = 1499.95;
+
+        int ONEstep = 10;
+        float ONEmin = -0.05;
+        float ONEmax = 0.95;
+        
+        int SPstep = 15;
+        float SPmin = 2.95;
+        float SPmax = 32.95;
+
+        int CameraStep = 16;
+        float CameraMin = -0.5;
+        float CameraMax = 15.5;
+
     };  
 #endif
