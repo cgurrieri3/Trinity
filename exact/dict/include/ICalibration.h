@@ -13,7 +13,7 @@
 
 const double BrVperDeg = 0.03844;/**< Breakdown Voltage change per degree C, 0.001 times avg breakdown voltage at 25 deg C where we did gain calibration; avg breakdown voltage is 38.44 V at 25 deg C*/
 const double BrVol[16] = {38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44,
-                          38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44}; /**< use average breakdown voltages for each of the matrices in Trinity measured at 25C*/
+                          38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44}; /**< use average breakdown voltages for each of the matrices in Trinity reported by Hamamatsu at 25C, because min and max deviation from the average value across the camera is less than 1%*/
 
 /*const double VOffsetPx[256] = {
     636.8, 598.4, 672.0, 598.4, 604.8, 595.2, 585.6, 544.0, 784.0, 819.2, 844.8, 867.2, 1040.0, 723.2, 768.0, 787.2,
@@ -97,7 +97,7 @@ class ICalibration {
     	 * 
     	 * @return a double with the conversion from ADC to photo-electrons for charge.
     	 * */
-	    double GetCharge(int pixelID) const;
+	    //double GetCharge(int pixelID) const;
 	    /**
     	 * A method used to obtain the error on the measurement of the conversion factor in ADC to PE for the charge of a pulse for a specific pixel
     	 * 
@@ -105,7 +105,7 @@ class ICalibration {
     	 * 
     	 * @return a double with the error on the measurement of the conversion from ADC to photo-electrons for charge.
     	 * */
-	    double GetErrCharge(int pixelID) const;
+	    //double GetErrCharge(int pixelID) const;
 	    /**
 	     * A method used to obtain the voltage offset set for the pixel in the camera
 	     * 

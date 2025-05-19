@@ -2,7 +2,7 @@
 
 
 ICalibration::ICalibration(const std::string& filename)
-{
+{/*
     //relativeGain = 0.0;
     //std::cout << filename << endl;
     std::ifstream file(filename);
@@ -21,7 +21,7 @@ ICalibration::ICalibration(const std::string& filename)
         errAmplitudes.push_back(errAmplitude);
         charges.push_back(charge);
         errCharges.push_back(errCharge);
-    }
+    }*/
 }
 
 double ICalibration::GetAmplitude(int pixelID) const {
@@ -32,13 +32,13 @@ double ICalibration::GetErrAmplitude(int pixelID) const {
     return errAmplitudes[pixelID];
 }
 
-double ICalibration::GetCharge(int pixelID) const {
+/*double ICalibration::GetCharge(int pixelID) const {
     return charges[pixelID];
 }
 
 double ICalibration::GetErrCharge(int pixelID) const {
     return errCharges[pixelID];
-}
+}*/
 
 double ICalibration::GetRelativeGain(int pixelID, double sipmTemp, double OperatingVol) {
     OperatingVol = OperatingVol - VOffsetPx[pixelID]/1000.0; //mV to V

@@ -46,7 +46,7 @@ int AddSiPMInfoToEvents(std::string inputFileName) {
     
        
     
-    ICalibration* calib = new ICalibration(inputFileName);  
+    //ICalibration* calib = new ICalibration(inputFileName);  
 
     const double GAIN_REF = 22.1; // factor at 25 C 
     //obtained by multiplying (1 - 37.97V/5.7V * 0.001 * (25C - 12.7C)) with 24.1 DC/PE measured at 12.7C 
@@ -85,9 +85,9 @@ int AddSiPMInfoToEvents(std::string inputFileName) {
     std::vector<float> sipmTemp;
     std::vector<double> absoluteGain(256);
     std::vector<double> tempCorrection(256);
-    //std::vector<double> optXTalk(256);        
+    std::vector<double> relOverVoltage(256);        
     std::vector<double> amplitudeToPE(256);
-    std::vector<double> chargeToPE(256);
+
 
     double hvSettingPx, relOverV, overV;
     
@@ -99,25 +99,29 @@ int AddSiPMInfoToEvents(std::string inputFileName) {
         sipmTemp = ev->GetSiPMTemp();
 
         for (int j = 0; j < 256; ++j) {
-            hvSettingPx = hv[IUtilities::GetHVChannel(j)];
+            hvSettingPx = hv[IUtilities::GetHVChannel(j)-1];
             relOverV = ICalibration::GetRelativeOverVoltage(j, hvSettingPx, 44);
             overV = ICalibration::GetOverVoltage(j, hvSettingPx);
             tempCorrection[j] = ICalibration::GetRelativeGain(j,sipmTemp[j/16],hvSettingPx);
-            //optXTalk[j] = 0.01 * calib->GetAmplitude(j);              
-            absoluteGain[j] = GAIN_REF / tempCorrection[j];
-            amplitudeToPE[j] = calib->GetAmplitude(j) * relOverV;
-            chargeToPE[j] = calib->GetCharge(j) * relOverV;
+
             
-            std::cout << i << "\t" << j << "\t" << calib->GetAmplitude(j) << "\t" << absoluteGain[j] << "\t"
-                          << tempCorrection[j] << "\t" << amplitudeToPE[j] << "\t" << chargeToPE[j] << "\t"
-                          << relOverV << "\t" << sipmTemp[j / 16] << "\t" << hvSettingPx << "\t" << overV << std::endl;
+            Pulse* pulse = new Pulse(ev->GetSignalValue(j));
+            double amplitude = pulse->GetAmplitude();            
+            absoluteGain[j] = GAIN_REF * (1.0/tempCorrection[j]);
+            amplitudeToPE[j] = amplitude * (1.0/absoluteGain[j]);
+            relOverVoltage[j] = relOverV;
+            
+            std::cout << i << "\t" << j << "\t" << amplitude << "\t" << hvSettingPx << "\t"
+                          << sipmTemp[j/16] << std::endl;
+            /*std::cout << i << "\t" << j << "\t" << amplitude << "\t" << absoluteGain[j] << "\t"
+                          << tempCorrection[j] << "\t" << amplitudeToPE[j] << "\t" <<IUtilities::GetHVChannel(j)<<"\t"
+                          << hvSettingPx << "\t" << relOverVoltage[j] << "\t" << sipmTemp[j / 16] << "\t" << overV << std::endl;*/
         }
 
         sipmInfo->SetGain(absoluteGain);
         sipmInfo->SetTCorrection(tempCorrection);
-        //sipmInfo->SetOptXTalk(optXTalk);
         sipmInfo->SetAmplToPE(amplitudeToPE);
-        sipmInfo->SetChgToPE(chargeToPE);
+        sipmInfo->SetRelOverV(relOverVoltage);
 
         tree->Fill(); 
     }

@@ -30,9 +30,11 @@ IEvent *ev;
 BiFocal *bf = new BiFocal();
 ISiPM *sipmInfo;
 TCanvas *c_disp = 0;
-TH1I *hPixelTraceLED = 0;
-int NPixs = 512;
+TH1F *hPixelTraceLED = 0;
+int NPixs = 256;
 long triggerTime;
+IPlotTools *plottools;
+
 
 void LoadEvents(std::string filename, std::string treeString); // access the file with events
 void SetBranches(Event *evD, long *timeTrig, BiFocal *bfF);
@@ -77,7 +79,7 @@ void PlotTrace(int iPix)
 {// function for ploting individual traces
     if(hPixelTraceLED == 0) // histogram set-up
     {
-        hPixelTraceLED = new TH1I("hPixelTraceLED","Pixel Trace",500,-0.5,499.5);
+        hPixelTraceLED = new TH1F("hPixelTraceLED","Pixel Trace",500,-0.5,499.5);
         hPixelTraceLED->SetStats(0);
         hPixelTraceLED->GetXaxis()->SetTitle("ADC sample");
         hPixelTraceLED->GetYaxis()->SetTitle("PEs");
@@ -87,22 +89,30 @@ void PlotTrace(int iPix)
     TString title;
     title.Form("Trace of Pixel %i", iPix);
     hPixelTraceLED->SetTitle(title);
+    
+    std::vector<Int_t> trace = std::vector<Int_t>(NPixs);
+    
     // converstion variables for ADC to PEs
     std::vector<double> amplToPE= sipmInfo->GetAmplToPE();
     std::vector<double> tempCorrection= sipmInfo->GetTCorrection();
+    std::vector<double> absGain= sipmInfo->GetGain();
     float amplToPE_forPix = amplToPE[iPix];
-    float tempCorrection_forPix = tempCorrection[iPix];
+    float absGain_forPix = absGain[iPix];
+    //float tempCorrection_forPix = tempCorrection[iPix];
     
-    std::vector<Int_t> trace = std::vector<Int_t>(512);
+    
 
     trace  = ev->GetSignalValue(iPix); // getting data for traces
     for(int k = 0; k<512; k++){
     	// converting to PEs
-        float peAmplitude = (float(trace[k])) / ((1.0/tempCorrection_forPix) * amplToPE_forPix);
+        //float peAmplitude = (float(trace[k])) / ((1.0/tempCorrection_forPix) * amplToPE_forPix);
+        float peAmplitude = (float(trace[k]))*(1.0/absGain_forPix);
 
-        hPixelTraceLED->SetBinContent(k+1,peAmplitude);
+       hPixelTraceLED->SetBinContent(k+1,peAmplitude);
+        
+       //cout<<k<<"    "<<trace[k]<<"    "<<tempCorrection_forPix<<"    "<<amplToPE_forPix<<"    "<<peAmplitude<<endl;
 
-       // hPixelTraceLED->SetBinContent(k+1,trace[k]);
+        //hPixelTraceLED->SetBinContent(k+1,trace[k]);
     }
     
     // displaying the histogram    
@@ -126,7 +136,7 @@ void PixelClicked()
     Float_t yy = gPad->AbsPixeltoY(py);
     Float_t x = 0.5+gPad->PadtoX(xx);
     Float_t y = 0.5+gPad->PadtoY(yy);
-    int pix = IPlotTools::FindPixel((int)x,(int)y);
+    int pix = plottools->FindPixel((int)x,(int)y);
     if(pix!=iLastPixHLED)
     {
         int iLastPix = -1;
@@ -137,16 +147,13 @@ void PixelClicked()
         PlotTrace(pix);
     }
 }
+
+
 void ShowInfoAtCursor(int x, int y)
-{// displays text about selected pixel/event ect...
-    int MUSIC_column = x/2;
-    int MUSIC_row = y/4;
-    int MUSIC_ID = MUSIC_column+MUSIC_row*16;
-    int MUSIC_Channel = y%4+4*(x%2);
-    int PixID = MUSIC_row*8*16+MUSIC_column*8+MUSIC_Channel;
+{
 
     TString statusline;
-    statusline.Form("MUSIC_ID: %i    MUSIC_Channel: %i    Pixel ID: %i", MUSIC_ID, MUSIC_Channel, PixID);
+    statusline.Form("Pixel: %i, MUSIC: %i, SIAB: %i", plottools->FindPixel(x,y), plottools->FindMUSIC(x,y), plottools->FindSIAB(x,y));
     if(text!=0)
         text->Delete();
     TLatex T1;
@@ -161,18 +168,18 @@ void PlotEvent()
 	// initializing histograms
     c_disp->cd(1);
     gPad->AddExec("ev","PixelClicked()");
-    TH2F *hcam = new TH2F("hcam","",32,-0.5,31.5,16,-0.5,15.5);
+    TH2F *hcam = new TH2F("hcam","",16,-0.5,15.5,16,-0.5,15.5);
     hcam->SetStats(0);
     hcam->Draw("colz");
-    IPlotTools::DrawMUSICBoundaries();
+    plottools->DrawMUSICBoundaries();
     
     TH1F *hChg = new TH1F("hChg","Charge Distribution",4096, 0, 4096);
     hChg->SetStats(0);
     hChg->GetXaxis()->SetTitle("Charge [ADC]");
     hChg->GetYaxis()->SetTitle("No. of Pixels");
 
-	// retrieving entries from data file to see the number of events in the file
-	int nEntries = tree->GetEntries();
+	  // retrieving entries from data file to see the number of events in the file
+    int nEntries = tree->GetEntries();
     std::cout << "Total Number of Events: " << nEntries << std::endl;
 
     tree->SetBranchAddress("SiPM", &sipmInfo); // access tree to get callibration values
@@ -191,7 +198,9 @@ void PlotEvent()
 
 		// converstion variables for ADC to PEs
         std::vector<double> amplToPE= sipmInfo->GetAmplToPE();
-    	std::vector<double> tempCorrection= sipmInfo->GetTCorrection();
+        std::vector<double> absGain= sipmInfo->GetGain();
+    	  //std::vector<double> tempCorrection= sipmInfo->GetTCorrection();
+        std::vector<float> sipmTemp = ev->GetSiPMTemp();
 
         // setting up for data extraction for plotting
         Int_t nEventsHLED = 0;
@@ -209,15 +218,18 @@ void PlotEvent()
 
                 extractedData[j]->SetAmplitude(pulse->GetAmplitude()); // setting that amplitude to variable setup above
 				// convert and callibrate to PEs
-                float peAmplitude = (extractedData[j]->GetAmplitude())/((1.0/tempCorrection[j])*amplToPE[j]);
+                //float peAmplitude = (extractedData[j]->GetAmplitude())/((1.0/tempCorrection[j])*amplToPE[j]);
+                float peAmplitude = (extractedData[j]->GetAmplitude())*(1.0/absGain[j]);
+                //if (j==118)
+                cout<<j<<"    "<<extractedData[j]->GetAmplitude()<<"    "<<sipmTemp[j/16]<<"    "<<amplToPE[j]<<"    "<<absGain[j]<<"    "<<peAmplitude<<endl;
 
 				// functions to figure out location for plotting
                 int nx, ny;
-                IPlotTools::FindBin(j,&nx,&ny);
+                plottools->FindBin(j,&nx,&ny);
                 // filling histograms
                 //hcam->SetBinContent(nx+1,ny+1,extractedData[j]->GetAmplitude());
                 //hChg->Fill(extractedData[j]->GetAmplitude());
-				hcam->SetBinContent(nx+1,ny+1,peAmplitude);
+				        hcam->SetBinContent(nx+1,ny+1,peAmplitude);
                 hChg->Fill(peAmplitude);
 
                 // Update maxCharge if the current peAmplitude is larger
