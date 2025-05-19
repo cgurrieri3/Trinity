@@ -63,7 +63,7 @@ CP  := cp
 
 #Recipe
 
-.PHONY: all
+.PHONY: all clean
 all: $(EXE)
 
 $(EXE): $(OBJ) | $(BIN_DIR) 
@@ -75,6 +75,12 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 
 $(BIN_DIR)/$(OBJ_DIR):
 		mkdir -p $@
+
+clean: 
+
+	@echo "Cleaning up..."
+	rm -f $(BIN_DIR)/*.o $(EXE)
+	@echo "Clean complete."
 
 -include $(OBJ:.o=.d)
 

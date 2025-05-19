@@ -421,6 +421,17 @@ bool IUtilities::isBranchPresentInFile(const std::string fileName, const std::st
     return treeExists; // Return whether the tree exists
 }
 
+void IUtilities::setFilePermissions(const std::string& filename) {
+    // Set permissions to rwxrwx--- (octal 0770)
+    mode_t permissions = 0770;
+
+    // Change file permissions using chmod
+    if (chmod(filename.c_str(), permissions) == 0) {
+        std::cout << "Permissions changed to 770 for: " << filename << std::endl;
+    } else {
+        std::cerr << "Error changing file permissions" << std::endl;
+    }
+}
 
 void IUtilities::removeDuplicates(std::vector<double>& arr) {
     // Sort the array
@@ -450,6 +461,25 @@ std::vector<double> IUtilities::readFileToVector(const std::string filename) {
     return result;
 }
 
+// Function to write a vector to a file
+void IUtilities::writeVectorToFile(const std::vector<double>& vec, const std::string& filename) {
+    std::ofstream outfile(filename);
+
+    // Check if the file was opened successfully
+    if (outfile.is_open()) {
+        for (const auto& elem : vec) {
+            double valueToWrite = std::isnan(elem) ? 1.0 : elem;
+            outfile << valueToWrite << " ";  // Write each element followed by a space
+        }
+        outfile << std::endl;  // Add a newline after the elements
+        outfile.close();       // Close the file
+        setFilePermissions(filename);
+        std::cout << "Data written to " << filename << std::endl;
+    } else {
+        std::cerr << "Unable to open file: " << filename << std::endl;
+    }
+}
+
 int IUtilities::GetHVChannel(int pixelID){
 	// given pixelID calculates hVChannel # bottom left 1, top left 2, bottom right 3, top right 4
 	int hVChannel = -1;
@@ -471,4 +501,20 @@ double IUtilities::Interpolate(double x1, double y1, double x2, double y2, doubl
     double offset = y2 - x2*slope;
 
    return slope*xNew + offset;
+}
+
+Double_t IUtilities::Median(std::vector<double> v)
+{
+    //Size of vector
+    int n = v.size();
+    //Make temp copy of the vector to leave original in the same order
+    std::vector<double> tempV(v);
+    //Sort the vector
+    sort(tempV.begin(), tempV.end());
+    //Check if the number of elements is odd
+    if(n%2!=0){
+        return(Double_t)tempV[n/2];
+    }
+    //If the number of elements is even, return the average of the two middle elements
+    return(Double_t)(tempV[(n-1)/2]+tempV[n/2])/2.0;
 }

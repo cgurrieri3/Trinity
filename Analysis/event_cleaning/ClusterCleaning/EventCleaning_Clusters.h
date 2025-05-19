@@ -1,6 +1,7 @@
 //R__LOAD_LIBRARY(libExACT.so)
 //#include "libExACT.so"
 #include "PCA.h"
+#include "PlotHelp.h"
 #include <set>
 #include <TH1.h>
 #include <TTree.h>
@@ -12,7 +13,8 @@
 #include <sstream>
 #include <TPaletteAxis.h>
 #include <TEllipse.h>
-
+#include <IUtilities.h>
+#include <TObjString.h>
 #include <TH2F.h>
 #include <TROOT.h>
 #include <TSystem.h>
@@ -57,6 +59,8 @@
 #include <TPaveText.h>
 #include <random>
 #include <utility>
+#include <CEvent.h>
+#include <IPlotTools.h>
 
 // Define variables (global)
 std::vector<double> MaxAmplitudePixel;
@@ -68,12 +72,21 @@ std::vector<int> MaxPixelIDTimeBin;
 std::vector<double> AvgAmplitudePerEvent;
 std::vector<double> CameraAmplitudeAtTimeBin;
 
-
+IUtilities *util;
+IPlotTools *plottools;
+CEvent *cev;
+PlotHelp *plothelp;
 
 TTree *tree = 0;
 TTree *treeHLED = 0;
 Event *ev;
 Event *evHLED;
+
+
+TH2F* hcam_panel1=0;
+TH2F* hcam_panel2=0;
+TH2F* hcam_panel3=0;
+TH2F* hcam_panel4=0;
 TH2F* COGgraph=0;
 TH2F* COGgraphweighted=0;
 TH2F* pixeldist=0;
@@ -84,104 +97,103 @@ TFile *file;
 TCanvas *c_cleaned =0;
 TCanvas *c_PCA=0;
 int MaxNofChannels = 256;
+std::string OutputFileRoot = "";
+std::string OutputFilePDF = "";
+std::string OutputFilePDFOpen = "";
+std::string OutputFilePDFClose = "";
+
+
+
 
 std::string neighborDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/ClusterCleaning/neighbors/";
-std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlatFieldCalibration/Output/";
+std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlasherCalibration/Output/";
 std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
 // std::string dataDir = "/storage/hive/project/phy-otte/sstepanoff3/Data/";
 std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
 // std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/EventCleaning/ClusterCleaning/Output/";
 
+const int TriggeredChannelAmpCutOff = 200; // (200 ADC/8 PE) Cut off for the triggered music channel
+const int TimeBinAll = 239; // Difference between triggered pixel time bin and the pixels around it time bin difference more that 1 risk saving cross talk events
+const int CorePixelAmpCutOff = 200; // (200ish ADC/8PE) // Cut off for the pixels surrounding the triggered music channel
+const int SaturatedPixelCutoff = 256; // 0 removed saturated pixels max channels from being cleaned. 1 allows them to be cleaned (changed from 0 on 2/26/2025)
+const int FlasherEventsCutOff = 800; // (350 ish ADC/15 PE ) Average amplitude across the camera ~1200 is  Flasher event
+const int PixelSurviveCutOff = 3; //How many pixels need to survive cleaning to plot 
+const int LWRatioCutOff = 50 ; // length width How elliptical you require the events to be after the Principle Compomnent Analysis (helps removed crosstalk events.) 
+const int rmTopRow = 1 ; // removed the top row of the camera (sky) 0 = remove, 1 = dont remove 
 
-// Initialize functions
-std::vector<int> GetNeighborArray(int id, std::string filename);
-void NeighborCheck(int pixelID, std::vector<int>& ampattime, std::vector<int>& correctPixelIDs, std::set<int>& addedIDs, const std::vector<double>& AmplitudeValues, const std::vector<int>& peakTimeValues, int& firstPixID,std::vector<double>& PedVal);
-void TriggeredPixelNeighborhoodChecker(std::vector<double> AmplitudesSelected,std::vector<int>& IDSelected, int triggeredpixel,std::vector<double>& cleaned_pixels);
-void NeighborhoodCheckerHelper(int ID, std::vector<int>& IDSelected, std::vector<double> AmplitudesSelected,std::vector<double>& cleaned_pixels, std::vector<int>& visited_ids);
-void SaveAmplitudesToCSV(const std::string& fileName, int eventIndex, double allAmplitudes);
-Bool_t HandleInput();
-void NeighborCheckHelper(int arrayID, std::vector<int>& ampattime, std::vector<int>& correctPixelIDs, std::set<int>& addedIDs, const std::vector<double>& AmplitudeValues, const std::vector<int>& peakTimeValues, int& firstPixID,std::vector<double>& PedVal);
 void SetBranches(Event *evD);
 void SetBranchesHLED(Event *evD);
 void LoadEvents(std::string filename, std::string treeString);
 void LoadEventsHLED(string NameofFile, std::string treeString);
-void FindBin(int pixelID, int *nx, int *ny);
-void DrawMUSICBoundaries();
-vector<int> FindNeighborPixels(int FirstTrigMusic);
-int findMUSICIndex(int MUSIC);
-int findMUSICPair(int MUSICID);
-void getSIABTriggeredInfo(Event *ev,std::vector<int>& Max_pixel, std::vector<double>& Max_Amp, std::vector<int>& Max_MUSIC, std::vector<int>& peak_time,std::vector<double>& Avg_Amp, std::vector<double>& Max_Amp_Time_Bin, std::vector<int>& Max_pixel_Time_Bin);
-void getPixelInfo(Event *ev, std::vector<double>& AmplitudeValues, std::vector<int>& peakTimeValues, std::vector<double>& PedestalValues, int* SC, int* totalAPE, std::vector<std::vector<int>>& traceValues);
-std::vector<std::string> read_directory( const std::string& path = std::string());
-void removeDuplicates(std::vector<int>& arr);
-void removeDuplicates(std::vector<double>& arr);
-void CleanedPlot(TCanvas* c_cleaned, TH2F* hcam1, TH2F* hcam2, TH2F* hcam3, TH2F* hcam4, double avg_amp,int maxpixelnumberTimeBin, int maxMUSICnumber, double conc, TVectorD eigenVals, TMatrixD eigenVecs, std::vector<double> sigmas, int Cleaned_count, double Cleaned_total_amp,std::vector<double> M3LongVar);
-Double_t Median(vector<int> v);
-std::vector<double> readFileToVector(const std::string& filename);
-void savePlot(TCanvas* c_cleaned,TH1* hist, std::string outDir,std::string folString, TFile* file,std::string plotname);
-void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp, std::vector<double> *COG);
-std::vector<double> getM3Long(double xcog,double ycog, std::vector<double> sur_pix, std::vector<double> amps);
-double convertADC2PE(int ADC_counts);
-double convertADC2PE(double ADC_counts);
-int checkTopRow(int value);
+
+void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp);
+double StartPanel4(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs);
+void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, double EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs);
+std::vector<double> getM3Long(double xcog,double ycog, std::vector<int> sur_pix, std::vector<float> amps);
 std::vector<double> generateRandomNumbers();
-bool isBranchPresentInFile(const std::string& fileName, const std::string& treeName);
+void CreateFileName(std::string filename);
 
+void CreateFileName(std::string filename) {
+    OutputFileRoot=Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
+        outDir.c_str(),
+        filename.c_str(),
+        TriggeredChannelAmpCutOff,
+        TimeBinAll,
+        CorePixelAmpCutOff, 
+        SaturatedPixelCutoff,
+        FlasherEventsCutOff,
+        PixelSurviveCutOff,
+        LWRatioCutOff,
+        rmTopRow
+    );
 
-// get files sorted
-std::vector <std::string> read_directory(const std::string& path){
-	std::vector <std::string> result;
-	dirent* de;
-	DIR* dp;
-	errno = 0;
-	dp = opendir( path.empty() ? "." : path.c_str() );
-	if (dp)
-	{
-	while (true)
-		{
-		errno = 0;
-		de = readdir( dp );
-		if (de == NULL) break;
-		
-		result.push_back( Form("%s%s",path.c_str(),de->d_name) );
-		}
-	closedir( dp );
-	std::sort( result.begin(), result.end() );
-	}
-	return result;
+    // Create the file name with the cariables in the name for sorting of them. 
+    // _TC_#_ = TriggeredChannelAmpCutOff
+    // TB_#_ = TimeBinAll
+    // NP_#_ = CorePixelAmpCutOff
+    // s_#_ = SaturatedPixelCutoff
+    // FA_#_ = FlasherEventsCutOff
+    // mp_# = PixelSurviveCutOff
+    OutputFilePDF=Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.pdf",
+        outDir.c_str(),
+        filename.c_str(),
+        TriggeredChannelAmpCutOff,
+        TimeBinAll,
+        CorePixelAmpCutOff, 
+        SaturatedPixelCutoff,
+        FlasherEventsCutOff,
+        PixelSurviveCutOff,
+        LWRatioCutOff,
+        rmTopRow
+    );
+
+    OutputFilePDFOpen=Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.pdf[",
+        outDir.c_str(),
+        filename.c_str(),
+        TriggeredChannelAmpCutOff,
+        TimeBinAll,
+        CorePixelAmpCutOff, 
+        SaturatedPixelCutoff,
+        FlasherEventsCutOff,
+        PixelSurviveCutOff,
+        LWRatioCutOff,
+        rmTopRow
+    );
+
+    OutputFilePDFClose=Form("%sEventCleanedCluster%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.pdf]",
+        outDir.c_str(),
+        filename.c_str(),
+        TriggeredChannelAmpCutOff,
+        TimeBinAll,
+        CorePixelAmpCutOff, 
+        SaturatedPixelCutoff,
+        FlasherEventsCutOff,
+        PixelSurviveCutOff,
+        LWRatioCutOff,
+        rmTopRow
+    );
 }
 
-double convertADC2PE(int ADC_counts){
-    int ADCtoPEratio = 24.1;
-    return (ADC_counts*1.0)/ADCtoPEratio;
-}
-
-double convertADC2PE(double ADC_counts){
-    double ADCtoPEratio = 24.1;
-    return (ADC_counts*1.0)/ADCtoPEratio;
-}
-
-void removeDuplicates(std::vector<int>& arr) {
-    // Sort the array
-    std::sort(arr.begin(), arr.end());
-
-    // Use std::unique to remove duplicates
-    auto last = std::unique(arr.begin(), arr.end());
-
-    // Resize the vector to remove the undefined tail elements
-    arr.erase(last, arr.end());
-}
-
-void removeDuplicates(std::vector<double>& arr) {
-    // Sort the array
-    std::sort(arr.begin(), arr.end());
-
-    // Use std::unique to remove duplicates
-    auto last = std::unique(arr.begin(), arr.end());
-
-    // Resize the vector to remove the undefined tail elements
-    arr.erase(last, arr.end());
-}
 
 void LoadEvents(string NameofFile, std::string treeString)
 {
@@ -210,63 +222,212 @@ void SetBranchesHLED(Event *evD)
     treeHLED->SetBranchAddress("Events", &evHLED);
 }
 
-//Draws red boxes to make obvious which pixels are associated with the same MUSIC chip
-void DrawMUSICBoundaries()
-{
-	//creates TBox object, makes fill transparent and border red, and draws box to active canvas
-	TBox *b = new TBox(-0.5,-0.5,1.5,3.5);
-	b->SetFillStyle(0);
-	b->SetLineColor(kRed);
-	b->Draw();
-	//Adds a box for each MUSIC chip/position
-	for(int i=1; i < MaxNofChannels/8; i++)
-	{
-		TBox *bn = (TBox*)b->Clone();
-		bn->SetX1((i%8)*2-0.5);
-		bn->SetX2((i%8)*2+1.5);
-		bn->SetY1((i/8)*4-0.5);
-		bn->SetY2((i/8)*4+3.5);
-		bn->Draw();
-	}
-    delete b;
+
+
+
+
+// /***
+// Start of Functions
+
+// ***/
+
+
+
+void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp){
+    
+
+
+    // (*COG)[0] = 0.0;
+    // (*COG)[1] = 0.0;
+   
+
+    // Loop over the bins of the histogram and extract the bin content (data points)
+    for (int bin = 0; bin <= MaxNofChannels; bin++) {
+       
+        int nx, ny;
+        plottools->FindBin(bin, &nx, &ny);
+        // Get the bin center for X and Y
+        double weight = hist->GetBinContent(nx+1, ny+1);
+         // Check if the value is infinity
+        if (std::isinf(weight)) {
+            weight = 0.0; // Set to 0
+        }
+        
+        // Add the data point to the PCA object weighted by the bin content
+        if (weight > 0) {  // Only add rows for non-zero bins
+
+            std::vector<double> randomNumbers;
+            for (double w = 0; w < weight; w++){
+                randomNumbers = generateRandomNumbers();
+                // cout << "nx: " << nx <<  " ny: " << ny << endl;
+                // cout << "rand 1: " << nx + randomNumbers[0] << " rand 2: " << ny + randomNumbers[1] << endl;
+                std::vector<double> data = {nx + randomNumbers[0], ny+randomNumbers[1]};
+                // cout << "COG " << weight << "total" << totalAmp << endl;
+                
+                pca.AddRow(data);  
+            }
+            if (nx == 0){
+                nx = 0.1;
+            }
+            if (ny == 0){
+                ny = 0.1;
+            }
+
+            // (*COG)[0] += (nx * (weight/totalAmp));
+            // (*COG)[1] += (ny * (weight/totalAmp));
+        }   
+    }
 }
 
-void FindBin(int pixelID, int *nx, int *ny)
-{
-	// Calculate the SIAB number (0 to 15)
-	int SIAB_Number = pixelID / 16;
+std::vector<double> generateRandomNumbers() {
+    // Define the random number generator and distribution
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dist(-0.49, 0.49);
 
-        // Calculate the pixel number within the SIAB (0 to 15)
-	int SIAB_Pixel_Number = pixelID % 16;
-
-        // Calculate the row and column within the SIAB (0 to 3 for both)
-	int SIAB_Pixel_Row = SIAB_Pixel_Number % 4;
-	int SIAB_Pixel_Col = SIAB_Pixel_Number / 4;
-
-        // Calculate the overall row and column	
-	*nx = SIAB_Number % 4 * 4 + SIAB_Pixel_Col;
-	*ny = SIAB_Number / 4 * 4 + SIAB_Pixel_Row;
+    // Generate two random numbers and return them as a pair
+    return {dist(gen), dist(gen)};
 }
 
-// Function to check if a branch exists in a ROOT file
-bool isBranchPresentInFile(const std::string& fileName, const std::string& treeName) {
-    // Open the ROOT file
-    TFile* file = TFile::Open(fileName.c_str(), "READ");
-    if (!file || file->IsZombie()) {
-        std::cerr << "Error: Could not open the .root file: " << fileName << std::endl;
-        delete file;
-        return false;
+double StartPanel4(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs) {
+    eigenVals.ResizeTo(2);
+    eigenVecs.ResizeTo(2,2);
+    std::vector<double> sigmas;
+
+    pca.ComputeEigenDecomposition();
+    eigenVals = pca.GetEigenValues();
+    eigenVecs = pca.GetEigenVectors();
+    sigmas = pca.GetSigmas();                            
+    
+    double r1 = sqrt(eigenVals[0]);
+    double r2 = sqrt(eigenVals[1]);
+    double EllipicRatio = r2/r1;
+    // cout << "LW " << r1 << "," << r2 << ", ratio:" <<  EllipicRatio << "is: " << LWRatioCutOff/100.0 << endl;
+    
+    return EllipicRatio;
+}
+
+void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, double EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs) {
+    
+    
+    
+    hcam_panel4->Draw("colz");
+    plottools->DrawMUSICBoundaries();
+    
+    double meanx = hcam_panel4->GetMean(1);
+    double meany = hcam_panel4->GetMean(2);
+    // cout << "MEAN " << meanx << "," << meany << endl;
+    
+    double angledeg = atan(eigenVecs[1][0]/eigenVecs[0][0])*(180.0/3.141592653589793238463);
+    double anglerad = atan(eigenVecs[1][0]/eigenVecs[0][0]);
+    
+    
+    double r1 = sqrt(eigenVals[0]);
+    double r2 = sqrt(eigenVals[1]);
+    TArrow* arrow = new TArrow(meanx - 2*(r1*cos(anglerad)), meany - 2*(r1*sin(anglerad)), meanx + 2*(r1*cos(anglerad)), meany + 2*(r1*sin(anglerad)), 0.01, "|"); // "|>" option gives an arrowhead
+    TArrow* arrow1 = new TArrow(meanx - 2*(r2*cos(anglerad+1.5708)), meany - 2*(r2*sin(anglerad+1.5708)), meanx + 2*(r2*cos(anglerad+1.5708)), meany + 2*(r2*sin(anglerad+1.5708)), 0.01, "|"); // "|>" option gives an arrowhead
+    
+    arrow->SetLineColor(kRed); // Optional: Set the color of the arrow
+    arrow->Draw("SAME");             // Draw the arrow on the same canvas
+    arrow1->SetLineColor(kBlue); // Optional: Set the color of the arrow
+    arrow1->Draw("SAME");             // Draw the arrow on the same canvas
+    
+    TEllipse* ell = new TEllipse(meanx, meany,r1,r2,0,360,angledeg);
+    ell->SetFillColorAlpha(kGreen,0.00);
+    ell->Draw("SAME");
+    TLatex* title = new TLatex();
+    title->SetNDC(); // Set to Normalized Device Coordinates (NDC)
+    title->SetTextSize(0.03);
+    
+    float areaEllipse = (3.8/16) * (3.8/16) * (cev->GetSurvivingPixelPanel3().size()); // area of an ellipse
+    double conc = cev->GetAmplitudeValuesTimeBin()[cev->GetMaxAmplitudePixelID()]/cev->GetSurvivingPixelTotalAmpPanel3();
+    
+    
+    std::vector<double> M3LongVar = getM3Long(meanx, meany, cev->GetSurvivingPixelPanel3(),cev->GetAmplitudeValuesTimeBin());
+    std::string M3Longx = "+";
+    if (M3LongVar[0] < 0){
+        M3Longx = "-";
+    }
+    std::string M3Longy = "+";
+    if (M3LongVar[1] < 0){
+        M3Longy = "-";
+    }
+    title->DrawLatex(0.1, 0.92, Form("LW:%.2f Pixels:%i Area:%.2f Size:%.2f Conc:%.2f M3Long:(%s,  %s)",
+        EllipicRatio,
+        static_cast<int>((cev->GetSurvivingPixelPanel3()).size()),
+        areaEllipse,
+        cev->GetSurvivingPixelTotalAmpPanel3()/util->GetADCtoPEratio(),
+        conc,
+        M3Longx.data(),
+        M3Longy.data()));
+        delete title;
+        
+    plothelp->AddtoLW(EllipicRatio);
+    plothelp->AddtoSize(cev->GetSurvivingPixelTotalAmpPanel3()/util->GetADCtoPEratio());
+    plothelp->AddtoSurvivingPixelCount(cev->GetSurvivingPixelPanel3().size());
+    plothelp->AddtoConcentation(conc);
+    plothelp->AddtoCOGx(meanx);
+    plothelp->AddtoCOGy(meany);
+    plothelp->AddtoTriggeredPixelsID(cev->GetMaxAmplitudePixelID());
+    
+    // Open a text file to write variables
+    std::ofstream outputFile("output_variables.txt");
+    if (outputFile.is_open()) {
+        outputFile << "LWRatio: " << EllipicRatio << "\n";
+        outputFile << "Cleaned_count: " << static_cast<int>((cev->GetSurvivingPixelPanel3()).size()) << "\n";
+        outputFile << "AreaEllipse: " << areaEllipse << "\n";
+        outputFile << "Cleaned_total_amp: " << cev->GetSurvivingPixelTotalAmpPanel3() << "\n";
+        outputFile << "Conc: " << conc << "\n";
+        outputFile << "M3LongVar: (" << M3LongVar[0] << ", " << M3LongVar[1] << ")\n";
+        outputFile.close();
+    } else {
+        std::cerr << "Unable to open file for writing." << std::endl;
     }
 
-    // Check if the tree exists
-    bool treeExists = (file->Get(treeName.c_str()) != nullptr);
-    if (!treeExists) {
-        std::cout << "Tree '" << treeName << "' is not present in the file. Skipping..." << std::endl;
+            
+}
+
+std::vector<double> getM3Long(double xcog,double ycog, std::vector<int> sur_pix, std::vector<float> amps){
+    // N = Max number of pixels survived
+    // i = pixel index
+    // x = pixel x location
+    // x cog = x comp. Center of Gravity
+    // q = charge of that pixel (start with amplitude for us)
+    std::vector<double> M3Long = {0.0,0.0};
+    int psize = sur_pix.size();
+
+    // cout << "xcog: " << xcog << " ycog: "<< ycog << endl;
+    
+    std::vector<double> randomNumbers;
+    for(int p = 0; p < psize; p++) {
+        // randomNumbers = generateRandomNumbers();
+        int nx, ny;
+        plottools->FindBin(sur_pix[p], &nx, &ny);
+        double p1x = std::pow((nx*1.0 - xcog*1.0),3.0);
+        // cout << ny << endl;
+        // cout << (ny*1.0 - ycog*1.0) << endl;
+        double p1y = std::pow((ny*1.0 - ycog*1.0),3.0);
+        double p2x = amps[sur_pix[p]]*p1x;
+        double p2y = amps[sur_pix[p]]*p1y;
+        // cout << amps[sur_pix[p]] << endl;
+
+        M3Long[0] = M3Long[0] + p2x;
+        M3Long[1] = M3Long[1] + p2y;
+        // cout << "M3 summingx: " << M3Long[0] << endl;
+        // cout << "M3 summingy: " << M3Long[1] << endl;
     }
-
-    // Clean up
-    file->Close();
-    delete file;
-
-    return treeExists; // Return whether the tree exists
+    // cout << "M3 summing2x: " << M3Long[0] << endl;
+    // cout << "M3 summing2y: " << M3Long[1] << endl;
+    // cout << psize << endl;
+    double p3x = M3Long[0] / psize;
+    double p3y = M3Long[1] / psize;
+    if (p3x < 0){
+        M3Long[0] = -1*std::pow(p3x*-1.0,0.333333333);
+    }
+    if (p3y < 0){
+        M3Long[1] = -1*std::pow(p3y*-1.0,0.333333333);
+    }
+    // cout << "M3Long Complete: " << M3Long[0] << endl;
+    // cout << "M3Long Complete: " << M3Long[1] << endl;
+    return M3Long;
 }

@@ -1,3 +1,6 @@
+#ifndef IPLOTTOOLS_H
+#define IPLOTTOOLS_H
+
 #include<iostream>
 #include <vector>
 
@@ -53,3 +56,4 @@ class IPlotTools{
 		inline static std::vector<int> mapMUSIC = {17,16,1,0,25,24,9,8,19,18,3,2,27,26,11,10,21,20,5,4,29,28,13,12,23,22,7,6,31,30,15,14};
 		inline static std::vector<int> mapSIAB = {12,12,8,8,4,4,0,0,13,13,9,9,5,5,1,1,14,14,10,10,6,6,2,2,15,15,11,11,7,7,3,3};
 };
+#endif // IPLOTTOOLS_H
