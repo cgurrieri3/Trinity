@@ -111,8 +111,7 @@ int AddSiPMInfoToEvents(std::string inputFileName) {
             amplitudeToPE[j] = amplitude * (1.0/absoluteGain[j]);
             relOverVoltage[j] = relOverV;
             
-            std::cout << i << "\t" << j << "\t" << amplitude << "\t" << hvSettingPx << "\t"
-                          << sipmTemp[j/16] << std::endl;
+            
             /*std::cout << i << "\t" << j << "\t" << amplitude << "\t" << absoluteGain[j] << "\t"
                           << tempCorrection[j] << "\t" << amplitudeToPE[j] << "\t" <<IUtilities::GetHVChannel(j)<<"\t"
                           << hvSettingPx << "\t" << relOverVoltage[j] << "\t" << sipmTemp[j / 16] << "\t" << overV << std::endl;*/

@@ -105,13 +105,12 @@ void PlotTrace(int iPix)
     trace  = ev->GetSignalValue(iPix); // getting data for traces
     for(int k = 0; k<512; k++){
     	// converting to PEs
-        //float peAmplitude = (float(trace[k])) / ((1.0/tempCorrection_forPix) * amplToPE_forPix);
+
         float peAmplitude = (float(trace[k]))*(1.0/absGain_forPix);
 
        hPixelTraceLED->SetBinContent(k+1,peAmplitude);
         
-       //cout<<k<<"    "<<trace[k]<<"    "<<tempCorrection_forPix<<"    "<<amplToPE_forPix<<"    "<<peAmplitude<<endl;
-
+ 
         //hPixelTraceLED->SetBinContent(k+1,trace[k]);
     }
     
@@ -221,7 +220,7 @@ void PlotEvent()
                 //float peAmplitude = (extractedData[j]->GetAmplitude())/((1.0/tempCorrection[j])*amplToPE[j]);
                 float peAmplitude = (extractedData[j]->GetAmplitude())*(1.0/absGain[j]);
                 //if (j==118)
-                cout<<j<<"    "<<extractedData[j]->GetAmplitude()<<"    "<<sipmTemp[j/16]<<"    "<<amplToPE[j]<<"    "<<absGain[j]<<"    "<<peAmplitude<<endl;
+                //cout<<j<<"    "<<extractedData[j]->GetAmplitude()<<"    "<<sipmTemp[j/16]<<"    "<<amplToPE[j]<<"    "<<absGain[j]<<"    "<<peAmplitude<<endl;
 
 				// functions to figure out location for plotting
                 int nx, ny;
