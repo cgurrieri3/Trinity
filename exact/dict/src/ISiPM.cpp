@@ -18,10 +18,10 @@ void ISiPM::SetGain(std::vector<double> values){
 	gain = values;
 }
 void ISiPM::SetRelOverV(std::vector<double> values){
-	amplToPE = values;
+	relOverV = values;
 }
 void ISiPM::SetTCorrection(std::vector<double> values){
-	relOverV = values;
+	gainTCorrection = values;
 }
 void ISiPM::SetAmplToPE(std::vector<double> values){
 	amplToPE = values;

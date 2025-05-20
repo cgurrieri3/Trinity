@@ -61,6 +61,8 @@ int AddSiPMInfoToEvents(std::string inputFileName) {
                 absoluteGain[j] = GAIN_REF * (1.0 / tempCorrection[j]);
                 amplitudeToPE[j] = amplitude / absoluteGain[j];
                 relOverVoltage[j] = relOverV;
+                
+                //cout<<i<<"    "<<j<<"    "<<amplitude<<"    "<<sipmTemp[j/16]<<"    "<<tempCorrection[j]<<"    "<<amplitudeToPE[j]<<"    "<<absoluteGain[j]<<endl;
             }
 
             sipmInfo->SetGain(absoluteGain);

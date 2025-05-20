@@ -188,6 +188,96 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
+   static TClass *IPlotTools_Dictionary();
+   static void IPlotTools_TClassManip(TClass*);
+   static void *new_IPlotTools(void *p = nullptr);
+   static void *newArray_IPlotTools(Long_t size, void *p);
+   static void delete_IPlotTools(void *p);
+   static void deleteArray_IPlotTools(void *p);
+   static void destruct_IPlotTools(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::IPlotTools*)
+   {
+      ::IPlotTools *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::IPlotTools));
+      static ::ROOT::TGenericClassInfo 
+         instance("IPlotTools", "IPlotTools.h", 7,
+                  typeid(::IPlotTools), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &IPlotTools_Dictionary, isa_proxy, 4,
+                  sizeof(::IPlotTools) );
+      instance.SetNew(&new_IPlotTools);
+      instance.SetNewArray(&newArray_IPlotTools);
+      instance.SetDelete(&delete_IPlotTools);
+      instance.SetDeleteArray(&deleteArray_IPlotTools);
+      instance.SetDestructor(&destruct_IPlotTools);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::IPlotTools*)
+   {
+      return GenerateInitInstanceLocal(static_cast<::IPlotTools*>(nullptr));
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::IPlotTools*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *IPlotTools_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::IPlotTools*>(nullptr))->GetClass();
+      IPlotTools_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void IPlotTools_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   static TClass *IUtilities_Dictionary();
+   static void IUtilities_TClassManip(TClass*);
+   static void *new_IUtilities(void *p = nullptr);
+   static void *newArray_IUtilities(Long_t size, void *p);
+   static void delete_IUtilities(void *p);
+   static void deleteArray_IUtilities(void *p);
+   static void destruct_IUtilities(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::IUtilities*)
+   {
+      ::IUtilities *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::IUtilities));
+      static ::ROOT::TGenericClassInfo 
+         instance("IUtilities", "IUtilities.h", 18,
+                  typeid(::IUtilities), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &IUtilities_Dictionary, isa_proxy, 4,
+                  sizeof(::IUtilities) );
+      instance.SetNew(&new_IUtilities);
+      instance.SetNewArray(&newArray_IUtilities);
+      instance.SetDelete(&delete_IUtilities);
+      instance.SetDeleteArray(&deleteArray_IUtilities);
+      instance.SetDestructor(&destruct_IUtilities);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::IUtilities*)
+   {
+      return GenerateInitInstanceLocal(static_cast<::IUtilities*>(nullptr));
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::IUtilities*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *IUtilities_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::IUtilities*>(nullptr))->GetClass();
+      IUtilities_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void IUtilities_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
    static TClass *Event_Dictionary();
    static void Event_TClassManip(TClass*);
    static void *new_Event(void *p = nullptr);
@@ -273,51 +363,6 @@ namespace ROOT {
    }
 
    static void GoldPlated_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
-   static TClass *IUtilities_Dictionary();
-   static void IUtilities_TClassManip(TClass*);
-   static void *new_IUtilities(void *p = nullptr);
-   static void *newArray_IUtilities(Long_t size, void *p);
-   static void delete_IUtilities(void *p);
-   static void deleteArray_IUtilities(void *p);
-   static void destruct_IUtilities(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const ::IUtilities*)
-   {
-      ::IUtilities *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::IUtilities));
-      static ::ROOT::TGenericClassInfo 
-         instance("IUtilities", "IUtilities.h", 17,
-                  typeid(::IUtilities), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &IUtilities_Dictionary, isa_proxy, 4,
-                  sizeof(::IUtilities) );
-      instance.SetNew(&new_IUtilities);
-      instance.SetNewArray(&newArray_IUtilities);
-      instance.SetDelete(&delete_IUtilities);
-      instance.SetDeleteArray(&deleteArray_IUtilities);
-      instance.SetDestructor(&destruct_IUtilities);
-      return &instance;
-   }
-   TGenericClassInfo *GenerateInitInstance(const ::IUtilities*)
-   {
-      return GenerateInitInstanceLocal(static_cast<::IUtilities*>(nullptr));
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::IUtilities*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *IUtilities_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::IUtilities*>(nullptr))->GetClass();
-      IUtilities_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void IUtilities_TClassManip(TClass* ){
    }
 
 } // end of namespace ROOT
@@ -536,51 +581,6 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
-   static TClass *IPlotTools_Dictionary();
-   static void IPlotTools_TClassManip(TClass*);
-   static void *new_IPlotTools(void *p = nullptr);
-   static void *newArray_IPlotTools(Long_t size, void *p);
-   static void delete_IPlotTools(void *p);
-   static void deleteArray_IPlotTools(void *p);
-   static void destruct_IPlotTools(void *p);
-
-   // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const ::IPlotTools*)
-   {
-      ::IPlotTools *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::IPlotTools));
-      static ::ROOT::TGenericClassInfo 
-         instance("IPlotTools", "IPlotTools.h", 4,
-                  typeid(::IPlotTools), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &IPlotTools_Dictionary, isa_proxy, 4,
-                  sizeof(::IPlotTools) );
-      instance.SetNew(&new_IPlotTools);
-      instance.SetNewArray(&newArray_IPlotTools);
-      instance.SetDelete(&delete_IPlotTools);
-      instance.SetDeleteArray(&deleteArray_IPlotTools);
-      instance.SetDestructor(&destruct_IPlotTools);
-      return &instance;
-   }
-   TGenericClassInfo *GenerateInitInstance(const ::IPlotTools*)
-   {
-      return GenerateInitInstanceLocal(static_cast<::IPlotTools*>(nullptr));
-   }
-   // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::IPlotTools*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *IPlotTools_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::IPlotTools*>(nullptr))->GetClass();
-      IPlotTools_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void IPlotTools_TClassManip(TClass* ){
-   }
-
-} // end of namespace ROOT
-
-namespace ROOT {
    static TClass *ISims_Dictionary();
    static void ISims_TClassManip(TClass*);
    static void *new_ISims(void *p = nullptr);
@@ -728,6 +728,48 @@ namespace ROOT {
 
 namespace ROOT {
    // Wrappers around operator new
+   static void *new_IPlotTools(void *p) {
+      return  p ? new(p) ::IPlotTools : new ::IPlotTools;
+   }
+   static void *newArray_IPlotTools(Long_t nElements, void *p) {
+      return p ? new(p) ::IPlotTools[nElements] : new ::IPlotTools[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_IPlotTools(void *p) {
+      delete (static_cast<::IPlotTools*>(p));
+   }
+   static void deleteArray_IPlotTools(void *p) {
+      delete [] (static_cast<::IPlotTools*>(p));
+   }
+   static void destruct_IPlotTools(void *p) {
+      typedef ::IPlotTools current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class ::IPlotTools
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_IUtilities(void *p) {
+      return  p ? new(p) ::IUtilities : new ::IUtilities;
+   }
+   static void *newArray_IUtilities(Long_t nElements, void *p) {
+      return p ? new(p) ::IUtilities[nElements] : new ::IUtilities[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_IUtilities(void *p) {
+      delete (static_cast<::IUtilities*>(p));
+   }
+   static void deleteArray_IUtilities(void *p) {
+      delete [] (static_cast<::IUtilities*>(p));
+   }
+   static void destruct_IUtilities(void *p) {
+      typedef ::IUtilities current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class ::IUtilities
+
+namespace ROOT {
+   // Wrappers around operator new
    static void *new_Event(void *p) {
       return  p ? new(p) ::Event : new ::Event;
    }
@@ -767,27 +809,6 @@ namespace ROOT {
       (static_cast<current_t*>(p))->~current_t();
    }
 } // end of namespace ROOT for class ::GoldPlated
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_IUtilities(void *p) {
-      return  p ? new(p) ::IUtilities : new ::IUtilities;
-   }
-   static void *newArray_IUtilities(Long_t nElements, void *p) {
-      return p ? new(p) ::IUtilities[nElements] : new ::IUtilities[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_IUtilities(void *p) {
-      delete (static_cast<::IUtilities*>(p));
-   }
-   static void deleteArray_IUtilities(void *p) {
-      delete [] (static_cast<::IUtilities*>(p));
-   }
-   static void destruct_IUtilities(void *p) {
-      typedef ::IUtilities current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class ::IUtilities
 
 namespace ROOT {
    // Wrapper around operator delete
@@ -872,27 +893,6 @@ namespace ROOT {
       (static_cast<current_t*>(p))->~current_t();
    }
 } // end of namespace ROOT for class ::IHealthTools
-
-namespace ROOT {
-   // Wrappers around operator new
-   static void *new_IPlotTools(void *p) {
-      return  p ? new(p) ::IPlotTools : new ::IPlotTools;
-   }
-   static void *newArray_IPlotTools(Long_t nElements, void *p) {
-      return p ? new(p) ::IPlotTools[nElements] : new ::IPlotTools[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_IPlotTools(void *p) {
-      delete (static_cast<::IPlotTools*>(p));
-   }
-   static void deleteArray_IPlotTools(void *p) {
-      delete [] (static_cast<::IPlotTools*>(p));
-   }
-   static void destruct_IPlotTools(void *p) {
-      typedef ::IPlotTools current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class ::IPlotTools
 
 namespace ROOT {
    // Wrappers around operator new
@@ -1300,15 +1300,15 @@ extern int __Cling_AutoLoading_Map;
 class __attribute__((annotate("$clingAutoload$ReadConfiguration.h")))  __attribute__((annotate("$clingAutoload$BiFocal.h")))  ReadConfiguration;
 class __attribute__((annotate("$clingAutoload$ExtractedData.h")))  __attribute__((annotate("$clingAutoload$BiFocal.h")))  ExtractedData;
 class __attribute__((annotate("$clingAutoload$BiFocal.h")))  BiFocal;
+class __attribute__((annotate("$clingAutoload$IPlotTools.h")))  __attribute__((annotate("$clingAutoload$CEvent.h")))  IPlotTools;
+class __attribute__((annotate("$clingAutoload$IUtilities.h")))  __attribute__((annotate("$clingAutoload$CEvent.h")))  IUtilities;
 class __attribute__((annotate("$clingAutoload$Event.h")))  Event;
 class __attribute__((annotate("$clingAutoload$GoldPlated.h")))  GoldPlated;
-class __attribute__((annotate("$clingAutoload$IUtilities.h")))  __attribute__((annotate("$clingAutoload$ICalibration.h")))  IUtilities;
 class __attribute__((annotate("$clingAutoload$ICalibration.h")))  ICalibration;
 class __attribute__((annotate("$clingAutoload$IEvent.h")))  IEvent;
 class __attribute__((annotate("$clingAutoload$IFile.h")))  IFile;
 class __attribute__((annotate("$clingAutoload$Pulse.h")))  __attribute__((annotate("$clingAutoload$IHealthTools.h")))  Pulse;
 class __attribute__((annotate("$clingAutoload$IHealthTools.h")))  IHealthTools;
-class __attribute__((annotate("$clingAutoload$IPlotTools.h")))  IPlotTools;
 class __attribute__((annotate("$clingAutoload$ISims.h")))  ISims;
 class __attribute__((annotate("$clingAutoload$ISiPM.h")))  ISiPM;
 )DICTFWDDCLS";

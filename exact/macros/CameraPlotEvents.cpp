@@ -198,7 +198,7 @@ void PlotEvent()
 		// converstion variables for ADC to PEs
         std::vector<double> amplToPE= sipmInfo->GetAmplToPE();
         std::vector<double> absGain= sipmInfo->GetGain();
-    	  //std::vector<double> tempCorrection= sipmInfo->GetTCorrection();
+    	  std::vector<double> tempCorrection= sipmInfo->GetTCorrection();
         std::vector<float> sipmTemp = ev->GetSiPMTemp();
 
         // setting up for data extraction for plotting
@@ -219,8 +219,8 @@ void PlotEvent()
 				// convert and callibrate to PEs
                 //float peAmplitude = (extractedData[j]->GetAmplitude())/((1.0/tempCorrection[j])*amplToPE[j]);
                 float peAmplitude = (extractedData[j]->GetAmplitude())*(1.0/absGain[j]);
-                //if (j==118)
-                //cout<<j<<"    "<<extractedData[j]->GetAmplitude()<<"    "<<sipmTemp[j/16]<<"    "<<amplToPE[j]<<"    "<<absGain[j]<<"    "<<peAmplitude<<endl;
+                
+                //cout<<j<<"    "<<extractedData[j]->GetAmplitude()<<"    "<<sipmTemp[j/16]<<"    "<<tempCorrection[j]<<"    "<<amplToPE[j]<<"    "<<absGain[j]<<"    "<<peAmplitude<<endl;
 
 				// functions to figure out location for plotting
                 int nx, ny;
