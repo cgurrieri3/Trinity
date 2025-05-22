@@ -131,7 +131,14 @@ int main(int argc, char **argv){
                 plothelp->AddHLEDEvent(1);
                 continue;
             }
-            
+
+            // Remove events where the door is closed. This can be done by checking the HV currents of the SiPMs and 
+            // if the sky seeing Channels are below 3.8 mA you know that the door is closed.
+            if (ev->Gethvc()[0] < 3.8 && ev->Gethvc()[2] < 3.8){
+                plothelp->AddCleanedEvent(1);
+                continue;
+            }
+
             std::vector<int> SaturatedPixels = util->GetSaturatedPixels(ev->GetSignalValue());
             cev->SetSaturatedPixels(std::accumulate(SaturatedPixels.begin(), SaturatedPixels.end(), 0));
             if (cev->GetSaturatedPixels() > SaturatedPixelCutoff) {
