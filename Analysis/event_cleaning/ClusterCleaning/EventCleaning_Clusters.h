@@ -60,7 +60,9 @@
 #include <random>
 #include <utility>
 #include <CEvent.h>
+#include <IEvent.h>
 #include <IPlotTools.h>
+
 
 // Define variables (global)
 std::vector<double> MaxAmplitudePixel;
@@ -79,8 +81,8 @@ PlotHelp *plothelp;
 
 TTree *tree = 0;
 TTree *treeHLED = 0;
-Event *ev;
-Event *evHLED;
+IEvent *ev;
+IEvent *evHLED;
 
 
 TH2F* hcam_panel1=0;
@@ -107,8 +109,9 @@ std::string OutputFilePDFClose = "";
 
 std::string neighborDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/ClusterCleaning/neighbors/";
 std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlasherCalibration/Output/";
-std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
+// std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
 // std::string dataDir = "/storage/hive/project/phy-otte/sstepanoff3/Data/";
+std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/";
 std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
 // std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/EventCleaning/ClusterCleaning/Output/";
 
@@ -121,8 +124,8 @@ const int PixelSurviveCutOff = 3; //How many pixels need to survive cleaning to 
 const int LWRatioCutOff = 50 ; // length width How elliptical you require the events to be after the Principle Compomnent Analysis (helps removed crosstalk events.) 
 const int rmTopRow = 1 ; // removed the top row of the camera (sky) 0 = remove, 1 = dont remove 
 
-void SetBranches(Event *evD);
-void SetBranchesHLED(Event *evD);
+void SetBranches(IEvent *evD);
+void SetBranchesHLED(IEvent *evD);
 void LoadEvents(std::string filename, std::string treeString);
 void LoadEventsHLED(string NameofFile, std::string treeString);
 
@@ -212,12 +215,14 @@ void LoadEventsHLED(string NameofFile, std::string treeString)
 }
 
 
-void SetBranches(Event *evD)
+void SetBranches(IEvent *evD)
 {
     tree->SetBranchAddress("Events", &ev);
+    // tree->SetBranchAddress("Event", &ev);
+    // tree->Scan("Events.Event");
 }
 
-void SetBranchesHLED(Event *evD)
+void SetBranchesHLED(IEvent *evD)
 {
     treeHLED->SetBranchAddress("Events", &evHLED);
 }
