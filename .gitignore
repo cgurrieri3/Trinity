@@ -6,3 +6,5 @@
 *.jpeg
 *.mov
 *.pdf
+*.root
+*.o
