@@ -231,7 +231,7 @@ void PushButton(){
     gPad->Update();
 }
 
-void TCameraPlotEventsNEW(string fileName,string treeString)
+void TCameraPlotEvents_Trinity_Fancy(string fileName,string treeString)
 {   
     
 	c_disp = new TCanvas("Display","CameraPlot",750,750);
