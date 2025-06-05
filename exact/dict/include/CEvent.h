@@ -78,9 +78,9 @@ class CEvent {
         void SetTriggeredMUSICID(int id) {TriggeredMUSICID = id; } // Use const_cast to modify the member variable
         int GetTriggeredMUSICID() const {return TriggeredMUSICID; }  
 
-        void SetAmplitudeValues(std::vector<float> amp) { AmplitudeValues = amp; }
+        void SetAmplitudeValues(std::vector<float> amp);
         std::vector<float> GetAmplitudeValues() { return AmplitudeValues; }
-        void SetAmplitudeValuesTimeBin(std::vector<float> amp) { AmplitudeValuesTimeBin = amp; }
+        void SetAmplitudeValuesTimeBin(std::vector<float> amp, std::string CalibrationFactorDir, std::string folString, std::vector<double> absGain); 
         std::vector<float> GetAmplitudeValuesTimeBin() { return AmplitudeValuesTimeBin; }
 
         void SetPedestalValues(std::vector<float> ped) { PedestalValues = ped; }
@@ -94,11 +94,18 @@ class CEvent {
         void SetMaxAmplitude(float amp) { MaxEventAmplitde = amp; }
         float GetMaxAmplitude() const { return MaxEventAmplitde; }
 
+        void SetAbsoluteGain(std::vector<double> absgain) {AbsoluteGain = absgain; }
+        double GetAbsoluteGain(int i) const { return AbsoluteGain[i]; }
+
         void SetSaturatedPixels(int sat) { SaturedPixels = sat; }
         int GetSaturatedPixels() const { return SaturedPixels; }
 
         void SetAverageAmplitude(float amp) { AverageAmplitude = amp; }
         float GetAverageAmplitude() const { return AverageAmplitude; } 
+
+        void SetRMS(std::vector<float> amp);
+        float GetRMS() const { return RMS; } // RMS is calculated in the SetRMS function)
+        float GetRMSoverAvgAmp() const { return RMS/AverageAmplitude; } // RMS is calculated in the SetRMS function)
 
         void SetSumAmplitude(int sum) { SumAmplitude = sum; }
         int GetSumAmplitude() const { return SumAmplitude; }
@@ -121,7 +128,7 @@ class CEvent {
 
         void LoadFlasherCalibration(std::string CalibrationFactorDir, std::string folderName); 
         TH2F* GetFlasherCalibration() const { return hflasher; }
-        void SetPanel1(TH2F* hcam_panel1, std::string CalibrationFactorDir, std::string folString);
+        void SetPanel1(TH2F* hcam_panel1);
         void SetPanel2(TH2F* hcam_panel2, int CorePixelAmpCutOff);
         void SetPanel3(TH2F* hcam_panel3, std::string neighborDir);
         std::vector<int> GetSurvivingPixelPanel2() {return SurvivingPixelPanel2; }
@@ -145,11 +152,14 @@ class CEvent {
         std::vector<float> AmplitudeValuesTimeBin;
         std::vector<float> PedestalValues;
         std::vector<int> PeakTimeBin;
+        std::vector<double> AbsoluteGain;
         int MaxAmplitdePixelID = -1;
         float MaxEventAmplitde = -1;
         int SaturedPixels = -1;
 
         float AverageAmplitude = -1;
+        float RMS = -1;
+        float RMSoverAvgAmp = -1;
         int SumAmplitude = -1;
         int EventNumber = -1;
         std::string Filename;

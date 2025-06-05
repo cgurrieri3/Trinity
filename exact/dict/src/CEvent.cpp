@@ -23,7 +23,45 @@ void CEvent::LoadFlasherCalibration(std::string CalibrationFactorDir, std::strin
     delete flasher;
 }
 
-void CEvent::SetPanel1(TH2F* hcam_panel1,std::string CalibrationFactorDir, std::string folString) {
+// this is for when you set all your gain and such when outside the script
+void CEvent::SetAmplitudeValues(std::vector<float> amp) {
+    // sets the peak amplitude  and assumes that gain calibration as already been set to the CEvent object
+    AmplitudeValues = amp;
+}
+
+// setting the abs gain and the flasher calibration within the CEvent object for when you pull a time bin
+void CEvent::SetAmplitudeValuesTimeBin(std::vector<float> amp, std::string CalibrationFactorDir, std::string folString, std::vector<double> absgain) {
+    // sets the peak amplitude  and assumes that gain calibration as already been set to the CEvent object
+    // Load the flasher calibration histogram
+    LoadFlasherCalibration(CalibrationFactorDir, folString);
+    TH2F* hf = GetFlasherCalibration();
+    
+    // set the absolute gain from the ISiPM calss
+    SetAbsoluteGain(absgain);
+
+    AmplitudeValuesTimeBin = amp;
+    for (int i = 0; i < MaxNofChannels; i++) {
+        int nx, ny;
+        IPlotTools::FindBin(i, &nx, &ny);
+        double flashercalibratedamp = amp[i]*(1.0/hf->GetBinContent(nx + 1, ny + 1));
+        // std::cout << "flasher calib: " << flashercalibratedamp << std::endl;
+        AmplitudeValuesTimeBin[i] = flashercalibratedamp*(1.0/AbsoluteGain[i]);
+        // std::cout << "AmplitudeValuesTimeBin[" << i << "]: " << AmplitudeValuesTimeBin[i] << std::endl;
+    }
+    delete hf;
+}
+
+void CEvent::SetRMS(std::vector<float> amp){
+    float sumsq = 0;
+    for (std::size_t i = 0; i < amp.size(); i++){
+        sumsq += amp[i]*amp[i];
+        // cout << "sumsq: " << sumsq << endl;
+        RMS = sqrt(sumsq)/MaxNofChannels;
+        // cout << "RMS: " << RMS << endl;
+    }
+}
+
+void CEvent::SetPanel1(TH2F* hcam_panel1) {
     hcam_panel1->SetStats(0);
     hcam_panel1->GetXaxis()->SetLabelSize(0.03);
     hcam_panel1->GetYaxis()->SetLabelSize(0.03);
@@ -33,30 +71,22 @@ void CEvent::SetPanel1(TH2F* hcam_panel1,std::string CalibrationFactorDir, std::
     hcam_panel1->GetYaxis()->SetTitleOffset(1.0); // Adjust Y-axis title offset
     hcam_panel1->SetMinimum(-1);
     
-    LoadFlasherCalibration(CalibrationFactorDir, folString);
-    TH2F* hf = GetFlasherCalibration();
-
     for(int j = 0; j<MaxNofChannels; j++){
         int nx, ny;
         IPlotTools::FindBin(j, &nx, &ny);
         hcam_panel1->SetBinContent(nx + 1, ny + 1, AmplitudeValuesTimeBin[j]);
-        AmplitudeValuesTimeBin[j] = AmplitudeValuesTimeBin[j]/hf->GetBinContent(nx + 1, ny + 1);
-        // cout << "Amp at max time bin: " << ampattimebin << endl;
     }
     
-    hcam_panel1->Divide(hf);
-    hcam_panel1->Scale(1.0/IUtilities::GetADCtoPEratio());
     hcam_panel1->Draw("colz");
     IPlotTools::DrawMUSICBoundaries();
-    delete hf;
-
+    
 }
 
 void CEvent::SetPanel2(TH2F* hcam_panel2, int CorePixelAmpCutOff) {
-    hcam_panel2->Scale(IUtilities::GetADCtoPEratio());
 
+    
     for(int j = 0; j<MaxNofChannels; j++){
-
+        
         int nx, ny;
         IPlotTools::FindBin(j, &nx, &ny);
         float binContent= hcam_panel2->GetBinContent(nx+1,ny+1);
@@ -68,17 +98,13 @@ void CEvent::SetPanel2(TH2F* hcam_panel2, int CorePixelAmpCutOff) {
             hcam_panel2->SetBinContent(nx + 1, ny + 1, 0);
         }
     }
-    // TH2F* hf = GetFlasherCalibration();
-    // hcam_panel2->Divide(hf);
-    hcam_panel2->Scale(1.0/IUtilities::GetADCtoPEratio());
+
     hcam_panel2->Draw("colz");
-    // hcam_panel2->Scale(IUtilities::GetADCtoPEratio());
-    // hcam_panel2->SetMinimum(200);
+    hcam_panel2->SetMinimum(7.95);
     IPlotTools::DrawMUSICBoundaries();
 }
 
 void CEvent::SetPanel3(TH2F* hcam_panel3, std::string neighborDir) {
-    hcam_panel3->Scale(IUtilities::GetADCtoPEratio());
     std::vector<int> PixelPeakTimes = PeakTimeBin;
     int TriggeredPixelPeakTime = PixelPeakTimes[MaxAmplitdePixelID];
     // std::cout << "Triggered Pixel Peak Time: " << TriggeredPixelPeakTime << std::endl;
@@ -113,9 +139,7 @@ void CEvent::SetPanel3(TH2F* hcam_panel3, std::string neighborDir) {
             hcam_panel3->SetBinContent(nx + 1, ny + 1, 0);
             }
         }
-    hcam_panel3->Scale(1.0/IUtilities::GetADCtoPEratio());
     hcam_panel3->Draw("colz");
-    // hcam_panel3->SetMinimum(200);
     IPlotTools::DrawMUSICBoundaries();
 }
 
