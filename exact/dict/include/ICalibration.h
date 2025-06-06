@@ -33,7 +33,7 @@ const double BrVol[16] = {38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44, 38.44
     694.4, 784.0, 601.6, 624.0, 646.4, 672.0, 595.2, 579.2, 585.6, 630.4, 502.4, 528.0, 502.4, 544.0, 736.0, 732.8,
     726.4, 723.2, 838.4, 838.4, 800.0, 803.2, 969.6, 937.6, 841.6, 915.2, 956.8, 985.6, 947.2, 982.4, 1273.6,
     1292.8, 1248.0, 1360.0, 1116.8, 1120.0, 1209.6, 1296.0, 1036.8, 1068.8, 1084.8, 1104.0, 966.4, 992.0, 1017.6, 1040.0};
-/**< Offset adjustments for Trinity Demonstrator camera flatfielding in mV, from 2025/03/10 */
+< Offset adjustments for Trinity Demonstrator camera flatfielding in mV, from 2025/03/10 */
 
 
 //to use with average breakdown voltage for all matrices
