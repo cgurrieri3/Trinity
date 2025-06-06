@@ -281,6 +281,17 @@ class IUtilities{
 		static std::vector<double> readFileToVector(const std::string filename);
 		
 		/**
+		* Public method to read a file containing textual values and store them in a vector.
+		* 
+		* @param filename A string with the path to the input file. The file is expected to contain
+		*                 whitespace-separated string values.
+		* 
+		* @return A vector of strings containing the values read from the file. Returns an empty vector
+		*         if the file cannot be opened.
+		*/
+		std::vector<std::string> readFileToVectorString(const std::string& filename);
+
+		/**
 		* Public method to write a vector of doubles to a specified file.
 		* 
 		* Each element in the vector is written to the file separated by spaces.

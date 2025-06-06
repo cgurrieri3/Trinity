@@ -25,7 +25,9 @@ int main(int argc, char **argv){
     // Get the Arguments
     std::string folString = argv[1];
     // Load in all the files
-    std::string FolderPath = Form("%s%s/RawDataMerged/",dataDir.c_str(),folString.c_str());
+    std::string FolderPath = Form("%s%s/",dataDir.c_str(),folString.c_str());
+    cout << "FolderPath: " << FolderPath << std::endl;
+    // std::string FolderPath = Form("%s%s/RawDataMerged/",dataDir.c_str(),folString.c_str());
     std::vector<std::string>fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
 
     CreateFileName(folString);
@@ -50,10 +52,10 @@ int main(int argc, char **argv){
         }
         LoadEvents(FilePath, "Test");
         LoadEventsHLED(FilePath, "HLED");
-        ev = new Event();
+        ev = new IEvent();
+        evHLED = new IEvent();
         SetBranches(ev);
         SetBranchesHLED(evHLED);
-        evHLED = new Event();
         
         
         int nEntries = tree->GetEntries();
@@ -129,7 +131,14 @@ int main(int argc, char **argv){
                 plothelp->AddHLEDEvent(1);
                 continue;
             }
-            
+
+            // Remove events where the door is closed. This can be done by checking the HV currents of the SiPMs and 
+            // if the sky seeing Channels are below 3.8 mA you know that the door is closed.
+            if (ev->Gethvc()[0] < 3.8 && ev->Gethvc()[2] < 3.8){
+                plothelp->AddCleanedEvent(1);
+                continue;
+            }
+
             std::vector<int> SaturatedPixels = util->GetSaturatedPixels(ev->GetSignalValue());
             cev->SetSaturatedPixels(std::accumulate(SaturatedPixels.begin(), SaturatedPixels.end(), 0));
             if (cev->GetSaturatedPixels() > SaturatedPixelCutoff) {
@@ -159,7 +168,7 @@ int main(int argc, char **argv){
             gPad->SetBottomMargin(0.25); // Increase bottom margin
             gPad->SetRightMargin(0.15);
 
-            std::string filenameTitle = (cev->GetFilename()).substr(23,5);
+            std::string filenameTitle = (cev->GetFilename()).substr(18,5);
             // create TH2D for Camera
             hcam_panel1 = new TH2F("hcam_panel1", Form("Calibrated Image --File# %s-- Event# %i ", filenameTitle.c_str() ,EventCounter), 16, -0.5, 15.5, 16, -0.5, 15.5);
             hcam_panel1->SetDirectory(0);

@@ -395,6 +395,18 @@ std::vector<std::string> IUtilities::GetFilesInDirectory(std::string dirname, st
 
 	}
 	std::sort(files.begin(), files.end());
+
+	// Remove elements matching the pattern _0001.root as these are overflow files and as of right now we dont process them 
+    files.erase(
+        std::remove_if(
+            files.begin(),
+            files.end(),
+            [](const std::string& name) {
+                return name.find("_0001.root") != std::string::npos;
+            }
+        ),
+        files.end()
+    );
 	return files;
 }
 
@@ -453,6 +465,23 @@ std::vector<double> IUtilities::readFileToVector(const std::string filename) {
     }
 
     double value;
+    while (file >> value) {
+        result.push_back(value);
+    }
+
+    file.close();
+    return result;
+}
+
+std::vector<std::string> IUtilities::readFileToVectorString(const std::string& filename) {
+    std::vector<std::string> result;
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return result; // Return empty vector if file can't be opened
+    }
+
+    std::string value;
     while (file >> value) {
         result.push_back(value);
     }
