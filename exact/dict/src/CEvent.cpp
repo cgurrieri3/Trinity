@@ -253,6 +253,27 @@ std::vector<int> CEvent::GetNeighborArray(int id, std::string filename) {
     return std::vector<int>(); // returns array of neighbors for given pixel
 }
 
+int CEvent::isConfigureEvent(){
+    if (SurvivingPixelPanel3.size() < 16 && SurvivingPixelTotalAmpPanel3 < 2080){
+        return 0;
+    }
+    std::vector<int> survivingSIABS; 
+    for(unsigned int i=0; i < SurvivingPixelPanel3.size(); i++){
+        int nx, ny;
+        IPlotTools::FindBin(SurvivingPixelPanel3[i],&nx,&ny);
+        survivingSIABS.push_back(IPlotTools::FindSIAB(nx,ny));
+    }
+
+    std::sort(survivingSIABS.begin(), survivingSIABS.end());
+    auto unique=std::unique(survivingSIABS.begin(), survivingSIABS.end());
+    survivingSIABS.erase(unique, survivingSIABS.end());
+
+    if (survivingSIABS.size() > 1){
+        return 0;
+    }
+    return 1;
+
+}
 
 
 

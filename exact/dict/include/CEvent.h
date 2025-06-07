@@ -134,6 +134,7 @@ class CEvent {
         std::vector<int> GetSurvivingPixelPanel2() {return SurvivingPixelPanel2; }
         std::vector<int> GetSurvivingPixelPanel3() {return SurvivingPixelPanel3; }
         float GetSurvivingPixelTotalAmpPanel3() {return SurvivingPixelTotalAmpPanel3; }
+        int isConfigureEvent();
 
 
     private:
