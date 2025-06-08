@@ -182,25 +182,25 @@ void IEvent::SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<f
 
 	// Just set the Parmeters from the arguments of the function
 
-    for (int j = 0; j < hv_arg.size(); ++j) {
+    for (std::size_t j = 0; j < hv_arg.size(); ++j) {
         hv[j] = hv_arg[j];
     }
-    for (int j = 0; j < hvc_arg.size(); ++j) {
+    for (std::size_t j = 0; j < hvc_arg.size(); ++j) {
         hvc[j] = hvc_arg[j];
     }
-    for (int j = 0; j < UCtemps_arg.size(); ++j) { 
+    for (std::size_t j = 0; j < UCtemps_arg.size(); ++j) { 
 	float UCy = UCdata[j][0] * UCtemps_arg[j] +  UCdata[j][1];
 	std::string str_UCy = std::to_string(UCy);	
 	 ucTemp[j] = UCy;
 	//ucTemp[j] = UCtemps_arg[j];
     }
-    for (int j = 0; j < MUSICpower_arg.size(); ++j) {
+    for (std::size_t j = 0; j < MUSICpower_arg.size(); ++j) {
         siabMPWR[j] = MUSICpower_arg[j];
     }
-    for (int j = 0; j < HVswitch_arg.size(); ++j) {
+    for (std::size_t j = 0; j < HVswitch_arg.size(); ++j) {
         hvSW[j] = HVswitch_arg[j];
     }
-    for (int j = 0; j < sipmTemp_arg.size(); ++j) {	
+    for (std::size_t j = 0; j < sipmTemp_arg.size(); ++j) {	
 		float SIPMy = SIPMdata[j][0] * sipmTemp_arg[j] +  SIPMdata[j][1];
 		std::string str_SIPMy = std::to_string(SIPMy);	
         sipmTemp[j] = SIPMy;
@@ -211,7 +211,7 @@ void IEvent::SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<f
     ASADcurr = ASADcurr_arg[0];
     
 
-    for (int j = 0; j < siabCurr_arg.size(); ++j) {
+    for (std::size_t j = 0; j < siabCurr_arg.size(); ++j) {
         siabCurr[j] = siabCurr_arg[j];
     }
 
@@ -371,7 +371,7 @@ int IEvent::findClosestTimestamp(const std::vector<std::vector<std::string>>& da
     int closestTimestamp = std::stoi(data[0][0]);
     int minDifference = std::abs(timestamp - closestTimestamp);
 
-    for (int i = 1; i < data.size(); ++i) {
+    for (std::size_t i = 1; i < data.size(); ++i) {
         int currentTimestamp = std::stoi(data[i][0]);
         int difference = std::abs(timestamp - currentTimestamp);
 
@@ -392,7 +392,7 @@ int IEvent::FindClosestTimestampIndex(std::vector<unsigned long long> timeArray,
     unsigned long long difference;
 
     int index = 0;
-    for (int i = 1; i < timeArray.size(); ++i) {
+    for (std::size_t i = 1; i < timeArray.size(); ++i) {
         currentTimestamp = timeArray[i];
         
         difference = std::abs((long long int)(eventTime - currentTimestamp));
