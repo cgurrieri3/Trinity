@@ -112,6 +112,9 @@ class CEvent {
 
         void SetEventNumber(int event) { EventNumber = event; }
         int GetEventNumber() const { return EventNumber; }
+
+        void SetEventDate(int date) {EventDate = date; }
+        int GetEventDate() const {return EventDate;}
         
         void SetFilename(const std::string& name) { Filename = name; }
         std::string GetFilename() const { return Filename; }
@@ -163,6 +166,7 @@ class CEvent {
         float RMSoverAvgAmp = -1;
         int SumAmplitude = -1;
         int EventNumber = -1;
+        int EventDate = -1;
         std::string Filename;
 
         int TotalEvents = 0;

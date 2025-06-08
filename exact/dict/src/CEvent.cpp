@@ -115,7 +115,7 @@ void CEvent::SetPanel3(TH2F* hcam_panel3, std::string neighborDir) {
     for(int j = 0; j < MaxNofChannels; j++){
         int nx, ny;
         IPlotTools::FindBin(j, &nx, &ny);
-        if (PeakTimeBin[j] == TriggeredPixelPeakTime && std::find(std::begin(neighborsurvivingPanel3Pixels), std::end(neighborsurvivingPanel3Pixels), j) != std::end(neighborsurvivingPanel3Pixels)) {
+        if ((PeakTimeBin[j] == TriggeredPixelPeakTime || PeakTimeBin[j] == TriggeredPixelPeakTime-1 || PeakTimeBin[j] == TriggeredPixelPeakTime-2) && std::find(std::begin(neighborsurvivingPanel3Pixels), std::end(neighborsurvivingPanel3Pixels), j) != std::end(neighborsurvivingPanel3Pixels)) {
             // std::cout << "Surviving Panel 3 Pixel: " << j << " Amplitude: " << AmplitudeValuesTimeBin[j] << std::endl;
             tempSurvivingPixelPanel3.push_back(j);
             //hcam_panel3->SetBinContent(nx + 1, ny + 1, AmplitudeValuesTimeBin[j]);
@@ -130,7 +130,7 @@ void CEvent::SetPanel3(TH2F* hcam_panel3, std::string neighborDir) {
             int nx, ny;
             IPlotTools::FindBin(j, &nx, &ny);
             float binContent = hcam_panel3->GetBinContent(nx+1,ny+1);
-            if (PeakTimeBin[j] == TriggeredPixelPeakTime && std::find(std::begin(neighborsurvivingPanel3Pixels), std::end(neighborsurvivingPanel3Pixels), j) != std::end(neighborsurvivingPanel3Pixels)) {
+            if ((PeakTimeBin[j] == TriggeredPixelPeakTime || PeakTimeBin[j] == TriggeredPixelPeakTime-1 || PeakTimeBin[j] == TriggeredPixelPeakTime-2) && std::find(std::begin(neighborsurvivingPanel3Pixels), std::end(neighborsurvivingPanel3Pixels), j) != std::end(neighborsurvivingPanel3Pixels)) {
                 // std::cout << "Surviving Panel 3 Pixel: " << j << " Amplitude: " << AmplitudeValuesTimeBin[j] << std::endl;
                 SurvivingPixelPanel3.push_back(j);
                 SurvivingPixelTotalAmpPanel3 += binContent;
@@ -254,7 +254,9 @@ std::vector<int> CEvent::GetNeighborArray(int id, std::string filename) {
 }
 
 int CEvent::isConfigureEvent(){
-    if (SurvivingPixelPanel3.size() < 16 && SurvivingPixelTotalAmpPanel3 < 2080){
+    // std::cout << "Pixels: " << SurvivingPixelPanel3.size() <<" And size: " << SurvivingPixelTotalAmpPanel3 << std::endl;
+    if (SurvivingPixelPanel3.size() < 15 || SurvivingPixelTotalAmpPanel3 < 2080){
+        // std::cout << "Exitting" << std::endl;
         return 0;
     }
     std::vector<int> survivingSIABS; 
