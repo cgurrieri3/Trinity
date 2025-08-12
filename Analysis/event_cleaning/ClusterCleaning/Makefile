@@ -8,6 +8,7 @@
 
 BIN_DIR := .
 EXE := $(BIN_DIR)/ClusterCleaning
+# EXE := $(BIN_DIR)/ClusterCleaningNoSat
 DICT_DIR := ${EXACT_DIR}/dict
 
 ARCH := $(shell uname)

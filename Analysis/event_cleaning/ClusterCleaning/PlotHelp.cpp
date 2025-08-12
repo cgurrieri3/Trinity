@@ -6,8 +6,15 @@ PlotHelp::PlotHelp() {
 }
 
 
-void PlotHelp::AddtoLW(double LWRatio){
-    LWvector.push_back(LWRatio);
+void PlotHelp::AddtoWL(double WLRatio){
+    WLvector.push_back(WLRatio);
+}
+
+void PlotHelp::AddtoL(double L){
+    Lvector.push_back(L);
+}
+void PlotHelp::AddtoW(double W){
+    Wvector.push_back(W);
 }
 
 void PlotHelp::AddtoSize(double size){
@@ -34,102 +41,381 @@ void PlotHelp::AddtoTriggeredPixelsID(int id){
     TPID.push_back(id);
 }
 
-void PlotHelp::PlothLW(TCanvas* c, std::string pdf){
-    TH1D* hLW = new TH1D("hLW", "Distribution of Length Width Ratio",10 ,-0.05 ,0.95);
-    hLW->SetStats(0);
-    hLW->SetXTitle("Length Width Ratio");
-    for (std::vector<double>::size_type h = 0; h < LWvector.size(); h++) {
-        hLW->Fill(LWvector[h]);
+void PlotHelp::AddtoEventDate(int date){
+    Datevecctor.push_back(date);
+}
+
+void PlotHelp::AddtoRMSratioAVGamp(double rmsoveravg){
+    RMSoverAVGvector.push_back(rmsoveravg);
+}
+
+void PlotHelp::AddtoCoreRatio(double cr){
+    Corevector.push_back(cr);
+}
+
+void PlotHelp::AddtoNumberOfCores(double num){
+    NCorevector.push_back(num);
+}
+
+void PlotHelp::PlothWL(TCanvas* c, std::string pdf,std::string outDir,std::string date){
+    TH1D* hWL = new TH1D("hWL", "Distribution of Width Length Ratio",ONEstep, ONEmin, ONEmax);
+    hWL->SetStats(0);
+    hWL->SetXTitle("Width Length Ratio");
+    for (std::vector<double>::size_type h = 0; h < WLvector.size(); h++) {
+        hWL->Fill(WLvector[h]);
     }
-    // hLW->SetXaxis()->SetLabelSize(0.03);
-    // hLW->SetXaxis()->SetTitleOffset(1.2); // Adjust X-axis title offset
-    // hLW->SetYaxis()->SetTitleOffset(1.5); // Adjust Y-axis title offset
+    // hWL->SetXaxis()->SetLabelSize(0.03);
+    // hWL->SetXaxis()->SetTitleOffset(1.2); // Adjust X-axis title offset
+    // hWL->SetYaxis()->SetTitleOffset(1.5); // Adjust Y-axis title offset
     c->cd(0);
-    hLW->Draw();
+    hWL->Draw();
     //Create a TLatex object to display the label
     TLatex *latex = new TLatex();
     latex->SetNDC(); // Use normalized coordinates
     latex->SetTextSize(0.02); // Set the text size
 
-    latex->DrawLatex(0.7, 0.85, Form("Events #: %i", TotalEvents-HLEDEvents));
-    latex->DrawLatex(0.7, 0.83, Form("Flasher Events #: %i", HLEDEvents));
-    latex->DrawLatex(0.7, 0.81, Form("Survived Events #: %i", SurvivingEvents));
+    latex->DrawLatex(0.1, 0.83, Form("Flasher Events #: %i", HLEDEvents));
+    latex->DrawLatex(0.1, 0.85, Form("Events #: %i", TotalEvents-HLEDEvents));
+    latex->DrawLatex(0.1, 0.81, Form("Survived Events #: %i", SurvivingEvents));
+    latex->DrawLatex(0.1, 0.79, Form("PreCleaned Cleaned #: %i", PreCleanedEvents));
+    latex->DrawLatex(0.1, 0.77, Form("Panel 2 Cleaned #: %i", Panel2CleanedEvents));
+    latex->DrawLatex(0.1, 0.75, Form("Panel 3 Cleaned #: %i", Panel3CleanedEvents));
     delete latex;
     c->Update();
-    c->Write("LW_Distribution");
-    hLW->Write("LW_DistributionTH1D");
+    c->SetLogy();
+    c->Write("WL_Distribution");
+    hWL->Write("WL_DistributionTH1D");
     c->Print(pdf.c_str());
-    delete hLW;
+    c->SetLogy(0);
+    delete hWL;
+
+    std::ofstream outputFile1(Form("%sTotalEvents_%s.txt",outDir.c_str(),date.c_str()));
+    if (outputFile1.is_open()) {
+        outputFile1 << "Triggered,Flasher,Survived,Pre,Panel2,Panel3" << "\n";
+        outputFile1 << TotalEvents-HLEDEvents << "," << HLEDEvents<<","<< SurvivingEvents << "," << PreCleanedEvents << "," << Panel2CleanedEvents << "," << Panel3CleanedEvents <<"\n";
+        outputFile1.close();
+    } else {
+        std::cerr << "Unable to open file for writing." << std::endl;
+    }
+}
+
+void PlotHelp::PlothdistLandW(TCanvas* c, std::string pdf){
+    TH1D* hW = new TH1D("hL", "Seperate Distribution of Width and Length",4*ONEstep, ONEmin, ONEmax+1);
+    TH1D* hL = new TH1D("hW", "Distribution of Length ",4*ONEstep, ONEmin, ONEmax+1);
+    hW->SetStats(0);
+    hL->SetStats(0);
+    hW->SetXTitle("Value");
+    hL->SetXTitle("Value");
+    for (std::vector<double>::size_type h = 0; h < Wvector.size(); h++) {
+        hW->Fill(Wvector[h]);
+        hL->Fill(Lvector[h]);
+    }
+    // hWL->SetXaxis()->SetLabelSize(0.03);
+    // hWL->SetXaxis()->SetTitleOffset(1.2); // Adjust X-axis title offset
+    // hWL->SetYaxis()->SetTitleOffset(1.5); // Adjust Y-axis title offset
+    c->cd(0);
+    hW->SetLineColor(kBlue);
+    hW->SetFillColor(38);
+    hW->SetFillStyle(3017);
+    hW->Draw();
+    
+    hL->SetLineColor(kRed);
+    hL->SetFillColor(46);
+    hL->SetFillStyle(3017);
+    hL->Draw("Same");
+    // //Create a TLatex object to display the label
+    // TLatex *latex = new TLatex();
+    // latex->SetNDC(); // Use normalized coordinates
+    // latex->SetTextSize(0.02); // Set the text size
+    
+    // latex->DrawLatex(0.1, 0.83, Form("Flasher Events #: %i", HLEDEvents));
+    // latex->DrawLatex(0.1, 0.85, Form("Events #: %i", TotalEvents-HLEDEvents));
+    // latex->DrawLatex(0.1, 0.81, Form("Survived Events #: %i", SurvivingEvents));
+    // latex->DrawLatex(0.1, 0.79, Form("PreCleaned Cleaned #: %i", PreCleanedEvents));
+    // latex->DrawLatex(0.1, 0.77, Form("Panel 2 Cleaned #: %i", Panel2CleanedEvents));
+    // latex->DrawLatex(0.1, 0.75, Form("Panel 3 Cleaned #: %i", Panel3CleanedEvents));
+    // delete latex;
+    
+    auto legend = new TLegend(0.1,0.8,0.34,0.9);
+    // legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+    legend->AddEntry(hL,"Length","f");
+    legend->AddEntry(hW,"Width","f");
+    legend->Draw();
+    c->Update();
+    c->SetLogy();
+    c->Write("WandL_Distribution");
+    hW->SetTitle("Distribution of Width");
+    hW->SetXTitle("Width");
+    hL->SetXTitle("Length");
+    hW->Write("W_DistributionTH1D");
+    hL->Write("L_DistributionTH1D");
+    c->Print(pdf.c_str());
+    c->SetLogy(0);
+
 }
 
 void PlotHelp::PlothSize(TCanvas* c, std::string pdf){
     TH1D* hSize = new TH1D("hSize", "Size Distribution of Surviving Pixels", SIZEstep, SIZEmin,SIZEmax );
     hSize->SetStats(0);
-    hSize->SetXTitle("SIZE (PEs)");
+    hSize->SetXTitle("SIZE (PE)");
+    
+    LogBinning(hSize);
+
     for (std::vector<double>::size_type h = 0; h < Svector.size(); h++) {
         hSize->Fill(Svector[h]);
     }
     c->cd(0);
     hSize->Draw();
     c->Update();
+    c->SetLogx();
+    c->SetLogy();
     c->Write("Size_Distribution");
     hSize->Write("Size_DistributionTH1D");
     c->Print(pdf.c_str());
     delete hSize;
+    c->SetLogx(0);
+    c->SetLogy(0);
 }
 
-void PlotHelp::PlothSizeConc(TCanvas* c, std::string pdf){
-    TH2F* hConc = new TH2F("hConc", "SIZE vs Concentation; CONC; SIZE",ONEstep, ONEmin, ONEmax, SIZEstep, SIZEmin,SIZEmax);
-    hConc->SetStats(0);
+void PlotHelp::PlothNumberofCores(TCanvas* c, std::string pdf){
+    TH1D* hncore = new TH1D("hncore", "Distribution of NUmber of Cores", nCoreStep, nCoreMin,nCoreMax );
+    hncore->SetStats(0);
+    hncore->SetXTitle("Number of Cores");
+    
+    // LogBinning(hncore);
 
+    for (std::vector<double>::size_type h = 0; h < Svector.size(); h++) {
+        hncore->Fill(NCorevector[h]);
+    }
+    c->cd(0);
+    hncore->Draw();
+    c->Update();
+    c->SetLogy();
+    c->Write("Ncore_Distribution");
+    hncore->Write("NCore_DistributionTH1D");
+    c->Print(pdf.c_str());
+    delete hncore;
+    c->SetLogx(0);
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothCoreRatioandNumberofCores(TCanvas* c, std::string pdf){
+    TH2F* hcrvnc = new TH2F("hcrvnc", "Core Ratio vs Number of cores;Number of cores;Core Ratio",nCoreStep, nCoreMin,nCoreMax,4*ONEstep,4*ONEmin,4*ONEmax);
+    hcrvnc->SetStats(0);
+
+    for (std::vector<double>::size_type h = 0; h < Lvector.size(); h++) {
+        hcrvnc->Fill(NCorevector[h],Corevector[h]);
+    }
+    c->cd(0);
+    hcrvnc->Draw("COLZ");
+    c->Update();
+    c->Write("crvnc");
+    hcrvnc->Write("crvncTH2F");
+    c->Print(pdf.c_str());
+    delete hcrvnc;
+}
+
+
+
+void PlotHelp::PlothRMSratioAvg(TCanvas* c, std::string pdf) {
+    TH1D* hRMS = new TH1D("hRMS", "Ratio of RMS with Avg Amp", ONEstep*10, ONEmin,ONEmax );
+    hRMS->SetStats(0);
+    hRMS->SetXTitle("RMS/Avg Amplitude");
+    for (std::vector<double>::size_type h = 0; h < RMSoverAVGvector.size(); h++) {
+        hRMS->Fill(RMSoverAVGvector[h]);
+    }
+    c->cd(0);
+    hRMS->Draw();
+    c->Update();
+    c->Write("RMSratioAvg_Distribution");
+    hRMS->Write("RMSratioAvg_DistributionTH1D");
+    c->Print(pdf.c_str());
+    delete hRMS;
+}
+
+void PlotHelp::PlothLvW(TCanvas* c, std::string pdf){
+    TH2F* hLvW = new TH2F("hLvW", "Length vs Width; Width;Length",4*ONEstep, ONEmin, ONEmax+1,4*ONEstep, ONEmin, ONEmax+1);
+    hLvW->SetStats(0);
+
+    for (std::vector<double>::size_type h = 0; h < Lvector.size(); h++) {
+        hLvW->Fill(Wvector[h],Lvector[h]);
+    }
+    c->cd(0);
+    hLvW->Draw("COLZ");
+    c->Update();
+    c->Write("LvW");
+    hLvW->Write("LvWTH2F");
+    c->Print(pdf.c_str());
+    delete hLvW;
+}
+
+
+
+void PlotHelp::PlothSizeConc(TCanvas* c, std::string pdf){
+    TH2F* hConc = new TH2F("hConc", "SIZE vs concentration; SIZE (PE); CONC", SIZEstep, SIZEmin,SIZEmax,ONEstep, ONEmin, ONEmax);
+    hConc->SetStats(0);
+    LogBinning(hConc);
     for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
-        hConc->Fill(Cvector[h], Svector[h]);
+        hConc->Fill(Svector[h],Cvector[h]);
     }
     c->cd(0);
     hConc->Draw("COLZ");
     c->Update();
+    c->SetLogx();
     c->Write("Conc_Size");
     hConc->Write("Conc_SizeTH2F");
     c->Print(pdf.c_str());
     delete hConc;
+    c->SetLogx(0);
 }
 
-void PlotHelp::PlothLWConc(TCanvas* c, std::string pdf){
-    TH2F* hLWConc = new TH2F("hLWConc", "LW vs Concentation; LW; CONC",ONEstep, ONEmin, ONEmax,ONEstep, ONEmin, ONEmax);
-    hLWConc->SetStats(0);
+void PlotHelp::PlothWLConc(TCanvas* c, std::string pdf){
+    TH2F* hWLConc = new TH2F("hWLConc", "WL vs concentration; WL; CONC",ONEstep, ONEmin, ONEmax,ONEstep, ONEmin, ONEmax);
+    hWLConc->SetStats(0);
     for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
-        hLWConc->Fill(LWvector[h],Cvector[h] );
+        hWLConc->Fill(WLvector[h],Cvector[h] );
     }
     c->cd(0);
-    hLWConc->Draw("COLZ");
+    hWLConc->Draw("COLZ");
     c->Update();
-    c->Write("LW_Conc");
-    hLWConc->Write("LW_ConcTH2F");
+    c->Write("WL_Conc");
+    hWLConc->Write("WL_ConcTH2F");
     c->Print(pdf.c_str());
-    delete hLWConc;
+    delete hWLConc;
 }
 
-
-void PlotHelp::PlothLWSPC(TCanvas* c, std::string pdf){
-    TH2F* hLWSPC = new TH2F("hLWSPC", "Surviving pixels vs Length Width Ratio; LW ratio; Surviving Pixels",ONEstep, ONEmin, ONEmax, SPstep, SPmin, SPmax);
-    hLWSPC->SetStats(0);
+void PlotHelp::PlothncoreSIZE(TCanvas* c, std::string pdf){
+    TH2F* ncoreSIZE = new TH2F("ncoreSIZE", "Number of Core pixels vs Size; Size (PE);Number of Core pixel ",SIZEstep, SIZEmin,SIZEmax, nCoreStep, nCoreMin,nCoreMax);
+    ncoreSIZE->SetStats(0);
+    LogBinning(ncoreSIZE);
     for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
-        hLWSPC->Fill(LWvector[h],SPCvector[h] );
+        ncoreSIZE->Fill(Svector[h],NCorevector[h] );
     }
     c->cd(0);
-    hLWSPC->Draw("COLZ");
+    ncoreSIZE->Draw("COLZ");
     c->Update();
-    c->Write("LW_SPC");
-    hLWSPC->Write("LW_SPCTH2F");
+    c->SetLogx();
+    c->Write("Ncore_SIZE");
+    ncoreSIZE->Write("Ncore_SIZETH2F");
     c->Print(pdf.c_str());
-    delete hLWSPC;
+    
+    delete ncoreSIZE;
+    c->SetLogx(0);
+}
+
+void PlotHelp::PlothCRSPC(TCanvas* c, std::string pdf){
+    TH2F* hCRSPC = new TH2F("hCRSPC", "Core Ratio vs Size; SPC;Core Ratio ",SPstep, SPmin,SPmax, 4*ONEstep,4*ONEmin,4*ONEmax);
+    hCRSPC->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
+        hCRSPC->Fill(SPCvector[h],Corevector[h] );
+    }
+    c->cd(0);
+    hCRSPC->Draw("COLZ");
+    c->Update();
+    c->Write("CR_SPC");
+    hCRSPC->Write("CR_SPCTH2F");
+    c->Print(pdf.c_str());
+    delete hCRSPC;
+    c->SetLogx(0);
+}
+
+void PlotHelp::PlothnCoreSPC(TCanvas* c, std::string pdf){
+    TH2F* hnCoreSPC = new TH2F("hnCoreSPC", "Number of Core Pixels vs Surviving Pixels; Surviving Pixels; Number of Cores ", SPstep, SPmin, SPmax,nCoreStep, nCoreMin,nCoreMax);
+    hnCoreSPC->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
+        hnCoreSPC->Fill(SPCvector[h],NCorevector[h] );
+    }
+    c->cd(0);
+    hnCoreSPC->Draw("COLZ");
+    c->Update();
+    c->Write("nCore_SPC");
+    hnCoreSPC->Write("nCore_SPCTH2F");
+    c->Print(pdf.c_str());
+    delete hnCoreSPC;
+}
+
+void PlotHelp::PlothWLSPC(TCanvas* c, std::string pdf){
+    TH2F* hWLSPC = new TH2F("hWLSPC", "Surviving pixels vs Width Length Ratio; Surviving Pixels;WL ratio ", SPstep, SPmin, SPmax,ONEstep, ONEmin, ONEmax);
+    hWLSPC->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
+        hWLSPC->Fill(SPCvector[h],WLvector[h] );
+    }
+    c->cd(0);
+    hWLSPC->Draw("COLZ");
+    c->Update();
+    c->Write("WL_SPC");
+    hWLSPC->Write("WL_SPCTH2F");
+    c->Print(pdf.c_str());
+    delete hWLSPC;
+}
+
+void PlotHelp::PlothSIZEWL(TCanvas* c, std::string pdf){
+    TH2F* hWLsize = new TH2F("hWLsize", "Size vs Width Length Ratio; SIZE (PE);WL ratio ", SIZEstep, SIZEmin,SIZEmax,ONEstep, ONEmin, ONEmax);
+    hWLsize->SetStats(0);
+    LogBinning(hWLsize);
+
+    for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
+        hWLsize->Fill(Svector[h],WLvector[h] );
+    }
+    c->cd(0);
+    hWLsize->Draw("COLZ");
+    c->Update();
+    c->SetLogx();
+    c->Write("WL_Size");
+    hWLsize->Write("WL_SizeTH2F");
+    c->Print(pdf.c_str());
+    delete hWLsize;
+    c->SetLogx(0);
+}
+
+void PlotHelp::PlothSIZEWandL(TCanvas* c, std::string pdf){
+    TH2F* hWsize = new TH2F("hWsize", "Width vs Size; SIZE (PE);Width ", SIZEstep, SIZEmin,SIZEmax,4*ONEstep, ONEmin, ONEmax+1);
+    TH2F* hLsize = new TH2F("hLsize", "Length vs Size; SIZE (PE);Length ", SIZEstep, SIZEmin,SIZEmax,4*ONEstep, ONEmin, ONEmax+1);
+    hWsize->SetStats(0);
+    hLsize->SetStats(0);
+    LogBinning(hLsize);
+    LogBinning(hWsize);
+
+    for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
+        hWsize->Fill(Svector[h],Wvector[h] );
+        hLsize->Fill(Svector[h],Lvector[h] );
+
+    }
+    hWsize->Write("W_SizeTH2F");
+    hLsize->Write("L_SizeTH2F");
+    hWsize->SetTitle("Width and Length vs Size; SIZE (PE);value");
+    c->cd(0);
+    gStyle->SetPalette(1);
+    hWsize->SetLineColor(kBlue);
+    hWsize->SetFillColor(kBlue);
+    hWsize->Draw("BOX");
+    
+    hLsize->SetLineColor(kRed);
+    hLsize->SetFillColor(kRed);
+    hLsize->SetFillStyle(3001);
+    hLsize->Draw("BOX SAME");
+    
+    auto legend = new TLegend(0.1,0.8,0.34,0.9);
+    // legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+    legend->AddEntry(hLsize,"Length","f");
+    legend->AddEntry(hWsize,"Width","f");
+    legend->Draw();
+
+    c->Update();
+    c->SetLogx();
+
+    c->Write("WandL_Size");
+    c->Print(pdf.c_str());
+    delete hWsize;
+    delete hLsize;
+    c->SetLogx(0);
 }
 
 void PlotHelp::PlothSPCConc(TCanvas* c, std::string pdf){
-    TH2F* hSPCConc = new TH2F("hSPCConc", "Surviving pixels vs Concentation; Conc; Surviving Pixels",ONEstep, ONEmin, ONEmax, SPstep, SPmin, SPmax);
+    TH2F* hSPCConc = new TH2F("hSPCConc", "Surviving pixels vs concentration; Surviving Pixels;Conc", SPstep, SPmin, SPmax,ONEstep, ONEmin, ONEmax);
     hSPCConc->SetStats(0);
     for (std::vector<double>::size_type h = 0; h < Cvector.size(); h++) {
-        hSPCConc->Fill(Cvector[h], SPCvector[h]);
+        hSPCConc->Fill(SPCvector[h],Cvector[h]);
     }
     c->cd(0);
     hSPCConc->Draw("COLZ");
@@ -141,18 +427,41 @@ void PlotHelp::PlothSPCConc(TCanvas* c, std::string pdf){
 }
 
 void PlotHelp::PlothSizeSPC(TCanvas* c, std::string pdf){
-    TH2F* hSizeSPC = new TH2F("hSizeSPC", "Distribution of # of pixels that surived cleaning over events; Size; Surviving Pixels",SPstep,SPmin,SPmax, SIZEstep, SIZEmin,SIZEmax);
+    TH2F* hSizeSPC = new TH2F("hSizeSPC", "Distribution of # of pixels that surived cleaning over events; SIZE (PE); Surviving Pixels", SIZEstep, SIZEmin,SIZEmax,SPstep,SPmin,SPmax);
     hSizeSPC->SetStats(0);
+    LogBinning(hSizeSPC);
+
     for (std::vector<double>::size_type h = 0; h < Svector.size(); h++) {
-        hSizeSPC->Fill(SPCvector[h], Svector[h]);
+        hSizeSPC->Fill(Svector[h],SPCvector[h]);
     }
     c->cd(0);
     hSizeSPC->Draw("COLZ");
     c->Update();
+    c->SetLogx();
     c->Write("Size_SPC");
     hSizeSPC->Write("Size_SPCTH2F");
     c->Print(pdf.c_str());
     delete hSizeSPC;
+    c->SetLogx(0);
+}
+
+void PlotHelp::PlothCoreRatio(TCanvas* c, std::string pdf){
+    TH2F* hsizeCORE = new TH2F("hsizeCORE", "Core Ratio (Trigger/Second); SIZE (PE); Core Ratio", SIZEstep, SIZEmin,SIZEmax,4*ONEstep,4*ONEmin,4*ONEmax);
+    hsizeCORE->SetStats(0);
+    LogBinning(hsizeCORE);
+
+    for (std::vector<double>::size_type h = 0; h < Svector.size(); h++) {
+        hsizeCORE->Fill(Svector[h],Corevector[h]);
+    }
+    c->cd(0);
+    hsizeCORE->Draw("COLZ");
+    c->Update();
+    c->SetLogx();
+    c->Write("Size_CORE");
+    hsizeCORE->Write("Size_CORETH2F");
+    c->Print(pdf.c_str());
+    delete hsizeCORE;
+    c->SetLogx(0);
 }
 
 void PlotHelp::PlothCOG(TCanvas* c, std::string pdf){
@@ -190,4 +499,95 @@ void PlotHelp::PlothTPID(TCanvas* c, std::string pdf){
     hTPID->Write("TPIDTH2F");
     c->Print(pdf.c_str());
     delete hTPID;
+}
+
+void PlotHelp::PlothEventDateTriggeredPixel(TCanvas* c, std::string pdf){
+    int enddates = 500;
+    TH2I* hDate = new TH2I("hDate", "Triggered Pixel on each date;Date;Pixel", enddates,-0.5,499.5,256,-0.5,255.5);
+    hDate->SetStats(0);
+    // hDate->SetXTitle("RMS/Avg Amplitude");
+    for (std::vector<int>::size_type h = 0; h < TPID.size(); h++) {
+        std::cout << "Date: " << Form("%i",GetSequentialDayIndex(Datevecctor[h])) << " Pixel Triggered: " << TPID[h] << std::endl;
+        hDate->Fill(GetSequentialDayIndex(Datevecctor[h]), TPID[h],1);
+    }
+    c->cd(0);
+    TDatime startDate(2024, 6, 11, 0, 0, 0);
+    TDatime current = startDate;
+
+    for (int i = 0; i < enddates; ++i) {
+        int day = current.GetDay();
+        int month = current.GetMonth();
+        int year = current.GetYear();
+
+        // Set tick marks for day 1 and 15
+        if (day == 1 || day == 15) {
+            hDate->GetXaxis()->SetTickLength(-0.03); // Negative = tick on opposite side
+            // (tick marks are automatic — this just ensures visibility)
+        }
+
+        // Label only on every 2nd month (day == 1)
+        if (day == 1 && (month % 2 == 0)) {
+            TString label = TString::Format("%04d-%02d-%02d", year, month, day);
+            hDate->GetXaxis()->SetBinLabel(i + 1, label);
+        }
+
+        current.Set(current.Convert() + 86400); // move to next day
+    }
+    gStyle->SetPalette(72);
+    hDate->Draw("COLZ");
+    c->Update();
+    c->Write("EventDateTriggeredPixel");
+    hDate->Write("EventDateTriggeredPixelTH2D");
+    c->Print(pdf.c_str());
+    delete hDate;
+}
+
+
+
+
+
+void PlotHelp::LogBinning(TH2F* hist){
+    TAxis *axis = hist->GetXaxis();
+    int bins = axis->GetNbins();
+    Axis_t from = axis->GetXmin();
+    Axis_t to = axis->GetXmax();
+    Axis_t width = (to - from) / bins;
+    Axis_t *new_bins = new Axis_t[bins + 1];
+    for (int i = 0; i <= bins; i++) {
+        new_bins[i] = TMath::Power(10, from + i * width);
+    }
+    axis->Set(bins, new_bins);
+    hist->SetBins(bins,new_bins);
+    delete[] new_bins;
+}
+
+void PlotHelp::LogBinning(TH1D* hist){
+    TAxis *axis = hist->GetXaxis();
+    int bins = axis->GetNbins();
+    Axis_t from = axis->GetXmin();
+    Axis_t to = axis->GetXmax();
+    Axis_t width = (to - from) / bins;
+    Axis_t *new_bins = new Axis_t[bins + 1];
+    for (int i = 0; i <= bins; i++) {
+        new_bins[i] = TMath::Power(10, from + i * width);
+    }
+    axis->Set(bins, new_bins);
+    hist->SetBins(bins,new_bins);
+    delete[] new_bins;
+}
+
+int PlotHelp::GetSequentialDayIndex(int dateInt) {
+    // Start date (e.g., your base reference)
+    TDatime start(2024, 6, 11, 0, 0, 0);
+
+    // Convert int date to year/month/day
+    int year  = dateInt / 10000;
+    int month = (dateInt / 100) % 100;
+    int day   = dateInt % 100;
+
+    // Target date
+    TDatime target(year, month, day, 0, 0, 0);
+
+    // Compute index as difference in days
+    return (target.Convert() - start.Convert()) / 86400;
 }
