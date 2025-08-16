@@ -108,7 +108,7 @@ def accepted_values_4(meas, hv_c,hv):
 	acpt_hi = 0
 	if meas == "HV":
 		#acpt_low = hv * 0.95
-		acpt_low = 41.7
+		acpt_low = hv * 0.95
 		acpt_hi = hv * 1.05
 	elif meas == "HV_currents":
 		acpt_low = 2
@@ -146,6 +146,22 @@ def dp4(ldp,meas,hv_c,hv):
 	if total == 4 and meas != 'Module_Status':
 		#print(f'Conditions matched {meas}')
 		return 1
+	
+	elif meas == 'HV_currents' and total < 4:
+		countchannels = 0
+		for i in index:
+			value = float(ldp[str(i)])
+			if value > hi:
+				lets.communicate(f'HV current is higher than {hi} mA')
+				countchannels += 1
+		lets.log_file(f'HV current channels above {hi} mA: {countchannels}')
+		if countchannels > 0:
+			tempvalue = 5500
+			return tempvalue
+		else:
+			lets.communicate(f'Conditions not matched {meas}')
+			return -100
+
 	elif meas != 'Modules_Status':
 		#print('hey')
 		lets.communicate(f'Conditions not matched {meas}')
@@ -182,6 +198,7 @@ def get_time_sm(client):
 	SM_time = datetime.strptime(SM_time, "%Y-%m-%dT%H:%M:%SZ")
 	
 	return SM_time
+	
 
 
 def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigger_rate,module):
@@ -240,6 +257,8 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 						#print(f"Last data point for measurement '{measurement}': {last_data_point['4']}")
 						match_status = dp4(last_data_point,measurement,hv_c, hv)
 						matched_conditions.append(match_status)
+
+
 						#print(match_status)
 						
 					except:
@@ -275,6 +294,10 @@ def query_last_SM(siab_c, simp_t, uc_t, music_p, hv_s,hv_c, hv,asad, tb_c,trigge
 	elif all_conditions < 0:
 		lets.communicate('HV current or voltage shutdown')
 		return -1
+	
+	elif all_conditions > 5000:
+		lets.communicate('HV currents are too high')
+		return 5500
 
 	else:
 		#print(matched_conditions)
