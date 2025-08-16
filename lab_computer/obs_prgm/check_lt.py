@@ -127,6 +127,7 @@ def get_times(sun_altitudes, sun_times, moon_altitudes, moon_times):
 
 
 
+
 # Get endtime
 
 def get_endtime(time_of_sunrise_crit, time_of_sunset_crit, time_of_moonset, time_of_max_altitude):
@@ -208,6 +209,7 @@ def create_file(user_input='nope'):
     sun_moon_list = [time_of_sunrise.strftime(date_format), time_of_sunset.strftime(date_format), time_of_moonrise.strftime(date_format), time_of_moonset.strftime(date_format)]
     start_time, endtime = get_endtime(time_of_sunrise_crit, time_of_sunset_crit, time_of_moonset, time_of_max_altitude) #changed from entime, start_time
     #print(start_time, endtime)
+    endtime = time_of_sunrise_crit
 
     sun_moon_list.append(start_time)
 
@@ -222,7 +224,7 @@ def create_file(user_input='nope'):
         sun_moon_list.append(endtime.strftime(date_format))
 
 
-    with open("EON_time.txt", "w") as file: #/data/TrinityLabComputer/obs_prgm/
+    with open("/data/TrinityLabComputer/obs_prgm/EON_time.txt", "w") as file: #/data/TrinityLabComputer/obs_prgm/
             # Loop through the list and write each element to the file
         for item in sun_moon_list:
             file.write(str(item) + '\n')
@@ -261,7 +263,9 @@ def check_current_time():
     sun_times, sun_altitudes, time_of_sunrise, time_of_sunset, time_of_sunrise_crit, time_of_sunset_crit = sun_position_over_time(latitude, longitude, start_date, interval_minutes)
     times_list = get_times(sun_altitudes, sun_times, moon_altitudes, moon_times)
     start_time, end_time = get_endtime(time_of_sunrise_crit, time_of_sunset_crit, time_of_moonset, time_of_max_altitude) # switched from endtime, start_time
-
+    # start_time =  time_of_sunset_crit
+    end_time = time_of_sunrise_crit
+    
     #print(start_time)
     #print(sunset_time)
     def curr_est_offset():
@@ -271,9 +275,10 @@ def check_current_time():
         offset_hours = offset_seconds // 3600
         return abs(offset_hours) # -4 or -5
     
-    current_date = datetime_today.date() 
-    time_today_dt = datetime.combine(current_date, time_today)
-
+    # current_date = datetime_today.date() 
+    # time_today = datetime_today.time()
+    time_today_dt = datetime.utcnow()
+    lets.log_file(f'start time: {start_time}, end time: {end_time}, current time: {time_today_dt} ')
     #print(start_time)
     if (start_time - timedelta(minutes=32) < time_today_dt and time_today_dt < cutoff_time): # and not (current_utc_time.strftime("%Y-%m-%d %H:%M") in times_list):   #and current_utc_time > sunset_time:
 
@@ -290,4 +295,3 @@ def check_current_time():
 
 create_file()
 check_current_time()
-
