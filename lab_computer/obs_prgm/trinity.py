@@ -17,7 +17,7 @@ from datetime import datetime,timedelta
 
 
 # state: internal or external, intrigs_nfiles: number of internal trigger files.
-def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
+def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status='c'):
 	lets.log_file(f"Monitoring Observations: {state} ")
 
 	intial_files = cdata.check_data_in_folder()
@@ -34,6 +34,9 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 	errors_rclog = 0
 	errors_WX = 0
 	errors_data = 0
+	bias_voltage = 44.0
+	secondary_voltage = 41.5
+	
 	while True:
 	# While the camera is operating this will check WEATHER, STATE MESSAGES, TIME, RCLOGS for DAQ, FILES
 		lets.fancy_communicate("")
@@ -83,7 +86,7 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 				break
 
 		if state == 'e':
-
+			#print('Before light')
 			# Check time
 			safe_light=clt.check_current_time() # one bad condition this will break
 			if safe_light != 1:
@@ -91,13 +94,38 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no'):
 				exit_message = 'EON'
 				break
 
+			#print('After light')
+
+
+
 			# check state messages
 			#lets.communicate(f'Monitor: Number or errors StateMessages #{errors}.')
-			safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
+			safe_proceed = csm.query_last_SM(180,35,35,1,1,12,bias_voltage,1830,240,1,4)
+			lets.log_file(f'SM check returned {safe_proceed}')
+			if isinstance(safe_proceed, str):
+				safe_proceed = 0
 			if errors < 20:
 				if safe_proceed == 1:
 					lets.communicate('Monitor: SM within limits')
 					errors = 0
+
+				elif safe_proceed  > 5000:
+					lets.communicate('Monitor: SiPM currents are above 12 mA')
+					if bias_voltage==44 and door_status=='o':
+						lets.communicate(f'Lowering HV to {secondary_voltage} V')
+						ssh.CTM_LVPS_HV(secondary_voltage)
+						bias_voltage=secondary_voltage
+					elif bias_voltage==secondary_voltage and door_status=='o':
+						lets.communicate('Closing the door')
+						ssh.door('down')
+						door_status='c'
+						lets.communicate('Raising the bias voltage to 44 V')
+						ssh.CTM_LVPS_HV(44)
+						bias_voltage=44
+					elif bias_voltage==44 and door_status=='c':
+						lets.communicate('Monitor: SM HV current to high and  door is already closed at 44V,  Shutting down... ')
+						exit_message = 'State messaged HV current or HV voltage'
+						break
 
 				elif safe_proceed == -1:
 					lets.communicate('Monitor: SM HV current or HV voltage out of limits, SHUTTING DOWN... ')
@@ -257,7 +285,7 @@ def turn_on_CT_config(config):
 	elif config == 'external':
 		ssh.CTM_config_single()
 
-def daqRECONFIGURE(rate, wx_override):
+def daqRECONFIGURE(rate, wx_override,door_status):
 
 	ssh.CTM_stop()
 	time.sleep(5)
@@ -280,7 +308,7 @@ def daqRECONFIGURE(rate, wx_override):
 	lets.fancy_communicate('DAQ start \n SM enabled')
 	lets.log_file('Starting DAQ')
 
-	monitor_to_shutdown(wx_override)
+	monitor_to_shutdown(wx_override,door_status)
 
 
 
@@ -298,9 +326,10 @@ def full_shutdown(exit_mess):
 	lets.send_email(exit_mess)
 	lets.log_file(f'Email sent reason {exit_mess}')
 
-def monitor_to_shutdown(wx):
+def monitor_to_shutdown(wx, door_status='c'):
+	# exit_mess=monitor_observations('e',wx_override = wx)
 	try:
-		exit_mess=monitor_observations('e',wx_override = wx)
+		exit_mess=monitor_observations('e',wx_override = wx, door_status=door_status)
 
 	except KeyboardInterrupt:
 		lets.communicate('User stopped monitoring')
@@ -540,21 +569,95 @@ def body_extrigs(wx_override = 'no',noise_runs='no'):
 			time.sleep(1320)
 			lets.communicate("Noise Data runs are complete. \n --- ")
 		while True:
-			inputbyuser = input("To continue type \"c\"- open the door or \"q\"-return to main prompt: ") 
-			if inputbyuser == "c":
+			inputbyuser = input("To OPEN the door type: \"o\"\nTo keep the door CLOSED type: \"cl\" \nTo return to the main prompt type: \"q\"\n") 
+			if inputbyuser == "o":
 				ssh.door('up')
 				lets.fancy_communicate('Door Up')
 				lets.log_file('Door up ')
 
-				monitor_to_shutdown(wx_override)
+				monitor_to_shutdown(wx_override,"o")
 				break
 			elif inputbyuser == "q":
 				lets.communicate("Not opening the door back to main prompt. ")
 				break
+
+			elif inputbyuser == "cl":
+				lets.fancy_communicate("Keeping door closed.")
+				lets.log_file("Keeping door closed.")
+
+				monitor_to_shutdown(wx_override,"c")
+				break
+
 			else: 
 				print("Invalid input. Please try again. ")
 
-					
+
+def noiseDataOnly():
+	input1=input("Are you sure you want to run noise data? (y/n): ")	
+	if input1 != "y":
+		return "q"
+	input2=input("HV will turn on after this command.\nIt needs to be dark\n\"c\" to continue... (c/q): ")	
+	if input2 != "c":
+		return "q"
+	
+	lets.fancy_communicate('Starting Noise Only Data')
+	lets.log_file(f'Starting Noise Only Data')
+	ssh.CTM_config_single() # leave state messages enabled
+
+	lets.fancy_communicate('External Configure Complete \n SM enabled')
+	lets.log_file('external config complete ')
+
+	#checks the statemessage after waiting 60 seconds and then again every 30 since the asad board needs time to update
+	time_counter = 60
+	time.sleep(60) # change this to try try for 3 minutes every 20 seconds rather then wait incase it is sooner
+	safe_proceed = csm.query_last_SM(180, 35, 35, 1, 0, 4, 42,1830,240,1,4)
+	while safe_proceed != 1 and time_counter < 600:
+		time.sleep(30)
+		time_counter = time_counter + 30
+		lets.communicate(f'Waiting for statemessage to update after config sequence {time_counter}')
+		safe_proceed = csm.query_last_SM(180, 35, 35, 1, 0, 4, 42,1830,240,1,4)
+	
+
+	if safe_proceed == 1:
+		lets.communicate('State messages safe moving on starting DAQ')
+
+		lets.fancy_communicate('DAQ starting')
+		ssh.CTM_start()
+		lets.communicate('Sleeping for 15 seconds...')
+		lets.log_file('Starting DAQ sleeping for 15 seconds')
+		time.sleep(15)
+
+		lets.fancy_communicate('HV updating to 44.0')
+		ssh.CTM_LVPS_HV(44) # State messages enabled
+		lets.communicate('HV to 44.0 COMPLETE')
+		time.sleep(5)
+
+		lets.fancy_communicate('Turning on SIABS')
+		ssh.CTM_HV_ON() # state messages enabled
+		lets.communicate('HV on completed \n SM enabled')
+		lets.log_file('HV ON COMPLETE and SM enabled')
+
+
+		lets.fancy_communicate('Setting trigger threshold')
+		# add the trigger rate scan
+		rate = 150
+		ssh.CTM_set_trigger(rate) # state messages enabled
+		lets.fancy_communicate(f'Trigger threshold {rate} \n SM enabled')
+		lets.log_file(f'Trigger threshold set {rate} ')
+
+		
+		lets.log_file('starting noise data runs')
+		lets.fancy_communicate("Starting Noise Data Runs for 22 minutes...")
+		lets.communicate("\033[1;32mPlease check on ctcpu: \x1B[3mcdCData\x1B[0m for file creation.")
+		current_time = datetime.now()
+		time_change = timedelta(minutes=22) 
+		new_time = (current_time + time_change).strftime("%H:%M:%S")
+		lets.communicate(f"The data collection period will end at {new_time} ET.\nDOOR WILL NOT OPEN \n ---")
+		time.sleep(1320)
+		lets.communicate("Noise Data runs are complete. \n --- ")
+
+		full_shutdown("Complete Noise Data Runs")
+
 
 def external_triggers(process,wx_override='no',noise_runs='no'): # LEFT OFF COMMENTING HERE
 	clt.create_file()
@@ -729,7 +832,7 @@ def trigger_scan(command,start =0,step = 0,size = 0,rate = 170,weather='no'):
 				# check data aquiastion
 				# add continious monitoring
 				# check info while taking data
-				monitor_to_shutdown(weather)
+				monitor_to_shutdown(weather,"o")
 
 			else:
 				lets.communicate('Config failed to update')
@@ -833,8 +936,9 @@ def main():
 				pwd_wx_ovrd = input("Please enter a password: ")
 				if pwd_wx_ovrd != "oct3":
 					wx_override = 'no'
-			
 
+			
+			# add later  option to change the LVPS voltage setting
 
 			if com_in == 're':
 				noise_runs = input("Take HV ON noise runs (yes or no): ")
@@ -844,6 +948,17 @@ def main():
 					lets.fancy_communicate('Starting external triggers')
 					lets.log_file(f'Starting external {com_in} triggers ')
 					external_triggers(com_in,wx_override,noise_runs)
+
+				else:
+					print('Incorrect process based on rc log')
+
+			if com_in == 'noiseOnly':
+				rclog=crc.check_rc_log('Finished loading this sequence: /home/trinity/Programs/Trinity/control_software/sequences/stop_daq_seq.txt') # maybe add another line in here
+				#print(rclog)
+				if rclog == 1:
+					
+					#external_triggers(com_in,wx_override,'yes')
+					noiseDataOnly()
 
 				else:
 					print('Incorrect process based on rc log')
@@ -862,7 +977,8 @@ def main():
 			if com_in == 'DAQre':
 				double_check = input("This is to reconfigure after DAQ starts do you want to proceed enter a trigger threshold!: ")
 				if double_check.isdigit():
-					daqRECONFIGURE(double_check,wx_override)
+					door_status = input("Is the door open or closed? ex. (o/c):")
+					daqRECONFIGURE(double_check,wx_override,door_status)
 
 		elif com_in == 'triggerScan':
 			password = input('Password: ')
@@ -922,7 +1038,8 @@ def main():
 				if pwd_wx_ovrd != "oct3":
 					wx_override = 'no'
 
-			monitor_to_shutdown(wx_override)
+			door_status = input("Is the door open or closed? ex. (o/c):")
+			monitor_to_shutdown(wx_override,door_status)
 
 
 		elif com_in == 'set_cutoff': # does not have anythong to do with camera 
