@@ -7,9 +7,17 @@
 
 
 BIN_DIR := .
-EXE := $(BIN_DIR)/ClusterCleaning
-# EXE := $(BIN_DIR)/ClusterCleaningNoSat
+EXE := $(BIN_DIR)/EventCleaning
 DICT_DIR := ${EXACT_DIR}/dict
+
+# Dictionary settings
+DICT_SRC := EventInfoDict.cpp
+DICT_OBJ := $(BIN_DIR)/EventInfoDict.o
+DICT_HDR := EventInfo.h
+LINKDEF  := LinkDef.h
+
+# # root cling
+# rootcling -f $(DICT_OBJ) -c $(DICT_HDR) $(LINKDEF)
 
 ARCH := $(shell uname)
 
@@ -82,6 +90,13 @@ clean:
 	@echo "Cleaning up..."
 	rm -f $(BIN_DIR)/*.o $(EXE)
 	@echo "Clean complete."
+
+# rootcling: 
+# 	@echo "reseting rootcling"
+# 	rm -r $(BIN_DIR)/*.o 
+# 	rm -r $(BIN_DIR)/*.pcm
+# 	rootcling -f $(DICT_SRC) -c $(DICT_HDR) $(LINKDEF)
+# 	@echo "rootcling complete"
 
 -include $(OBJ:.o=.d)
 

@@ -24,3 +24,7 @@ call the  muon cleaning with
 ./ClusterCleaning muon20241011
 
 
+rootcling -f EventInfoDict.cpp -c EventInfo.h LinkDef.h  remake the dictionary 
+
+
+

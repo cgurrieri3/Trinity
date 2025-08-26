@@ -59,20 +59,10 @@ class PlotHelp {
         void PlothnCoreSPC(TCanvas* c, std::string pdf);
         void PlothCRSPC(TCanvas* c, std::string pdf);
         void PlothSIZEWandL(TCanvas* c, std::string pdf);
+        void PlotEventFlags(TCanvas* c, std::string pdf);
 
-
-        void AddTotalEvent(int i) {TotalEvents += i; }
-        void AddHLEDEvent(int i) {HLEDEvents += i; }
-        void AddPreCleaned(int i) {PreCleanedEvents += i; }
-        void AddCleanedPanel2(int i) {Panel2CleanedEvents += i; }
-        void AddCleanedPanel3(int i) {Panel3CleanedEvents += i; }
-        void AddSurvivingEvent(int i) {SurvivingEvents += i; }
-        inline int GetTotalEvent() {return TotalEvents; }
-        inline int GetHLEDEvent() {return HLEDEvents; }
-        inline int GetPreCleanedEvent() {return PreCleanedEvents; }
-        inline int GetPanel2CleanedEvent() {return Panel2CleanedEvents; }
-        inline int GetPanel3CleanedEvent() {return Panel3CleanedEvents; }
-        inline int GetSurvivingEvent() {return SurvivingEvents; }
+        void AddEventFlags(int i);
+        std::map<std::string, int> GetEventFlags() const;
         void LogBinning(TH2F* hist);
         void LogBinning(TH1D* hist);
 
@@ -94,14 +84,15 @@ class PlotHelp {
         std::vector<int> TPID = {}; //Triggered Pixel ID
         std::vector<int> Datevecctor = {}; // date of events
         std::vector<double> RMSoverAVGvector = {}; //RMS over Average Amplitude
+        std::vector<double> Flagvector = {};
         IPlotTools *plottools;
 
-        int TotalEvents = 0;
-        int HLEDEvents = 0;
-        int PreCleanedEvents = 0;
-        int Panel2CleanedEvents = 0;
-        int Panel3CleanedEvents = 0;
-        int SurvivingEvents = 0;
+        // int TotalEvents = 0;
+        // int HLEDEvents = 0;
+        // int PreCleanedEvents = 0;
+        // int Panel2CleanedEvents = 0;
+        // int Panel3CleanedEvents = 0;
+        // int SurvivingEvents = 0;
 
         // plot help with step size, min and max for TH*
         int SIZEstep =50;

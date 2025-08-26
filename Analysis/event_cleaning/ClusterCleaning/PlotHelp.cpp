@@ -57,6 +57,71 @@ void PlotHelp::AddtoNumberOfCores(double num){
     NCorevector.push_back(num);
 }
 
+void PlotHelp::AddEventFlags(int i) {
+    Flagvector.push_back(i);
+}
+
+// flag = 0 default flag
+    // 1, pre cleaned before first cut
+    // 2, cleaned after  first cuts (panel2)
+    // 3, cleaned after second  cuts(panel 3)
+    // 4, cleaned after 3 set of  cut (panel 4)
+    // 5 Suviving Event from the  event cleaning
+    // 9, HLED event
+std::map<std::string, int> PlotHelp::GetEventFlags() const {
+    std::map<std::string, int> Eventdict;
+    Eventdict["Total"] = Flagvector.size();
+    Eventdict["Flasher"] = 0;
+    Eventdict["Survived"] = 0;
+    Eventdict["PreCleaned"] = 0;
+    Eventdict["Panel2_Cleaned"] = 0;
+    Eventdict["Panel3_Cleaned"] = 0;
+    Eventdict["Panel4_Cleaned"] = 0;
+
+    for (size_t i = 0; i < Flagvector.size(); ++i) {
+        if (Flagvector[i] == 9) {
+            Eventdict["Flasher"]++;
+        } else if (Flagvector[i] == 5) {
+            Eventdict["Survived"]++;
+        } else if (Flagvector[i] == 1) {
+            Eventdict["PreCleaned"]++;
+        } else if (Flagvector[i] == 2) {
+            Eventdict["Panel2_Cleaned"]++;
+        } else if (Flagvector[i] == 3) {
+            Eventdict["Panel3_Cleaned"]++;
+        } else if (Flagvector[i] == 4) {
+            Eventdict["Panel4_Cleaned"]++;
+        }
+    }
+    
+    
+    for (auto it : Eventdict)
+        std::cout << it.first << " Events: " << it.second << std::endl;
+
+    return Eventdict;
+
+}
+
+void PlotHelp::PlotEventFlags(TCanvas* c, std::string pdf){
+    TH1D* hEventFlag = new TH1D("hEventFlag", "Event Flags", 10, 0, 10);
+    hEventFlag->SetStats(0);
+    // hEventFlag->SetXTitle("Event Flag");
+    hEventFlag->SetYTitle("Event");
+    hEventFlag->SetFillColor(8);
+
+    auto eventFlags = GetEventFlags();
+    for (const auto& flag : eventFlags) {
+        hEventFlag->Fill(flag.first.c_str(), flag.second);
+    }
+
+    c->cd(0);
+    hEventFlag->Draw("B1 Text");
+    c->Write("EventFlags");
+    hEventFlag->Write("EventFlagsTH1D");
+    c->Print(pdf.c_str());
+    delete hEventFlag;
+}
+
 void PlotHelp::PlothWL(TCanvas* c, std::string pdf,std::string outDir,std::string date){
     TH1D* hWL = new TH1D("hWL", "Distribution of Width Length Ratio",ONEstep, ONEmin, ONEmax);
     hWL->SetStats(0);
@@ -73,13 +138,14 @@ void PlotHelp::PlothWL(TCanvas* c, std::string pdf,std::string outDir,std::strin
     TLatex *latex = new TLatex();
     latex->SetNDC(); // Use normalized coordinates
     latex->SetTextSize(0.02); // Set the text size
+    std::map<std::string, int> eventFlagsDict = GetEventFlags();
 
-    latex->DrawLatex(0.1, 0.83, Form("Flasher Events #: %i", HLEDEvents));
-    latex->DrawLatex(0.1, 0.85, Form("Events #: %i", TotalEvents-HLEDEvents));
-    latex->DrawLatex(0.1, 0.81, Form("Survived Events #: %i", SurvivingEvents));
-    latex->DrawLatex(0.1, 0.79, Form("PreCleaned Cleaned #: %i", PreCleanedEvents));
-    latex->DrawLatex(0.1, 0.77, Form("Panel 2 Cleaned #: %i", Panel2CleanedEvents));
-    latex->DrawLatex(0.1, 0.75, Form("Panel 3 Cleaned #: %i", Panel3CleanedEvents));
+    latex->DrawLatex(0.1, 0.83, Form("Flasher Events #: %i", eventFlagsDict["Flasher"]));
+    latex->DrawLatex(0.1, 0.85, Form("Events #: %i", eventFlagsDict["Total"]-eventFlagsDict["Flasher"]));
+    latex->DrawLatex(0.1, 0.81, Form("Survived Events #: %i", eventFlagsDict["Survived"]));
+    latex->DrawLatex(0.1, 0.79, Form("PreCleaned Cleaned #: %i", eventFlagsDict["PreCleaned"]));
+    latex->DrawLatex(0.1, 0.77, Form("Panel 2 Cleaned #: %i", eventFlagsDict["Panel2_Cleaned"]));
+    latex->DrawLatex(0.1, 0.75, Form("Panel 3 Cleaned #: %i", eventFlagsDict["Panel3_Cleaned"]));
     delete latex;
     c->Update();
     c->SetLogy();
@@ -89,14 +155,14 @@ void PlotHelp::PlothWL(TCanvas* c, std::string pdf,std::string outDir,std::strin
     c->SetLogy(0);
     delete hWL;
 
-    std::ofstream outputFile1(Form("%sTotalEvents_%s.txt",outDir.c_str(),date.c_str()));
-    if (outputFile1.is_open()) {
-        outputFile1 << "Triggered,Flasher,Survived,Pre,Panel2,Panel3" << "\n";
-        outputFile1 << TotalEvents-HLEDEvents << "," << HLEDEvents<<","<< SurvivingEvents << "," << PreCleanedEvents << "," << Panel2CleanedEvents << "," << Panel3CleanedEvents <<"\n";
-        outputFile1.close();
-    } else {
-        std::cerr << "Unable to open file for writing." << std::endl;
-    }
+    // std::ofstream outputFile1(Form("%sTotalEvents_%s.txt",outDir.c_str(),date.c_str()));
+    // if (outputFile1.is_open()) {
+    //     outputFile1 << "Triggered,Flasher,Survived,Pre,Panel2,Panel3" << "\n";
+    //     outputFile1 << TotalEvents-HLEDEvents << "," << HLEDEvents<<","<< SurvivingEvents << "," << PreCleanedEvents << "," << Panel2CleanedEvents << "," << Panel3CleanedEvents <<"\n";
+    //     outputFile1.close();
+    // } else {
+    //     std::cerr << "Unable to open file for writing." << std::endl;
+    // }
 }
 
 void PlotHelp::PlothdistLandW(TCanvas* c, std::string pdf){

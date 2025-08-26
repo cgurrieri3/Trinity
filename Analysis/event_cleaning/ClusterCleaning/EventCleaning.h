@@ -65,6 +65,7 @@
 #include <IPlotTools.h>
 #include <ISiPM.h>
 #include <execution>
+#include "EventInfo.h"
 
 
 // Define variables (global)
@@ -81,6 +82,7 @@ IUtilities *util;
 IPlotTools *plottools;
 CEvent *cev;
 PlotHelp *plothelp;
+EventInfo *eventInfo=0;
 
 TTree *tree = 0;
 TTree *treeHLED = 0;
@@ -107,6 +109,7 @@ std::string OutputFileRoot = "";
 std::string OutputFilePDF = "";
 std::string OutputFilePDFOpen = "";
 std::string OutputFilePDFClose = "";
+std::string OutputFileEventCleaningDataRoot = "";
 std::string whatData = "Data";
 
 
@@ -114,25 +117,17 @@ std::string whatData = "Data";
 
 std::string neighborDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/ClusterCleaning/neighbors/";
 std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlasherCalibration/Output/";
-// std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
-// std::string dataDir = "/storage/hive/project/phy-otte/sstepanoff3/Data/";
+
 std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/";
 std::string muonDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataTxtFiles/Muon/";
 std::string bkgDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataTxtFiles/BackgroundSamples/RandomSampling/";
 std::string simDir = "/storage/hive/project/phy-otte/sstepanoff3/SimulationData/data/";
-// std::string simDir = "/storage/hive/project/phy-otte/shared/Trinity/Simulations/TDemSims/";
 
-// std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputRank8/";
-// std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputRank8test/";
-std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputRank83pixel_2Core/";
-// std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputRank8All20250622/";
-// std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputRank8NoSat20250622/";
-// std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputRank8SatOnly20250622/";
 std::string outDirBkg = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputBkg/";
 std::string outDirMuon = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputMuon/";
 std::string outDirSim = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputSim/";
-// std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
-// std::string outDir = "/storage/hive/project/phy-otte/sstepanoff3/EventCleaning/ClusterCleaning/Output/";
+std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
+
 
 const int TriggeredChannelAmpCutOff = 481; // (200 ADC/8 PE) Cut off for the triggered music channel
 const int TimeBinAll = 239; // Difference between triggered pixel time bin and the pixels around it time bin difference more that 1 risk saving cross talk events
@@ -152,10 +147,11 @@ void SetBranches(IEvent *evD);
 void SetBranchesHLED(IEvent *evD);
 void LoadEvents(std::string filename, std::string treeString);
 void LoadEventsHLED(string NameofFile, std::string treeString);
+void saveEventInfo(EventInfo* evI, TTree* treeSims);
 
 void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp);
-std::vector<double> StartPanel4(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs);
-void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs);
+std::vector<double> CreateWLRatio(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs);
+void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs, EventInfo* eventInfo);
 std::vector<double> getM3Long(double xcog,double ycog, std::vector<int> sur_pix, std::vector<float> amps);
 std::vector<double> generateRandomNumbers();
 void CreateFileName(std::string filename, bool bkg);
@@ -182,6 +178,28 @@ void CreateFileName(std::string filename, std::string dataType) {
         WLRatioCutOff,
         rmTopRow
     );
+
+    OutputFileEventCleaningDataRoot = Form("%sDataFiles/Data_EventCleaning%s_TC_%i_TB_%i_NP_%i_s_%i_FA_%i_mp_%i_er_%i_tr_%i.root",
+        outDir.c_str(),
+        filename.c_str(),
+        TriggeredChannelAmpCutOff,
+        TimeBinAll,
+        CorePixelAmpCutOff, 
+        SaturatedPixelCutoff,
+        FlasherEventsCutOff,
+        PixelSurviveCutOff,
+        WLRatioCutOff,
+        rmTopRow
+    );
+    int check = mkdir(Form("%sDataFiles",outDir.c_str()),0777);
+
+    // check if directory is created or not
+    if (!check)
+        printf("Directory created\n");
+    else {
+        printf("Unable to create directory\n");
+    }
+
 
     // Create the file name with the cariables in the name for sorting of them. 
     // _TC_#_ = TriggeredChannelAmpCutOff
@@ -260,7 +278,13 @@ void SetBranchesHLED(IEvent *evD)
     treeHLED->SetBranchAddress("Events", &evHLED);
 }
 
-
+void saveEventInfo(EventInfo* evI, TTree* treeSims) {
+    // TFile *fileOutput = new TFile("Test.root", "UPDATE");
+    // treeSims->Branch("Cleaned","EventInfo",evI);
+    treeSims->Fill();
+    // fileOutput->Write();
+    // fileOutput->Close();
+}
 
 
 
@@ -327,7 +351,7 @@ std::vector<double> generateRandomNumbers() {
     return {dist(gen), dist(gen)};
 }
 
-std::vector<double> StartPanel4(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs) {
+std::vector<double> CreateWLRatio(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs) {
     eigenVals.ResizeTo(2);
     eigenVecs.ResizeTo(2,2);
     std::vector<double> sigmas;
@@ -345,7 +369,7 @@ std::vector<double> StartPanel4(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVe
     return EllipicRatio;
 }
 
-void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs) {
+void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs,  EventInfo* eventInfo) {
     
     
     
@@ -403,36 +427,42 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
         conc,
         M3Longx.data(),
         M3Longy.data()));
-        delete title;
-        
-        plothelp->AddtoWL(EllipicRatio[2]);
-        plothelp->AddtoL(EllipicRatio[0]);
-        plothelp->AddtoW(EllipicRatio[1]);
-        plothelp->AddtoSize(cev->GetSurvivingPixelTotalAmpPanel3());
-        plothelp->AddtoSurvivingPixelCount(cev->GetSurvivingPixelPanel3().size());
-        plothelp->AddtoConcentation(conc);
-        plothelp->AddtoCOGx(meanx);
-        plothelp->AddtoCOGy(meany);
-        plothelp->AddtoTriggeredPixelsID(cev->GetMaxAmplitudePixelID());
-        plothelp->AddtoCoreRatio(cev->GetCoreRatio());
-        plothelp->AddtoNumberOfCores(cev->GetNumberofCorePixels());
-        cout << "Core Ratio: " << cev->GetCoreRatio() << endl;
-        
-        
+    delete title;
 
-        // Open a text file to write variables
-        std::ofstream outputFile("output_variables.txt");
-        if (outputFile.is_open()) {
-            outputFile << "WLRatio: " << EllipicRatio[2] << "\n";
-            outputFile << "Cleaned_count: " << static_cast<int>((cev->GetSurvivingPixelPanel3()).size()) << "\n";
-            outputFile << "AreaEllipse: " << areaEllipse << "\n";
-            outputFile << "Cleaned_total_amp: " << cev->GetSurvivingPixelTotalAmpPanel3() << "\n";
-            outputFile << "Conc: " << conc << "\n";
-            outputFile << "M3LongVar: (" << M3LongVar[0] << ", " << M3LongVar[1] << ")\n";
-            outputFile.close();
-        } else {
-            std::cerr << "Unable to open file for writing." << std::endl;
-        }
+    // add values  for creating the plots
+    plothelp->AddtoWL(EllipicRatio[2]);
+    plothelp->AddtoL(EllipicRatio[0]);
+    plothelp->AddtoW(EllipicRatio[1]);
+    plothelp->AddtoSize(cev->GetSurvivingPixelTotalAmpPanel3());
+    plothelp->AddtoSurvivingPixelCount(cev->GetSurvivingPixelPanel3().size());
+    plothelp->AddtoConcentation(conc);
+    plothelp->AddtoCOGx(meanx);
+    plothelp->AddtoCOGy(meany);
+    plothelp->AddtoTriggeredPixelsID(cev->GetMaxAmplitudePixelID());
+    plothelp->AddtoCoreRatio(cev->GetCoreRatio());
+    plothelp->AddtoNumberOfCores(cev->GetNumberofCorePixels());
+    
+    // add info for all the events
+    eventInfo->SetHPanel4(hcam_panel4);
+    eventInfo->SetL(EllipicRatio[0]);
+    eventInfo->SetW(EllipicRatio[1]);
+    eventInfo->SetWLRatio(EllipicRatio[2]);
+    eventInfo->SetAngle(anglerad);
+    eventInfo->Setr1(r1);
+    eventInfo->Setr2(r2);
+    eventInfo->SetSize(cev->GetSurvivingPixelTotalAmpPanel3());
+    eventInfo->SetSurvivngPixels(cev->GetSurvivingPixelPanel3().size());
+    eventInfo->SetConc(conc);
+    eventInfo->SetCOGx(meanx);
+    eventInfo->SetCOGy(meany);
+    eventInfo->SetTriggeredPixelID(cev->GetMaxAmplitudePixelID());
+    eventInfo->SetCoreRatio(cev->GetCoreRatio());
+    eventInfo->SetNumberOfCores(cev->GetNumberofCorePixels());
+    eventInfo->SetArea(areaEllipse);
+    eventInfo->SetM3Longx(M3Longx.data());
+    eventInfo->SetM3Longy(M3Longy.data());
+
+
 
             
 }
