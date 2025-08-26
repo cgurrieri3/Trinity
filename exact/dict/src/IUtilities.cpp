@@ -78,6 +78,20 @@ int IUtilities::GetMUSICPosition(int musicID){
 	return musicID;
 }
 
+int IUtilities::GetMUSICMate(int musicID, bool c){
+	if (!c){
+		musicID = MUSICs[musicID];
+	} 
+
+	if (musicID % 2  == 0){
+		musicID = musicID + 1;
+	} else {
+		musicID = musicID - 1;
+	}
+	return musicID;
+	
+}
+
 int IUtilities::GetMaximumPixelID(std::vector<float>amplitude,int musicID){
 	musicID = MUSICs[musicID];
 	int iStartPixel, iEndPixel;

@@ -88,8 +88,26 @@ class CEvent {
         
         void SetPeakTimeBin(std::vector<int> peak) { PeakTimeBin = peak; }
         std::vector<int> GetPeakTimeBin() { return PeakTimeBin; }    
-        void SetMaxAmplitudePixelID(int id) { MaxAmplitdePixelID = id; }
+        
+        void SetMaxAmplitudePixelID(int id) { MaxAmplitdePixelID = id; } // aka triggered pixel
         int GetMaxAmplitudePixelID() const { return MaxAmplitdePixelID; }
+
+        // void SetMaxAmplitudePixelAmp(int Amp) { MaxAmplitdePixelAmp = Amp; } // aka triggered pixel
+        // int GetMaxAmplitudePixelAmp() const { return MaxAmplitdePixelAmp; }
+        
+        void SetSecondCoreID(int id) { SecondCoreID = id; }
+        int GetSecondCoreID() const { return SecondCoreID; }
+        void SetCoreIDs(std::vector<int> id) { SecondCoreIDs = id; }
+        std::vector<int> GetCoreIDs() const { return SecondCoreIDs; }
+
+        void SetTotalCoreAmp(float val) {totalCoreAmp  = val;}
+        float GetTotalCoreAmp() const {return totalCoreAmp;}
+        
+        void SetSecondCoreAmp(int id) { SecondCoreAmp = id; }
+        int GetSecondCoreAmp() const { return SecondCoreAmp; }
+
+        void SetNumberofCorePixels(int num) { CoreNumber = num; }
+        int GetNumberofCorePixels() const { return CoreNumber; }
 
         void SetMaxAmplitude(float amp) { MaxEventAmplitde = amp; }
         float GetMaxAmplitude() const { return MaxEventAmplitde; }
@@ -106,6 +124,9 @@ class CEvent {
         void SetRMS(std::vector<float> amp);
         float GetRMS() const { return RMS; } // RMS is calculated in the SetRMS function)
         float GetRMSoverAvgAmp() const { return RMS/AverageAmplitude; } // RMS is calculated in the SetRMS function)
+
+        void SetCoreRatio(float ratio) {coreRatio = ratio;}
+        float GetCoreRatio() const { return coreRatio; }
 
         void SetSumAmplitude(int sum) { SumAmplitude = sum; }
         int GetSumAmplitude() const { return SumAmplitude; }
@@ -133,11 +154,13 @@ class CEvent {
         TH2F* GetFlasherCalibration() const { return hflasher; }
         void SetPanel1(TH2F* hcam_panel1);
         void SetPanel2(TH2F* hcam_panel2, int CorePixelAmpCutOff);
-        void SetPanel3(TH2F* hcam_panel3, std::string neighborDir);
+        void SetPanel3AllNeighboringPixels(TH2F* hcam_panel3, std::string neighborDir);
+        void SetPanel3(TH2F* hcam_panel3, std::string neighborDir,int NumberOfCores,float CoreCutOff, float Crosstalkallowance);
         std::vector<int> GetSurvivingPixelPanel2() {return SurvivingPixelPanel2; }
         std::vector<int> GetSurvivingPixelPanel3() {return SurvivingPixelPanel3; }
         float GetSurvivingPixelTotalAmpPanel3() {return SurvivingPixelTotalAmpPanel3; }
         int isConfigureEvent();
+        void isSecondCorePixel(TH2F* hcam_panel3, int triggeredpixel,std::string neighborDir,float CoreCutOff, int NumberOfCores);
 
 
     private:
@@ -158,11 +181,18 @@ class CEvent {
         std::vector<int> PeakTimeBin;
         std::vector<double> AbsoluteGain;
         int MaxAmplitdePixelID = -1;
+        // int MaxAmplitdePixelAmp = -1;
+        int SecondCoreID = -1; // ID of the second core pixel, if it exists
+        std::vector<int> SecondCoreIDs; // ID of the second core pixel, if it exists
+        float totalCoreAmp = -1.0;
+        float SecondCoreAmp = -1.0; // Amplitude of the second core pixel, if it exists
+        int CoreNumber = -1;
         float MaxEventAmplitde = -1;
         int SaturedPixels = -1;
 
         float AverageAmplitude = -1;
         float RMS = -1;
+        float coreRatio = -1; // ratio of the amplitude of the triggered pixel to the second core pixel
         float RMSoverAvgAmp = -1;
         int SumAmplitude = -1;
         int EventNumber = -1;
@@ -183,6 +213,7 @@ class CEvent {
         void NeighborhoodCheckerHelper(int ID, std::vector<int>& IDSelected,std::vector<int>& cleaned_pixels, std::vector<int>& visited_ids, std::string neighborDir);
         void TriggeredPixelNeighborhoodChecker(std::vector<int>& IDSelected, int triggeredpixel,std::vector<int>& cleaned_pixels, std::string neighborDir);
         std::vector<int> GetNeighborArray(int id, std::string filename);
+        void CheckCloseNeigborsOnly(TH2F* hcam_panel3, int pixel,std::vector<int> cores,double cutoff,std::string neighborDir);
         
 
 

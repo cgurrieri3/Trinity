@@ -51,6 +51,7 @@ class IPlotTools{
 		 * 
 		 * */
 		static void DrawMUSICBoundaries();
+		static void DrawSIABBoundaries();
 	private:
 		inline static int MaxNofChannels = 256;
 		inline static std::vector<int> mapMUSIC = {17,16,1,0,25,24,9,8,19,18,3,2,27,26,11,10,21,20,5,4,29,28,13,12,23,22,7,6,31,30,15,14};

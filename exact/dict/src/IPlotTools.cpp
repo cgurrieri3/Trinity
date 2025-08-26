@@ -72,3 +72,20 @@ void IPlotTools::DrawMUSICBoundaries() {
 	}
 }
 
+void IPlotTools::DrawSIABBoundaries() {
+    //creates TBox object, makes fill transparent and border red, and draws box to active canvas
+	TBox *b = new TBox(-0.5,-0.5,3.5,3.5);
+	b->SetFillStyle(0);
+	b->SetLineColor(kRed);
+	b->Draw();
+	//Adds a box for each MUSIC chip/position
+	for(int i=1; i < MaxNofChannels/16; i++)
+	{
+		TBox *bn = (TBox*)b->Clone();
+		bn->SetX1((i%4)*4-0.5);
+		bn->SetX2((i%4)*4+3.5);
+		bn->SetY1((i/4)*4-0.5);
+		bn->SetY2((i/4)*4+3.5);
+		bn->Draw();
+	}
+}

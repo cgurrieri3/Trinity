@@ -78,6 +78,8 @@ class IUtilities{
 		*/
 		static int GetMUSICPosition(int musicID=-1);
 
+		static int GetMUSICMate(int musicID=-1, bool c=true);
+
 		/**
 		 * Public method to find the Pixel ID (assuming the amplitude vector is sorted in ascending pixelID number) of the maximum number in a std::vector. If musicID is not equal -1, the maximum is searched for only in the 8 channels connected to that MUSIC.
 		 * 
