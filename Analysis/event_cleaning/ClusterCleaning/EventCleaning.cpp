@@ -531,7 +531,8 @@ int main(int argc, char **argv){
             c_cleaned->Write(Form("N%i-F%s-E%i", cev->GetEventDate(),filenameTitle.c_str() ,cev->GetEventNumber()));
             hcam_panel1->Write(Form("PreN%i-F%s-E%iTH2F", cev->GetEventDate(),filenameTitle.c_str() ,cev->GetEventNumber()));
             hcam_panel4->Write(Form("PostN%i-F%s-E%iTH2F", cev->GetEventDate(),filenameTitle.c_str() ,cev->GetEventNumber()));
-            
+            file->Close();
+            c_cleaned->Print(OutputFilePDF.c_str());
             
 
             delete hcam_panel1;
