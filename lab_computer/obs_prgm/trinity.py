@@ -36,7 +36,8 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 	errors_data = 0
 	bias_voltage = 44.0
 	secondary_voltage = 41.5
-	
+	prior_time_check = clt.check_current_time()
+
 	while True:
 	# While the camera is operating this will check WEATHER, STATE MESSAGES, TIME, RCLOGS for DAQ, FILES
 		lets.fancy_communicate("")
@@ -89,18 +90,42 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 			#print('Before light')
 			# Check time
 			safe_light=clt.check_current_time() # one bad condition this will break
-			if safe_light != 1:
+			if safe_light < 1:
 				#lets.communicate('Monitor: Time Condition UNSAFE')
 				exit_message = 'EON'
 				break
+			
 
-			#print('After light')
+			# if the time check value has changed since the last one the door needs to move if 
+			# is has not already - this is easy for door closed it will just send the commmend again 
+			# 2>1
+			if safe_light > prior_time_check and door_status != 'never':
+				# open the door 
+				lets.communicate('Monitor: Time Condition safe for opening the door')
+				ssh.door('up')
+				door_status='o'
+				lets.communicate('Door is UP')
+			
+			# 1<2
+			if safe_light < prior_time_check and door_status != 'never':
+				# close the door
+				lets.communicate('Monitor: Time Condition required door closing')
+				ssh.door('down')
+				door_status='c'
+				lets.communicate('Door is Down')
+				
+			prior_time_check = safe_light
 
-
-
+			if door_status == 'o':
+				lets.communicate('Door Status: open')
+			elif door_status == 'c':
+				lets.communicate('Door Status: closed')
+			else:
+				lets.communicate(f'Door Status: {door_status}')
+				
 			# check state messages
 			#lets.communicate(f'Monitor: Number or errors StateMessages #{errors}.')
-			safe_proceed = csm.query_last_SM(180,35,35,1,1,12,bias_voltage,1830,240,1,4)
+			safe_proceed = csm.query_last_SM(180,35,35,1,1,9,bias_voltage,1830,240,1,4)
 			lets.log_file(f'SM check returned {safe_proceed}')
 			if isinstance(safe_proceed, str):
 				safe_proceed = 0
@@ -110,7 +135,7 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 					errors = 0
 
 				elif safe_proceed  > 5000:
-					lets.communicate('Monitor: SiPM currents are above 12 mA')
+					lets.communicate('Monitor: SiPM currents are above 9 mA')
 					if bias_voltage==44 and door_status=='o':
 						lets.communicate(f'Lowering HV to {secondary_voltage} V')
 						ssh.CTM_LVPS_HV(secondary_voltage)
@@ -122,7 +147,7 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 						lets.communicate('Raising the bias voltage to 44 V')
 						ssh.CTM_LVPS_HV(44)
 						bias_voltage=44
-					elif bias_voltage==44 and door_status=='c':
+					elif bias_voltage==44 and door_status !='o':
 						lets.communicate('Monitor: SM HV current to high and  door is already closed at 44V,  Shutting down... ')
 						exit_message = 'State messaged HV current or HV voltage'
 						break
@@ -569,7 +594,7 @@ def body_extrigs(wx_override = 'no',noise_runs='no'):
 			time.sleep(1320)
 			lets.communicate("Noise Data runs are complete. \n --- ")
 		while True:
-			inputbyuser = input("To OPEN the door type: \"o\"\nTo keep the door CLOSED type: \"cl\" \nTo return to the main prompt type: \"q\"\n") 
+			inputbyuser = input("To OPEN the door type: \"o\"\nTo keep the door CLOSED type: \"cl\" \nTo NEVER open the door: \"never\" \nTo return to the main prompt type: \"q\"\n") 
 			if inputbyuser == "o":
 				ssh.door('up')
 				lets.fancy_communicate('Door Up')
@@ -586,6 +611,12 @@ def body_extrigs(wx_override = 'no',noise_runs='no'):
 				lets.log_file("Keeping door closed.")
 
 				monitor_to_shutdown(wx_override,"c")
+				break
+			elif inputbyuser == "never":
+				lets.fancy_communicate("Never opening the door.")
+				lets.log_file("Never opening the door.")
+
+				monitor_to_shutdown(wx_override,"never")
 				break
 
 			else: 
@@ -661,14 +692,21 @@ def noiseDataOnly():
 
 def external_triggers(process,wx_override='no',noise_runs='no'): # LEFT OFF COMMENTING HERE
 	clt.create_file()
+	## add an while loop that will wait till after sunset to start the telesocpe 
 	safe_light=clt.check_current_time()
+	while safe_light < 1:
+		lets.communicate("Waiting to check the time again in 60 seconds...")
+		time.sleep(60) # check every minute
+		safe_light=clt.check_current_time()
+
+	lets.communicate('Time is safe starting extrigs')
 	# overides the weather
 	if wx_override != 'no':
 		safe_weather = 1
 	else:
 		safe_weather = cwx.query_last_wx() # **3
 
-	if safe_weather == 1 and safe_light == 1:
+	if safe_weather == 1 and safe_light >= 1:
 		lets.communicate('Time and weather are safe')
 
 		if process == 'start':
@@ -802,12 +840,12 @@ def trigger_scan(command,start =0,step = 0,size = 0,rate = 170,weather='no'):
 
 			time_counter = 60 ## **12
 			time.sleep(60) # change this to try try for 3 minutes every 20 seconds rather then wait incase it is sooner
-			safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
+			safe_proceed = csm.query_last_SM(180,35,35,1,1,9,44,1830,240,1,4)
 			while safe_proceed != 1 and time_counter < 600:
 				time.sleep(30)
 				time_counter = time_counter + 30
 				lets.communicate(f'Waiting for statemessage to update after config sequence {time_counter}')
-				safe_proceed = csm.query_last_SM(180,35,35,1,1,12,44,1830,240,1,4)
+				safe_proceed = csm.query_last_SM(180,35,35,1,1,9,44,1830,240,1,4)
 
 			if safe_proceed == 1:
 				lets.fancy_communicate('Extrenal Config complete \n SM enabled')
@@ -977,7 +1015,7 @@ def main():
 			if com_in == 'DAQre':
 				double_check = input("This is to reconfigure after DAQ starts do you want to proceed enter a trigger threshold!: ")
 				if double_check.isdigit():
-					door_status = input("Is the door open or closed? ex. (o/c):")
+					door_status = input("Is the door open or closed or never open? ex. (o/c/never):")
 					daqRECONFIGURE(double_check,wx_override,door_status)
 
 		elif com_in == 'triggerScan':
@@ -1038,7 +1076,7 @@ def main():
 				if pwd_wx_ovrd != "oct3":
 					wx_override = 'no'
 
-			door_status = input("Is the door open or closed? ex. (o/c):")
+			door_status = input("Is the door open or closed or never open? ex. (o/c/never):")
 			monitor_to_shutdown(wx_override,door_status)
 
 
@@ -1082,6 +1120,8 @@ def main():
 			else:
 				print("Please enter a number between 0-15 ")
 		# make trigger rate scan option and HVscan options
+
+
 if __name__ == "__main__":
 	#lets.send_email('Testing Email')
 	main()

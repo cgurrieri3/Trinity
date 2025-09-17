@@ -209,7 +209,7 @@ def create_file(user_input='nope'):
     sun_moon_list = [time_of_sunrise.strftime(date_format), time_of_sunset.strftime(date_format), time_of_moonrise.strftime(date_format), time_of_moonset.strftime(date_format)]
     start_time, endtime = get_endtime(time_of_sunrise_crit, time_of_sunset_crit, time_of_moonset, time_of_max_altitude) #changed from entime, start_time
     #print(start_time, endtime)
-    endtime = time_of_sunrise_crit
+    # endtime = time_of_sunrise_crit
 
     sun_moon_list.append(start_time)
 
@@ -238,7 +238,9 @@ def create_file(user_input='nope'):
     print("---")
     start_timetoprint=(start_time - timedelta(minutes=32)).strftime("%Y-%m-%d %H:%M")
     print("\033[1mStart extrigs time (UTC):\033[1m", start_timetoprint)
-    print("\033[1mCutoff time (UTC):\033[1m", endtime.strftime("%Y-%m-%d %H:%M"))
+    print("\033[1mDoor Open time (UTC):\033[1m", start_time.strftime("%Y-%m-%d %H:%M"))
+    print("\033[1mDoor Closed Cutoff time (UTC):\033[1m", endtime.strftime("%Y-%m-%d %H:%M"))
+    print("\033[1mStop extrigs time (UTC):\033[1m", time_of_sunrise_crit.strftime("%Y-%m-%d %H:%M"))
     print("---")
     lets.log_file('EON_time.txt created')
 
@@ -263,8 +265,7 @@ def check_current_time():
     sun_times, sun_altitudes, time_of_sunrise, time_of_sunset, time_of_sunrise_crit, time_of_sunset_crit = sun_position_over_time(latitude, longitude, start_date, interval_minutes)
     times_list = get_times(sun_altitudes, sun_times, moon_altitudes, moon_times)
     start_time, end_time = get_endtime(time_of_sunrise_crit, time_of_sunset_crit, time_of_moonset, time_of_max_altitude) # switched from endtime, start_time
-    # start_time =  time_of_sunset_crit
-    end_time = time_of_sunrise_crit
+
     
     #print(start_time)
     #print(sunset_time)
@@ -278,11 +279,18 @@ def check_current_time():
     # current_date = datetime_today.date() 
     # time_today = datetime_today.time()
     time_today_dt = datetime.utcnow()
-    lets.log_file(f'start time: {start_time}, end time: {end_time}, current time: {time_today_dt} ')
+    lets.log_file(f'start time: {time_of_sunset_crit}, end time: {time_of_sunrise_crit}, current time: {time_today_dt} ')
     #print(start_time)
-    if (start_time - timedelta(minutes=32) < time_today_dt and time_today_dt < cutoff_time): # and not (current_utc_time.strftime("%Y-%m-%d %H:%M") in times_list):   #and current_utc_time > sunset_time:
+    
+    # region when it is safe for door open data colletion (any voltage level)
+    if (start_time < time_today_dt and time_today_dt < cutoff_time): # and not (current_utc_time.strftime("%Y-%m-%d %H:%M") in times_list):   #and current_utc_time > sunset_time:
+        lets.communicate(f'TIME: TIME - Regular observation period - Door open data collection safe till {cutoff_time-timedelta(hours=curr_est_offset())} in ET')
+        
+        return 2
+    # Region when it is safe for HV to be turned on (between sunrise and sunset)
+    elif (time_of_sunset_crit - timedelta(minutes=32) < time_today_dt and time_today_dt < time_of_sunrise_crit): # and not (current_utc_time.strftime("%Y-%m-%d %H:%M") in times_list):   #and current_utc_time > sunset_time:
 
-        lets.communicate(f'TIME: TIME - The time is safe cutoff is {cutoff_time-timedelta(hours =curr_est_offset())} in ET')
+        lets.communicate(f'TIME: TIME - The time is safe cutoff is {time_of_sunrise_crit-timedelta(hours =curr_est_offset())} in ET')
 
         return 1
     else:
