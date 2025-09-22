@@ -1,5 +1,7 @@
 #include "IEvent.h"
 
+
+
 IEvent::IEvent(){
 	//Iazimuth = 0;
 	//Ialtitude = 0;
@@ -124,22 +126,22 @@ IEvent::IEvent(){
 //     file2.close();
 // }
 
-void IEvent::SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg,std::vector<float> SunAzi_arg, std::vector<float> SunEle_arg, std::vector<float> MoonAzi_arg, std::vector<float> MoonEle_arg, std::vector<float> MoonIll_arg,std::vector<float> CamRA_arg,std::vector<float> CamDEC_arg ) {
+void IEvent::SetParametersFromTimestamp(std::string path_to_exact, std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg,std::vector<float> SunAzi_arg, std::vector<float> SunEle_arg, std::vector<float> MoonAzi_arg, std::vector<float> MoonEle_arg, std::vector<float> MoonIll_arg,std::vector<float> CamRA_arg,std::vector<float> CamDEC_arg ) {
 
 //creating vector with m and b values for SIPM Temp
-	std::string SIPMfilen  = "/storage/hive/project/phy-otte/nlew3/exact/data/SiPMTempatureCorrections.csv";
+	std::string SIPMfilen  = Form("%s/exact/data/SiPMTempatureCorrections.csv",path_to_exact.c_str());
 	std::ifstream SIPMfile(SIPMfilen);
 	std::string line1;
     std::vector<std::vector<float>> SIPMdata;
-
-   // Skip the first row
+    
+    // Skip the first row
     std::getline(SIPMfile, line1);
-
+    
     while (std::getline(SIPMfile, line1)) {
         std::stringstream ss(line1);
         std::string cell;
         std::vector<float> row;
-
+        
         // Skip the first column
         std::getline(ss, cell, ',');
 
@@ -149,12 +151,12 @@ void IEvent::SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<f
                 row.push_back(stof(cell));
             }
         }
-
+        
         SIPMdata.push_back(row);
     }	 
-
-//creating vector with m and b values for UC Temp
-    std::string UCfilen  = "/storage/hive/project/phy-otte/nlew3/exact/data/UCTempatureCorrections.csv";
+    
+    //creating vector with m and b values for UC Temp
+    std::string UCfilen  = Form("%s/exact/data/UCTempatureCorrections.csv",path_to_exact.c_str());
     std::ifstream UCfile(UCfilen);
     std::string line2;
     std::vector<std::vector<float>> UCdata;

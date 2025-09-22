@@ -1,4 +1,5 @@
 #include <TROOT.h>
+#include "TSystem.h"
 #ifndef IFHBEVENT_H
 #define IFHBEVENT_H
 
@@ -73,7 +74,7 @@ class IEvent : public Event{
 		 * @param data2 A std::vector of strings containing the state message information.
 		 * */
 		//void SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg);
-		void SetParametersFromTimestamp(std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg,std::vector<float> sunAzi_arg, std::vector<float> SunEle_arg, std::vector<float> MoonAzi_arg, std::vector<float> MoonEle_arg,std::vector<float> MoonIll_arg, std::vector<float> CamRA_arg, std::vector<float> CamDEC_arg);
+		void SetParametersFromTimestamp(std::string path_to_exact,std::vector<float> hv_arg, std::vector<float> hvc_arg,std::vector<float> sipmTemp_arg,std::vector<float> UCtemps_arg,std::vector<float> MUSICpower_arg,std::vector<float> HVswitch_arg,std::vector<float> ASADcurr_arg,std::vector<float> siabCurr_arg,std::vector<float> TBCurr_arg,std::vector<float> Humid_arg,std::vector<float> OutTemp_arg,std::vector<float> sunAzi_arg, std::vector<float> SunEle_arg, std::vector<float> MoonAzi_arg, std::vector<float> MoonEle_arg,std::vector<float> MoonIll_arg, std::vector<float> CamRA_arg, std::vector<float> CamDEC_arg);
 		/**
 		 * Public method to get the closest timestamp to the event in the auxilliary data file1.
 		 * 
