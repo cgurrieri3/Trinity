@@ -112,21 +112,22 @@ std::string OutputFilePDFClose = "";
 std::string OutputFileEventCleaningDataRoot = "";
 std::string whatData = "Data";
 
+std::string mnt = "/storage/osg-otte1/shared/TrinityDemonstrator/";
+std::string dataDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/Output/";
+std::string outDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/event_cleaning/Output/";
 
 
+std::string neighborDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/event_cleaning/ClusterCleaning/neighbors/";
+std::string CalibrationFactorDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/flasher_calibration/Output/";
 
-std::string neighborDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/ClusterCleaning/neighbors/";
-std::string CalibrationFactorDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlasherCalibration/Output/";
+// FIX THESE 2025-09-23
+std::string muonDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/DataTxtFiles/Muon/";
+std::string bkgDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/DataTxtFiles/BackgroundSamples/RandomSampling/";
+std::string simDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/SimulationData/data/";
 
-std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/";
-std::string muonDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataTxtFiles/Muon/";
-std::string bkgDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataTxtFiles/BackgroundSamples/RandomSampling/";
-std::string simDir = "/storage/hive/project/phy-otte/sstepanoff3/SimulationData/data/";
-
-std::string outDirBkg = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputBkg/";
-std::string outDirMuon = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputMuon/";
-std::string outDirSim = "/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/OutputSim/";
-std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/EventCleaning/Output/";
+std::string outDirBkg = "/storage/osg-otte1/shared/TrinityDemonstrator/event_cleaning/OutputBkg/";
+std::string outDirMuon = "/storage/osg-otte1/shared/TrinityDemonstrator/event_cleaning/OutputSim/";
+std::string outDirSim = "/storage/osg-otte1/shared/TrinityDemonstrator/event_cleaning/OutputSim/";
 
 
 const int TriggeredChannelAmpCutOff = 481; // (200 ADC/8 PE) Cut off for the triggered music channel

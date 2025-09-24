@@ -11,6 +11,17 @@ int main(int argc, char **argv){
 		return 1;
 	}
     
+    std::string mount = argv[2];
+    
+    if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
+        std::cout << "using mounted directory path" << std::endl;
+        mnt="/mnt/";
+        dataDir = "/mnt/DataAnalysis/MergedData/Output/";
+        neighborDir = "/mnt/DataAnalysis/event_cleaning/ClusterCleaning/neighbors/";
+        CalibrationFactorDir = "/mnt/DataAnalysis/flasher_calibration/Output/";
+        outDir = "/mnt/DataAnalysis/event_cleaning/Output/";
+    }
+
     // Get the Arguments 
     std::string folString = argv[1];
 
@@ -76,8 +87,8 @@ int main(int argc, char **argv){
     
     // fileNamesVec.assign(fileNamesVec.begin() + 134, fileNamesVec.begin() + 135);
     
-    for(int f = 100; f<170; f++){
-    // for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
+    // for(int f = 100; f<170; f++){
+    for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
         if (whatData == "bkg" ||  whatData == "muon") {
             std::string date = fileNamesVec[f].substr(7, 10); // Extract date from filename
             // remove - from the date string

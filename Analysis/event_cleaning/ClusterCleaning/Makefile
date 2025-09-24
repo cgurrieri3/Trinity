@@ -1,4 +1,3 @@
-
 # Makefile for TCameraPlotEvents
 #
 #
@@ -75,12 +74,23 @@ CP  := cp
 .PHONY: all clean
 all: $(EXE)
 
+# Generate dictionary source with rootcling
+$(DICT_SRC): $(DICT_HDR) $(LINKDEF)
+	@echo "Rootcling..."
+	/opt/root/bin/rootcling -f $@ -c $(DICT_HDR) $(LINKDEF)
+
+# Compile dictionary object
+$(DICT_OBJ): $(DICT_SRC)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 $(EXE): $(OBJ) | $(BIN_DIR) 
 	$(LD) $(OBJ) $(CXXFLAGS) $(LIBS) $(LDFLAGS) $(OutPutOpt) $@ -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -lExACT
 	@echo "$@ Compilation done"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 	$(LD) $(CXXFLAGS) -c $< -o $@
+
+
 
 $(BIN_DIR)/$(OBJ_DIR):
 		mkdir -p $@
@@ -89,6 +99,8 @@ clean:
 
 	@echo "Cleaning up..."
 	rm -f $(BIN_DIR)/*.o $(EXE)
+	rm -f $(BIN_DIR)/*.pcm $(EXE)
+	rm -f $(BIN_DIR)/EventInfoDict* $(EXE)
 	@echo "Clean complete."
 
 # rootcling: 

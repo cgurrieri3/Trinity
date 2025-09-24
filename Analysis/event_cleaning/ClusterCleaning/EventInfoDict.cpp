@@ -36,6 +36,7 @@
 
 // Header files passed as explicit arguments
 #include "EventInfo.h"
+#include "EventInfo.h"
 
 // Header files passed via #pragma extra_include
 
@@ -149,8 +150,8 @@ namespace {
 nullptr
     };
     static const char* includePaths[] = {
-"/storage/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/include/",
-"/storage/hive/project/phy-otte/sstepanoff3/event_cleaning/UpdatingClusterCleaning/",
+"/opt/root/include/",
+"/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/event_cleaning/ClusterCleaning/",
 nullptr
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(
@@ -168,7 +169,10 @@ class __attribute__((annotate("$clingAutoload$EventInfo.h")))  EventInfo;
 #define _BACKWARD_BACKWARD_WARNING_H
 // Inline headers
 #include "EventInfo.h"
-
+#include "EventInfo.h"
+#ifdef __CINT__
+#pragma link C++ class EventInfo+;
+#endif
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
     static const char* classesHeaders[] = {
