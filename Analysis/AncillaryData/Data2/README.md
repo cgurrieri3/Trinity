@@ -16,6 +16,20 @@ TBCurr = Trigger Board Current
 Scripts: 
 To make all the csv in the correct format and by date I have created some helpful scripts from the files. You only need 2 and the other 2 work but are kind of useless. 
 
+------------------------------ Buzzard (contianers) -----------------------------------------------------------
+To run with the container localy use
+./run_script.sh YYYYMMDD
+    This will use a container and mount the system directories to locate and create the statemessage files
+    Uses: DailyData2file.py
+    Container: python3_10.sef
+To run with HTcondor as a job
+condor_submit -a "Date=YYYYMMDD" condense_SM.submit
+    This will use a HTCondor job to use the container and run the script on the HTC. 
+    Sumbit Script: condense_SM.submit
+    Uses: run_condor.sh, DailyData2file.py
+    Container: python3_10.sef 
+
+------------------------------------------------------------- HIVE ---------------------------------------------
 Useful scipts: 
 1. backlogSMprior710.py - this script handles all the Statemessages that were saved prior to 20240710. This is important because 20240710 is the date when I set up the automatic file transfers for the statemessges over to the hive computer. Before this there are two large files that have all the SM data 
 "/storage/hive/project/phy-otte/shared/Trinity/MiscData/StateMessages/phys43199/"

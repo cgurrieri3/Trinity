@@ -20,6 +20,8 @@ warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--date", help = "YYYYMMDD")
 parser.add_argument("-i", "--intAfter", help = "Dates after intial")
+parser.add_argument("-ifile", "--input_files", help = "Misc Data .csv for SM")
+parser.add_argument("-ofile","--output_files", help = "output filename")
 args = parser.parse_args()
 
 # if args.date:
@@ -31,7 +33,9 @@ args = parser.parse_args()
 start_date = args.date
 after_date = int(args.intAfter)
 
-PATH_TO_FOLDER = "/storage/hive/project/phy-otte/shared/Trinity/MiscData/StateMessages/cos4a-10345/"
+#PATH_TO_FOLDER = "/storage/hive/project/phy-otte/shared/Trinity/MiscData/StateMessages/cos4a-10345/"
+#PATH_TO_FOLDER = f"/mnt/MiscData/StateMessages/cos4a-10345/"
+PATH_TO_FOLDER = f"{args.input_files}"
 
 # get all the dates needed for all the backlog information this is between userdate + user increment
 
@@ -72,13 +76,14 @@ all_files = ['TRIGGER_RATE.csv',
 # loads all the statemessage data into a single pandas data frame
 
 for f in ALL_FOLDERS:
-  csvname = f"/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/Data2/statemessages{f[81:89]}.csv"
+  #csvname = f"/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/Data2/statemessges{f[81:89]}.csv"
+  csvname = f"{args.output_files}"
   print(f"\n{csvname}\n")
-  year = int(f[81:85])
-  month = int(f[85:87])
-  day = int(f[87:89])
-  #print(year, day)
-  #print(month)
+  year = int(start_date[0:4])
+  month = int(start_date[4:6])
+  day = int(start_date[6:8])
+  print(year, day)
+  print(month)
   intialtime = datetime(year, month, day, 0, 0 , 0,0,tzinfo=timezone.utc).timestamp()
   endtime = datetime(year, month, day, 23, 59 ,59,9999,tzinfo=timezone.utc).timestamp()
   #print(intialtime)
@@ -90,14 +95,13 @@ for f in ALL_FOLDERS:
   for i in range(len(all_files)): 
     file_lines = []
     full_file_paths = f'{f}{all_files[i]}' 
-    #print(full_file_paths)
+    print(full_file_paths)
     with open(full_file_paths, mode ='r') as file:
         csvFile = csv.reader(file)
         for lines in csvFile:
           file_lines.append(lines)
     
     #print(len(file_lines),len(file_lines[i]))
-
     df = pd.DataFrame(file_lines)
     #print(df)
     df.columns = df.iloc[0]    
