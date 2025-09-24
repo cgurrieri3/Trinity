@@ -66,8 +66,10 @@ CP  := cp
 .PHONY: all
 all: $(EXE)
 
+# 	$(LD) $(OBJ) $(CXXFLAGS) $(LIBS) $(LDFLAGS) $(OutPutOpt) $@ -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS 
 $(EXE): $(OBJ) | $(BIN_DIR) 
-	$(LD) $(OBJ) $(CXXFLAGS) $(LIBS) $(LDFLAGS) $(OutPutOpt) $@ -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -lExACT
+	$(LD) $(OBJ) $(CXXFLAGS) $(LDFLAGS) -L$(DICT_DIR) -lExACT $(LIBS) $(OutPutOpt) $@
+
 	@echo "$@ Compilation done"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)

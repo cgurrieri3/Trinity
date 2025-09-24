@@ -1,0 +1,31 @@
+---------------- BUZZARD -------------------
+
+*** you need to use contiainers ***
+container path : /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers
+container : rootandexact.sif - has root and exact compiled
+
+these are already built into the scripts 
+to run a single night not a job
+./run_script.sh - calls and mounts the container to allow the fill function to work. 
+
+./run_condor.sh - loads the container and the needed directorys to run the script 
+NOT COMPLETE
+
+for the Merging of data
+if you are just remaking in the /scripts/MergedData/ there is a file that will recompile
+./complile_script.sh - loads the contianer and makes the script 
+
+
+---------------- HIVE -------------------
+
+# how to run file merge script
+sbatch submit.sbatch YYYYMMDD 
+# or 
+
+will take all the ancillary data from Statemessages, Weather, Celestial positions and add them to the data .root files 
+./FileMerge 20250124 
+# or AllFileMerge.py
+
+will add the absolute gain informaiton to the data .root files
+./AllCalibData 20250124
+

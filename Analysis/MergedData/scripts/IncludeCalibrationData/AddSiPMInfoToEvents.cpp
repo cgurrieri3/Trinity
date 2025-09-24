@@ -9,6 +9,14 @@ int main(int argc, char **argv) {
 		return 1;
 	}
     
+    std::string mount = argv[2];
+    
+    if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
+        std::cout << "using mounted directory path" << std::endl;
+        mnt="/mnt/";
+        dataDir = "/mnt/DataAnalysis/MergedData/Output/";
+    }
+
     // Get the Arguments
     std::string folString = argv[1];
     // Load in all the files

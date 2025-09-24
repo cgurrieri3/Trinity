@@ -86,8 +86,9 @@ std::vector<std::string> read_directory( const std::string& path = std::string()
 tm* utcTime;
 int microsec;
 uint64_t convtime;
-std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
-std::string badfilescsv = "/storage/hive/project/phy-otte/nlew3/BadFiles.csv";
+std::string mnt = "/storage/osg-otte1/shared/TrinityDemonstrator/";
+std::string dataDir = "/storage/osg-otte1/shared/TrinityDemonstrator/Data/";
+std::string badfilescsv = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/scripts/MergedData/BadFiles.csv";
 
 void GetTime(uint64_t TriggerBoardTime){
     convtime = (TriggerBoardTime / 100000000ULL);

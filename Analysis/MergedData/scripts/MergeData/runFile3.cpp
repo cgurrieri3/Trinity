@@ -5,24 +5,30 @@ int main(int argc, char **argv){
 		cout << "Too few arguments; please include the date data directory to summarize" << endl;
 		return 1;
 	}
+    std::string mount = argv[2];
+    
+    if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
+        std::cout << "using mounted directory path" << std::endl;
+        mnt="/mnt/";
+        dataDir = "/mnt/Data/";
+        badfilescsv = "/mnt/DataAnalysis/MergedData/scripts/MergedData/BadFiles.csv";
 
+    }
+    
     std::string folString = argv[1];
     std::string dirName = Form("%s%s/RawDataMerged/",dataDir.c_str(),folString.c_str());
-	cout << dirName << endl;
+	cout << "Directory: " <<dirName << endl;
     std::vector <std::string> fileNamesVec;
 	fileNamesVec = read_directory(dirName.c_str());
     fileNamesVec.erase(fileNamesVec.begin(), fileNamesVec.begin() + 2);
-	
     //Set the file in and file directories
-    std::string fileDirIn = Form("/storage/hive/project/phy-otte/shared/Trinity/Data/%s/RawDataMerged",folString.c_str());
-    std::string fileDirOut = Form("/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/%s",folString.c_str());
-    
-	
+    std::string fileDirIn = Form("%sData/%s/RawDataMerged",mnt.c_str(),folString.c_str());
+    std::string fileDirOut = Form("%sDataAnalysis/MergedData/Output/%s",mnt.c_str(),folString.c_str());
+
 	// load in all the csv data into the class to be accessed later easily
-    
-    std::string weatherfilename = Form("/storage/hive/project/phy-otte/shared/Trinity/MiscData/WeatherData/weather/weather_%s",folString.c_str());
-    std::string sunmoonfilename = Form("/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/Data1/celestialPositions%s.csv", folString.c_str());
-    std::string StateMessageFile = Form("/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/Data2/statemessages%s.csv", folString.c_str());
+    std::string weatherfilename = Form("%sMiscData/WeatherData/weather/weather_%s",mnt.c_str(),folString.c_str());
+    std::string sunmoonfilename = Form("%sDataAnalysis/AncillaryData/Data1/celestialPositions%s.csv", mnt.c_str(), folString.c_str());
+    std::string StateMessageFile = Form("%sDataAnalysis/AncillaryData/Data2/statemessages%s.csv", mnt.c_str(), folString.c_str());
                     
     CSVData csvdata(StateMessageFile,weatherfilename,sunmoonfilename);
     csvdata.SetCSV();
@@ -51,11 +57,11 @@ int main(int argc, char **argv){
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
         
         std::string errorString = fileNamesVec[f];
-        if (fileNamesVec[f] == "/storage/hive/project/phy-otte/shared/Trinity/Data/20231023/RawDataMerged/CoBo0_AsAd0_2023-10-23T05:33:23.309_0000.root"){
-            errorString = errorString + " error because evil file";
-            appendToCSV(badfilescsv, errorString);			
-            continue;
-        }
+        // if (fileNamesVec[f] == "/storage/osg-otte1/shared/TrinityDemonstrator/Data/20231023/RawDataMerged/CoBo0_AsAd0_2023-10-23T05:33:23.309_0000.root"){
+        //     errorString = errorString + " error because evil file";
+        //     appendToCSV(badfilescsv, errorString);			
+        //     continue;
+        // }
 
         // Try to open the file
         TFile* testfile = TFile::Open(fileNamesVec[f].c_str());
@@ -68,7 +74,9 @@ int main(int argc, char **argv){
             }
             else{
                 std::string entry = fileNamesVec[f];
-                entry = entry.substr(86, 120);
+                // cout << "Processing file: " << entry << endl;
+                entry = entry.substr(33, 60);
+                cout << "Processing file: " << entry << endl;
                 std::cout << "The file was properly closed" << endl;
                 std::string fileOut = Form("%s/Merged_%s", cfileDirOut, entry.c_str());
                 std::cout <<"OUTfile name: " << fileOut << std::endl;
@@ -97,13 +105,9 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
     std::string hyphdate = date;
     // Remove the hyphens to get "20240807"
     date.erase(std::remove(date.begin(), date.end(), '-'), date.end());
-	size_t startPos = filename.find("Trinity/Data/") + 13;
-    std::string checkingdate = filename.substr(startPos, 8); //extract the date it was taken from to check for errors
-    if (checkingdate != date){
-		cout << "Wrong file in directory!!!" << endl;
-	}	
+    std::cout << "Date extracted: " << date << std::endl;
 
-
+    
     // create all the classes in IEvent for all the branchs
     IEvent *iEvHLED = new IEvent();
     IEvent *iEvBiFocal = new IEvent();
@@ -114,7 +118,6 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
     Event *evBiFocal = 0;
     Event *evTest = 0;
     Event *evForced = 0;
-
 
     TFile *fIn = new TFile(filename.c_str(), "READ");
     //cout << "here? ? ? " << endl;
@@ -128,13 +131,13 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
     // int nRunBF = 0;
     // int nRunForced = 0;
     // int nRunTest = 0;
-
+    
     // unsigned long long rTimeHLED = 0;
     // unsigned long long rTimeBiFocal = 0;
     // unsigned long long rTimeTest = 0;
     // unsigned long long rTimeForced = 0;
-
-
+    
+    
     tHLED->SetBranchAddress("Events",&evHLED);
     tBiFocal->SetBranchAddress("Events",&evBiFocal);
     tForced->SetBranchAddress("Events",&evForced);
@@ -145,13 +148,13 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
     //tForced->SetBranchAddress("RunNumber",&nRunForced);
     //tTest->SetBranchAddress("RunNumber",&nRunTest);
 
-   // tHLED->SetBranchAddress("RTimeTB",&rTimeHLED);
-   // tBiFocal->SetBranchAddress("RTimeTB",&rTimeBiFocal);
-   // tForced->SetBranchAddress("RTimeTB",&rTimeForced);
-   // tTest->SetBranchAddress("RTimeTB",&rTimeTest);
-
+    // tHLED->SetBranchAddress("RTimeTB",&rTimeHLED);
+    // tBiFocal->SetBranchAddress("RTimeTB",&rTimeBiFocal);
+    // tForced->SetBranchAddress("RTimeTB",&rTimeForced);
+    // tTest->SetBranchAddress("RTimeTB",&rTimeTest);
+    
 	TFile *fOut = new TFile(fileOut.c_str(),"RECREATE");
-
+    
     TTree *tMHLED = new TTree("HLED","HLED Events");
     TTree *tMBiFocal = new TTree("BiFocal","BiFocal Events");
     TTree *tMForced = new TTree("Forced","Forced Events");
@@ -161,47 +164,50 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
     tMBiFocal->Branch("Events","IEvent",&iEvBiFocal,64000,99);
     tMForced->Branch("Events","IEvent",&iEvForced,64000,99);
     tMTest->Branch("Events","IEvent",&iEvTest,64000,99);
-
+    
+    std::string pathtoexact = Form("%s/DataAnalysis",mnt.c_str());
     for(int i = 0; i < tHLED->GetEntries(); i++){
         tHLED->GetEntry(i);
-
+        
         // cout<<evHLED->GetTBTime()<<endl;
         // cout<<normalizedTimeNs<<endl;
         // cout<<timeAfterLaunch<<endl;;
         iEvHLED->SetCoBoTime(evHLED->GetCoBoTime());
         iEvHLED->SetUNIXTime(evHLED->GetUNIXTime());
         iEvHLED->SetTBTime(evHLED->GetTBTime());
-
+        
         iEvHLED->SetEventType(0);
         iEvHLED->SetROIPixelID(evHLED->GetROIPixelID());
         iEvHLED->SetROIMusicID(evHLED->GetROIMusicID());
         iEvHLED->SetSignalValue(evHLED->GetSignalValue());
-
+        
         GetTime((uint64_t)evHLED->GetTBTime());
-      //  std::cout << "Trigger Time (UTC): ";
-       // std::cout << std::put_time(utcTime, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0') << std::setw(6) << microsec << std::endl;
-
+        //  std::cout << "Trigger Time (UTC): ";
+        // std::cout << std::put_time(utcTime, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0') << std::setw(6) << microsec << std::endl;
+        
         // Find the closest statemessage time
         int closestIndex = findClosestIndex(csvdata.GetStateMessageTime(), convtime);
         //std::cout << "Closest value to Event time for statemessage : " << convtime << " is " << std::fixed << std::setprecision(0)<< StateMessageTime[closestIndex] << std::endl;
-       // std::cout << "Closest index: " << closestIndex << std::endl;
-
+        // std::cout << "Closest index: " << closestIndex << std::endl;
+        
         // Find the closest weather time
         int WXclosestIndex = findClosestIndex(csvdata.GetWeatherTime(), convtime);
         // std::cout << "Closest value to Event time for weather: " << convtime << " is " << std::fixed << std::setprecision(0)<< WeatherTime[WXclosestIndex] << std::endl;
         // std::cout << WeatherHumidity[WXclosestIndex] << std::endl;
-
+        
 		// Find the closest sunmoon time 
         // for (int i=0; i < SunmoonTime.size();i++){
-        //     cout << SunmoonTime[i] << endl;
-        // }
-		int SMXclosestIndex = findClosestIndex(csvdata.GetSunmoonTime(), convtime);	
-        // std::cout << "Closest value to Event time for sunmoon: " << convtime << " is " << std::fixed << std::setprecision(0)<< SunmoonTime[SMXclosestIndex] << ", "<< SMXclosestIndex<< std::endl;
-        // std::cout << "Closest value to Event time for sunmoon: " << convtime << " is " << std::setprecision(0)<< SunmoonTime[SMXclosestIndex] << std::endl;
-
-    
+            //     cout << SunmoonTime[i] << endl;
+            // }
+            int SMXclosestIndex = findClosestIndex(csvdata.GetSunmoonTime(), convtime);	
+            // std::cout << "Closest value to Event time for sunmoon: " << convtime << " is " << std::fixed << std::setprecision(0)<< SunmoonTime[SMXclosestIndex] << ", "<< SMXclosestIndex<< std::endl;
+            // std::cout << "Closest value to Event time for sunmoon: " << convtime << " is " << std::setprecision(0)<< SunmoonTime[SMXclosestIndex] << std::endl;
+            
+            
+            
         // Addes the closetest index of each statemessage to the file using the IEvents class
-        iEvHLED->SetParametersFromTimestamp(
+        
+        iEvHLED->SetParametersFromTimestamp(pathtoexact.c_str(),
             csvdata.GetStateMessageHV().at(closestIndex),
             csvdata.GetStateMessageHVCurrent().at(closestIndex),
             csvdata.GetStateMessageSiPMTempatures().at(closestIndex),
@@ -221,7 +227,6 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
             csvdata.GetCameraRA().at(SMXclosestIndex),
 			csvdata.GetCameraDEC().at(SMXclosestIndex)
 			);
-
         fOut->cd();
         tMHLED->Fill();
     }
@@ -264,7 +269,7 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
         // std::cout << "Closest value to Event time for sunmoon: " << convtime << " is " << std::setprecision(0)<< SunmoonTime[SMXclosestIndex] << std::endl;
 
         // Addes the closetest index of each statemessage to the file using the IEvents class
-        iEvBiFocal->SetParametersFromTimestamp(
+        iEvBiFocal->SetParametersFromTimestamp(pathtoexact.c_str(),
             csvdata.GetStateMessageHV().at(closestIndex),
             csvdata.GetStateMessageHVCurrent().at(closestIndex),
             csvdata.GetStateMessageSiPMTempatures().at(closestIndex),
@@ -324,7 +329,7 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
         // std::cout << "Closest value to Event time for sunmoon: " << convtime << " is " << std::setprecision(0)<< SunmoonTime[SMXclosestIndex] << std::endl;
 		
         // Addes the closetest index of each statemessage to the file using the IEvents class
-        iEvForced->SetParametersFromTimestamp(
+        iEvForced->SetParametersFromTimestamp(pathtoexact.c_str(),
             csvdata.GetStateMessageHV().at(closestIndex),
             csvdata.GetStateMessageHVCurrent().at(closestIndex),
             csvdata.GetStateMessageSiPMTempatures().at(closestIndex),
@@ -381,7 +386,7 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
         // std::cout << "Closest index: " << SMXclosestIndex << std::endl;
         // add the SiPM temps to the .root file
         
-        iEvTest->SetParametersFromTimestamp(
+        iEvTest->SetParametersFromTimestamp(pathtoexact.c_str(),
             csvdata.GetStateMessageHV().at(closestIndex),
             csvdata.GetStateMessageHVCurrent().at(closestIndex),
             csvdata.GetStateMessageSiPMTempatures().at(closestIndex),

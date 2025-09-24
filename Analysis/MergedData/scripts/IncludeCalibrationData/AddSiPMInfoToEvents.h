@@ -86,6 +86,8 @@
 
 IUtilities *util;
 
-std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/";
+std::string mnt = "/storage/osg-otte1/shared/TrinityDemonstrator/";
+std::string dataDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/Output/";
+//std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/";
 
 
