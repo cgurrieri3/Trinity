@@ -69,8 +69,9 @@ TCanvas *c_cleaned =0;
 int MaxNofChannels = 256;
 
 // std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Data/";
-std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/";
-std::string outDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/AncillaryData/FlasherCalibration/Output/";
+std::string mnt = "/storage/osg-otte1/shared/TrinityDemonstrator/";
+std::string dataDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/Output/";
+std::string outDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/flasher_calibration/Output/";
 
 // Initialize functions
 void SetBranches(IEvent *evD);
