@@ -5,22 +5,35 @@ int main(int argc, char **argv){
 		cout << "Too few arguments; please include the date data directory to summarize" << endl;
 		return 1;
 	}
-    std::string mount = argv[2];
-    
-    if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
-        std::cout << "using mounted directory path" << std::endl;
-        mnt="/mnt/";
-        dataDir = "/mnt/Data/";
-        badfilescsv = "/mnt/DataAnalysis/MergedData/scripts/MergedData/BadFiles.csv";
-
-    }
     
     std::string folString = argv[1];
+    
+    
+    std::string mount = "";
+    mount = argv[2];
+    std::string filename_argument = "";
+    filename_argument = argv[3];
+    
+    if (mount != ""){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
+        std::cout << "using mounted directory path" << std::endl;
+        mnt=mount.c_str();
+        dataDir = Form("%sData/",mnt.c_str());
+        badfilescsv = Form("%sDataAnalysis/MergedData/scripts/MergedData/BadFiles.csv",mnt.c_str());
+
+    }
+
     std::string dirName = Form("%s%s/RawDataMerged/",dataDir.c_str(),folString.c_str());
-	cout << "Directory: " <<dirName << endl;
+    cout << "Directory: " <<dirName << endl;
     std::vector <std::string> fileNamesVec;
-	fileNamesVec = read_directory(dirName.c_str());
-    fileNamesVec.erase(fileNamesVec.begin(), fileNamesVec.begin() + 2);
+
+    if (filename_argument != "n"){ // if the file name not specified then do all files in the directory
+        std::cout << "using specific file name" << std::endl;
+        std::string specificfile = Form("%s%s/RawDataMerged/%s",dataDir.c_str(),folString.c_str(),filename_argument.c_str());
+        fileNamesVec.push_back(specificfile);
+    } else {
+        fileNamesVec = read_directory(dirName.c_str());
+        fileNamesVec.erase(fileNamesVec.begin(), fileNamesVec.begin() + 2);
+    }
     //Set the file in and file directories
     std::string fileDirIn = Form("%sData/%s/RawDataMerged",mnt.c_str(),folString.c_str());
     std::string fileDirOut = Form("%sDataAnalysis/MergedData/Output/%s",mnt.c_str(),folString.c_str());
@@ -75,7 +88,10 @@ int main(int argc, char **argv){
             else{
                 std::string entry = fileNamesVec[f];
                 // cout << "Processing file: " << entry << endl;
-                entry = entry.substr(33, 60);
+                size_t coboPos = entry.find("CoBo0");
+                if (coboPos != std::string::npos) {
+                    entry = entry.substr(coboPos, entry.length() - coboPos);
+                }
                 cout << "Processing file: " << entry << endl;
                 std::cout << "The file was properly closed" << endl;
                 std::string fileOut = Form("%s/Merged_%s", cfileDirOut, entry.c_str());
@@ -120,7 +136,6 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
     Event *evForced = 0;
 
     TFile *fIn = new TFile(filename.c_str(), "READ");
-    //cout << "here? ? ? " << endl;
     TTree *tHLED = (TTree*) fIn->Get("HLED");    
     TTree *tBiFocal = (TTree*) fIn->Get("BiFocal");    
     TTree *tForced = (TTree*) fIn->Get("Forced");    
@@ -229,6 +244,7 @@ void TelescopeInformationMerge3(CSVData& csvdata,std::string filename, std::stri
 			);
         fOut->cd();
         tMHLED->Fill();
+        // cout << "HLED Event " << i << " processed" << endl;
     }
 
     for(int i = 0; i < tBiFocal->GetEntries(); i++){

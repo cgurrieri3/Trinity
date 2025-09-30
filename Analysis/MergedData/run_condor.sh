@@ -1,19 +1,72 @@
 #!/bin/bash
 # run_condor.sh
 
+source /opt/root/bin/thisroot.sh
+
+# Setup ExACT
+export EXACT_DIR=/exact
+export LD_LIBRARY_PATH=/exact/dict:/usr/lib/oracle/21/client64/lib:/usr/local/lib:$LD_LIBRARY_PATH
+
+
 DATE=$1
-echo "Running job for $DATE"
+FILENAME=$2
+echo "Running job for $DATE with file $FILENAME "
 echo "Directories"
 ls -lh
-pwd
-python3 /srv/DailyData2file.py -d "$DATE" -i 1 -ifile "/srv/" -ofile "/srv/statemessages$DATE.csv"
-echo "ran python script"
+
+# Create necessary directories if they don't exist
+mkdir DataAnalysis
+chmod 777 DataAnalysis
+mkdir Data
+mkdir MiscData
+cd DataAnalysis
+mkdir exact
+mkdir MergedData
+mkdir AncillaryData
+cd MergedData
+mkdir Output
+cd Output
+mkdir $DATE
+cd
+cd DataAnalysis/exact
+mkdir data
+cd
+cd Data
+mkdir $DATE
+cd $DATE
+mkdir RawDataMerged
+cd
+mv $FILENAME Data/$DATE/RawDataMerged/.
+cd DataAnalysis/AncillaryData
+mkdir Data2
+mkdir Data1
+cd
+mv statemessages${DATE}.csv DataAnalysis/AncillaryData/Data2/.
+mv celestialPositions${DATE}.csv DataAnalysis/AncillaryData/Data1/.
+mv UCTempatureCorrections.csv DataAnalysis/exact/data/.
+mv SiPMTempatureCorrections.csv DataAnalysis/exact/data/.
+cd 
+cd MiscData
+mkdir WeatherData
+cd WeatherData
+mkdir weather
+cd
+mv weather_${DATE} MiscData/WeatherData/weather/.
+
+
+echo "Running FileMerge for $DATE and File $FILENAME"
+# ldd ./FileMerge
+./FileMerge $DATE /srv/ $FILENAME
+# sleep 10
+echo "Running Calibration for $DATE and File $FILENAME"
+./AddCalibData $DATE /srv/ Merged_$FILENAME
 ls -lh
 
-echo "Created output file:"
-ls -lh statemessages*.csv
+cd 
+cd DataAnalysis/MergedData/Output/$DATE/
+pwd
+ls -lh
 
-
-FILE="statemessages${DATE}.csv"
-FULL_PATH=$(realpath "$FILE")
-echo "Full path to output file: $FULL_PATH"
+cd
+pwd
+ls -lh

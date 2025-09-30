@@ -9,19 +9,29 @@ int main(int argc, char **argv) {
 		return 1;
 	}
     
-    std::string mount = argv[2];
-    
-    if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
+    std::string mount = "";
+    mount = argv[2];
+    std::string filename_argument = "";
+    filename_argument = argv[3];
+
+    if (mount != ""){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
         std::cout << "using mounted directory path" << std::endl;
-        mnt="/mnt/";
-        dataDir = "/mnt/DataAnalysis/MergedData/Output/";
+        mnt=mount.c_str();
+        dataDir = Form("%sDataAnalysis/MergedData/Output/",mnt.c_str());
     }
 
     // Get the Arguments
     std::string folString = argv[1];
     // Load in all the files
     std::string FolderPath = Form("%s%s/",dataDir.c_str(),folString.c_str());
-    std::vector<std::string>fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
+    std::vector<std::string>fileNamesVec;
+    if (filename_argument != "Merged_n"){ // if the file name not specified then do all files in the directory
+        std::cout << "using specific file name" << std::endl;
+        // std::string specificfile = Form("%s%s",FolderPath.c_str(),filename_argument.c_str());
+        fileNamesVec.push_back(filename_argument);
+    } else {
+        fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
+    }
     cout << "Number of files: " << fileNamesVec.size() << endl;
 
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
