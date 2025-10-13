@@ -12,6 +12,8 @@ int main(int argc, char **argv){
 	}
     
     std::string mount = argv[2];
+    std::string filename_argument = "";
+    filename_argument = argv[3];
     
     if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
         std::cout << "using mounted directory path" << std::endl;
@@ -20,14 +22,23 @@ int main(int argc, char **argv){
         neighborDir = "/mnt/DataAnalysis/event_cleaning/ClusterCleaning/neighbors/";
         CalibrationFactorDir = "/mnt/DataAnalysis/flasher_calibration/Output/";
         outDir = "/mnt/DataAnalysis/event_cleaning/Output/";
+    } else if (mount != "n"){
+        std::cout << "using specific directory path" << std::endl;
+        mnt=mount.c_str();
+        dataDir = Form("%sDataAnalysis/MergedData/Output/",mnt.c_str());
+        neighborDir = Form("%sDataAnalysis/event_cleaning/ClusterCleaning/neighbors/",mnt.c_str());
+        CalibrationFactorDir = Form("%sDataAnalysis/flasher_calibration/Output/",mnt.c_str());
+        outDir = Form("%sDataAnalysis/event_cleaning/Output/",mnt.c_str());
     }
+
+    
 
     // Get the Arguments 
     std::string folString = argv[1];
 
     // Load in all the files
     std::string FolderPath = Form("%s%s/",dataDir.c_str(),folString.c_str());
-    
+    cout << "FolderPath: " <<FolderPath << endl;
     // Createthe fileNames Vector based on the type of data found in the passes argument
     // Sim - Simulation data (Only Test Branch events)
     // muon - muon data (Forced Branch events)
@@ -60,7 +71,16 @@ int main(int argc, char **argv){
             fileNamesVec.end()
         );
     } else {
+        if (filename_argument != "n"){ // if the file name not specified then do all files in the directory
+        // std::cout << "using specific file name" << std::endl;
+        // std::string specificfile = Form("%s%s/%s",dataDir.c_str(),folString.c_str(),filename_argument.c_str());
+        // // cout << "Specific File: " << specificfile << endl;
+        fileNamesVec.push_back(filename_argument);
+    } else {
+        // fileNamesVec = read_directory(dirName.c_str());
         fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
+        fileNamesVec.erase(fileNamesVec.begin(), fileNamesVec.begin() + 2);
+    }
     }
     
     CreateFileName(folString,whatData);
@@ -87,8 +107,8 @@ int main(int argc, char **argv){
     
     // fileNamesVec.assign(fileNamesVec.begin() + 134, fileNamesVec.begin() + 135);
     
-    // for(int f = 100; f<170; f++){
-    for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
+    for(int f = 100; f<110; f++){
+    // for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
         if (whatData == "bkg" ||  whatData == "muon") {
             std::string date = fileNamesVec[f].substr(7, 10); // Extract date from filename
             // remove - from the date string
@@ -99,6 +119,7 @@ int main(int argc, char **argv){
 
         // checks to make sure the  data  file is  readable
         std::string FilePath = Form("%s%s",FolderPath.c_str(),fileNamesVec[f].c_str());
+        // std::string FilePath = Form("%s",fileNamesVec[f].c_str());
         if (!util->isBranchPresentInFile(FilePath, "Test")) {
             continue; // Skip to the next branch if not present
         }
@@ -360,8 +381,11 @@ int main(int argc, char **argv){
             gPad->SetBottomMargin(0.25); // Increase bottom margin
             gPad->SetRightMargin(0.15);
             
-            std::string filenameTitle = (cev->GetFilename()).substr(18,5);
-            // cout << "Filename: " << cev->GetFilename()<< endl;
+
+            std::string filenameTitle = cev->GetFilename();
+            int pos = filenameTitle.find("T");
+            filenameTitle = filenameTitle.substr(pos+1, 5);
+            
             if (whatData == "sim") {
                 std::string temp = (cev->GetFilename()).substr(52,3);
                 filenameTitle = folString.substr(9,6);
