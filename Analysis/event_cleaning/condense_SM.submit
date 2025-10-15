@@ -41,6 +41,7 @@ when_to_transfer_output = ON_EXIT_OR_EVICT
 transfer_output_files = DataAnalysis/event_cleaning/Output , DataAnalysis/event_cleaning/Output/DataFiles
 
 
+
 request_cpus = 1
  # these are PER JOB
 
@@ -51,6 +52,8 @@ request_memory = 0.3GB
 request_disk = 3GB 
 # these are PER JOB
 
+JobBatchName = "EC_$(Date)"
+
 # Tell HTCondor to run 3 instances of our job:
 ###----------#####
 # Queue! HAS TO BE THE LAST LINE
@@ -60,6 +63,6 @@ request_disk = 3GB
 # queue + num - que this many identical jobs (EXACT  SAME JOB)
 # use case - executable can create independent jobs (script creates difference between jobs)
 # randomw number simulations 
-queue 1
+queue Filename from $(sysFilePath)/DataAnalysis/data_lists/file_list_$(Date).txt
  
 

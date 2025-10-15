@@ -39,13 +39,16 @@ for DATE in $DATES; do
 
   echo "Processing date: $DATE"
   
-  for FILE in "${TARGET_DIR}"*; do
-    [ -e "$FILE" ] || continue
+  OUTLIST="condor_lists/file_list_${DATE}.txt"
 
-    BASENAME=$(basename "$FILE")
-    #echo "Submitting job for: $BASENAME"
-    condor_submit Date="$DATE" Filename="$BASENAME" "$SUBMIT_TEMPLATE"
+  rm -f "$OUTLIST"
+  for f in "$TARGET_DIR"/*.root; do
+      echo "${f##*/}" >> "$OUTLIST"
   done
+
+  echo "Created $OUTLIST with $(wc -l < "$OUTLIST") files"
+  #echo "Submitting job for: $BASENAME"
+  condor_submit Date="$DATE" "$SUBMIT_TEMPLATE"
 
   #echo "Submitted all jobs for date $DATE"
   #echo "---------------------------------------------"

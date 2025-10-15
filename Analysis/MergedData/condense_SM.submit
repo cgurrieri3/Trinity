@@ -1,4 +1,5 @@
-container_image = /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif
+sysFilePath = /storage/osg-otte1/shared/TrinityDemonstrator
+container_image = $(sysFilePath)/DataAnalysis/containers/rootandexact.sif
 
 # Ensure host paths are visible inside the container
 #+ApptainerBind = "/storage,/tmp,/dev,/proc,/exact"
@@ -12,17 +13,17 @@ arguments = $(Date) $(Filename)
 # Keep your environment variables
 #getenv = False
 
-log = /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/.logs/HT_condor_$(Date)_$(Filename).log 
+log = $(sysFilePath)/DataAnalysis/MergedData/.logs/HT_condor_$(Date)_$(Filename).log 
 # HTCondor log
 
-error = /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/.logs/Program_$(Date)_$(Filename).err 
+error = $(sysFilePath)/DataAnalysis/MergedData/.logs/Program_$(Date)_$(Filename).err 
 #Standard Error - program and HTCondor errors
 
-output = /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/.logs/Program_$(Date)_$(Filename).out 
+output = $(sysFilePath)/DataAnalysis/MergedData/.logs/Program_$(Date)_$(Filename).out 
 # program terminal output (not output files)
 
 
-transfer_input_files = /storage/osg-otte1/shared/TrinityDemonstrator/Data/$(Date)/RawDataMerged/$(Filename),/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/scripts/MergeData/FileMerge,/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/scripts/IncludeCalibrationData/AddCalibData, /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/run_condor.sh,/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif,/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/AncillaryData/Data2/statemessages$(Date).csv,/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/AncillaryData/Data1/celestialPositions$(Date).csv,/storage/osg-otte1/shared/TrinityDemonstrator/MiscData/WeatherData/weather/weather_$(Date),/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/exact/data/SiPMTempatureCorrections.csv,,/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/exact/data/UCTempatureCorrections.csv
+transfer_input_files = $(sysFilePath)/Data/$(Date)/RawDataMerged/$(Filename),$(sysFilePath)/DataAnalysis/MergedData/scripts/MergeData/FileMerge,$(sysFilePath)/DataAnalysis/MergedData/scripts/IncludeCalibrationData/AddCalibData, $(sysFilePath)/DataAnalysis/MergedData/run_condor.sh,$(sysFilePath)/DataAnalysis/containers/rootandexact.sif,$(sysFilePath)/DataAnalysis/AncillaryData/Data2/statemessages$(Date).csv,$(sysFilePath)/DataAnalysis/AncillaryData/Data1/celestialPositions$(Date).csv,$(sysFilePath)/MiscData/WeatherData/weather/weather_$(Date),$(sysFilePath)/DataAnalysis/exact/data/SiPMTempatureCorrections.csv,,$(sysFilePath)/DataAnalysis/exact/data/UCTempatureCorrections.csv
 #any file that needs to included for the job - everything minus executable
 
 
@@ -35,8 +36,10 @@ transfer_output_files = DataAnalysis/MergedData/Output/$(Date)/
 request_cpus = 1
  # these are PER JOB
 
-request_memory = 4GB 
+request_memory = 1GB 
 # these are PER JOB
+
+JobBatchName = "MD_$(Date)"
 
 # space for all files input and output and intermediate files
 request_disk = 5GB 
@@ -51,6 +54,4 @@ request_disk = 5GB
 # queue + num - que this many identical jobs (EXACT  SAME JOB)
 # use case - executable can create independent jobs (script creates difference between jobs)
 # randomw number simulations 
-queue 1
- 
-
+queue Filename from $(sysFilePath)/DataAnalysis/data_lists/file_list_$(Date).txt
