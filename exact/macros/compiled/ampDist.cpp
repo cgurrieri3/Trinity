@@ -1,9 +1,3 @@
-//////////////////////
-//ANGELINA TESTING!!//
-//////////////////////
-
-//tells root where to find ExACT libraries. Only needed if using as a macro for root. To compile, you remove this line and include ExACT libraries directly
-R__LOAD_LIBRARY(libExACT.so)
 //includes libraries used in script
 #include <TH1.h>
 #include <TH2F.h>
@@ -21,9 +15,24 @@ R__LOAD_LIBRARY(libExACT.so)
 #include <sys/types.h>
 #include <vector>
 #include <cmath>
-#include <TImage.h>
 
+#include <Event.h>
+#include <Pulse.h>
+#include <TLatex.h>
+#include <TFile.h>
+#include <TBox.h>
+#include <Getline.h>
+#include <TRandom.h>
+#include <TTimer.h>
+#include <TApplication.h>
+#include <TGraph.h>
 
+//set "base" directories
+//dataDir is where the daily data directories are saved (i.e. "YYYYMMDD" directories)
+//outDir is the directory where output will be saved
+std::string outDir = "/home/trinity/Documents/exact_output/May2024/flatfielding/";
+/*std::string dataDir = "/mnt/hgfs/vm/ff/";
+std::string outDir = "/mnt/hgfs/vm/ff/";*/
 
 //initialize or declare global variables, which are allocated static memory and are available in every scope
 //TTree *tree = 0;
@@ -37,127 +46,64 @@ void DrawMUSICBoundaries();
 std::vector<Double_t> fileData(std::string dirStr, std::string treeStr);
 Double_t Median(vector<Double_t> v);
 
-void ampDist(std::string dStr, std::string treeString)
+int main(int argc, char **argv)
 {
-
-
-
+	if(argc != 3){
+		cout << "USAGE: ./ampDist <data-file-path> <tree-name>" << endl;
+		return 1;
+	}
+	std::string dStr = argv[1];
+	std::string treeString = argv[2];
 	std::vector<Double_t> dvAvg = fileData(dStr,treeString);
 
-	//c_disp = new TCanvas("Display","CameraPlot",2500,1000);
-        // Create and divide the canvas
-        TCanvas *c_disp = new TCanvas("Display", "CameraPlot", 1250, 1000);
-	c_disp->Divide(2,2); // Angelina change - (2,1) to (2,2) to have a 2x2 grid
-
-	for (int i = 1; i <= 4; i++) {
-		c_disp->cd(i);
-		gPad->SetRightMargin(0.15);
-		gPad->SetLeftMargin(0.12);
-		gPad->SetBottomMargin(0.12);
-		gPad->SetTopMargin(0.08);
-	}
-
-	TH2F *aCam = new TH2F("aCam","Normalized amplitude offset from camera median",16,-0.5,15.5,16,-0.5,15.5);
-	TH1 *aDist = new TH1F("aDist","Amplitudes normalized to camera median",100,0,2);
+	c_disp = new TCanvas("Display","CameraPlot",2500,1100);
+	TPad *p1 = new TPad("p1","left",0,0,0.5,0.8);
+	TPad *p2 = new TPad("p2","right",0.5,0,1,0.8);
+	//c_disp->Divide(2,1);
+	TH2F *aCam = new TH2F("aCam","Normalized amplitude",16,-0.5,15.5,16,-0.5,15.5);
+	//TH1 *aDist = new TH1F("aDist","Amplitudes",100,0,2);
+	TH1 *aDist = new TH1F("aDist","Amplitudes",300,0,1499);
 
 	Double_t dMedian = Median(dvAvg);
 	
 	for(int i = 0; i < MaxNofChannels; i++){
 		int nx, ny;
 		FindBin(i,&nx,&ny);
-		aCam->SetBinContent(nx+1,ny+1,(dvAvg[i]/dMedian)-1);
-		aDist->Fill(dvAvg[i]/dMedian);
+		//aCam->SetBinContent(nx+1,ny+1,(dvAvg[i]/dMedian)-1);
+		aCam->SetBinContent(nx+1,ny+1,dvAvg[i]);
+		//aDist->Fill(dvAvg[i]/dMedian);
+		aDist->Fill(dvAvg[i]);
 	}
 	aCam->SetStats(0);
 	//aDist->SetStats(0);
-	c_disp->cd(1);
-
-	gPad->SetRightMargin(0.20);
-	// gPad->SetFixedAspectRatio(false); 
-	// c_disp->cd(1)->SetRightMargin(0.15);
+	//c_disp->cd(1);
+	//c_disp->cd(1)->SetRightMargin(0.15);
+	p1->Draw();
+	p1->cd();
+	p1->cd()->SetRightMargin(0.15);
+	//aCam->SetTitle("Normalized amplitude offset from camera median");
+	//aCam->GetXaxis()->SetTitle("Camera column");
+	//aCam->GetYaxis()->SetTitle("Camera row");
 	aCam->Draw("colz");
 	DrawMUSICBoundaries();
-
-
-
-	c_disp->cd(2);
-	aDist->GetXaxis()->SetTitle("Normalized amplitude");
+	//c_disp->cd(2);
+	c_disp->cd();
+	p2->Draw();
+	p2->cd();
+	//aDist->GetXaxis()->SetTitle("Normalized amplitude");
+	//aDist->SetTitle("Amplitudes normalized to camera median");
+	//aDist->GetXaxis()->SetTitle("Signal amplitude normalized to camera median");
+	//aDist->GetYaxis()->SetTitle("# of pixels");
 	aDist->Draw("hist");
-
-
-	// Angelina changes below
-	
-	// compute std dev of normalized amplitudes
-	// (Angelina: previously using median as mean? Confused why it's displaying mean)
-	Double_t mean_norm = 0;
-	for (size_t i = 0; i < dvAvg.size(); i++) {
-		mean_norm += (dvAvg[i] / dMedian);
-	}
-	mean_norm /= dvAvg.size();
-
-	Double_t stdDev = 0;
-	for (size_t i = 0; i < dvAvg.size(); i++) {
-		stdDev += pow((dvAvg[i] / dMedian) - mean_norm, 2);
-	}
-	stdDev = sqrt(stdDev / dvAvg.size());
-
-	// red stats box
-	TLatex *stats = new TLatex();
-	stats->SetTextColor(kRed);
-	stats->SetTextSize(0.04);
-	stats->SetNDC();  // normalized device coords
-
-	// vertical line for the MEAN
-	TLine *meanLine = new TLine(mean_norm, 0, mean_norm, aDist->GetMaximum());
-	meanLine->SetLineColor(kRed);
-	meanLine->SetLineWidth(3);
-	meanLine->Draw("same");
-
-	// show mean and std
-	stats->DrawLatex(0.65, 0.85, Form("Mean = %.3f", mean_norm));
-	stats->DrawLatex(0.65, 0.80, Form("Std = %.3f (~<10%%)", stdDev));
-
-	// bottom left panel
-	c_disp->cd(3);
-	TImage *refImg1 = TImage::Open("/home/trinity/Programs/exact/macros/exampleHeatMap.png");
-	if (!refImg1) { //if the heat map doesn't exist or load
-		std::cout << "WARNING: Could not load exampleHeatMap.png" << std::endl;
-	} else {
-		refImg1->Draw(); 
-	}
-	gPad->Modified();
-
-	// bottom right panel
-	c_disp->cd(4);
-	TImage *refImg2 = TImage::Open("/home/trinity/Programs/exact/macros/exampleHistogram.png");
-	if (!refImg2) { // if histogram doesn't exist or load
-		std::cout << "WARNING: Could not load exampleHistogram.png" << std::endl;
-	} else {
-		refImg2->Draw();
-	}
-	gPad->Modified();
-
-
-	// Angelina changes above
-
-	// Manually remove the ".root" extension from the root file name
-	const char* cFilename = dStr.c_str();
-    	const char* cRootFilename = gSystem->BaseName(cFilename);
-    	TString rootFileName = cRootFilename;
-    	size_t extensionPos = rootFileName.Index(".root");
-   	 if (extensionPos != kNPOS) {
-        	rootFileName.Remove(extensionPos);
-    	}
-
-
-
-	// c_disp->SaveAs(Form("/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataQualityPlots/avgDist_%s.png",rootFileName.Data()));
-	c_disp->SaveAs(Form("/home/trinity/Programs/exact/macros/avgDist_%s.png",rootFileName.Data())); // testing 
-
-
-    	delete c_disp;
-
-
+	c_disp->cd();
+	string fStr = dStr.substr(dStr.find_last_of("/")+1);
+	string c_title = Form("%s, %s",fStr.c_str(),treeString.c_str());
+	TLatex *tex = new TLatex(0.2,0.9,c_title.c_str());
+	tex->SetNDC();
+//	tex->SetTextSize(0.1); 
+	tex->Draw();
+	c_disp->Print("/home/trinity/Documents/exact_output/avgDist.png");
+	return 0;
 }
 
 std::vector<Double_t> fileData(std::string fileName, std::string treeStr){
@@ -168,7 +114,7 @@ std::vector<Double_t> fileData(std::string fileName, std::string treeStr){
 	Event *ev = new Event();
 	tree->SetBranchAddress("Events", &ev);
 	int nEntries = tree->GetEntries();
-	cout << "TEST: Total Number of Events: " << nEntries << endl;
+	cout << "Total Number of Events: " << nEntries << endl;
 	for(int countEvent = 0; countEvent < nEntries; countEvent++){
 		std::vector<Double_t> outRun(MaxNofChannels,0.0);
 		tree->GetEntry(countEvent);
