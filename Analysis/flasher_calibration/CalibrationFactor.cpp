@@ -39,8 +39,27 @@ int main(int argc, char **argv){
     std::vector<double> AvgAmplitudeValuesPixels(MaxNofChannels, 0.0);
     int hled_event_counter = 0;
 
+    TH1F* h1 = new TH1F("h1", "Average Amplitude Distribution", 300, 0, 1500);
+    h1->SetXTitle("Average Amplitude (ADC)");
+    h1->SetYTitle("Counts");
+    h1->GetXaxis()->SetTitleOffset(1.1); // Adjust X-axis title offset
+    h1->GetYaxis()->SetTitleOffset(1.0); // Adjust Y-axis title offset
+    TH1F* h4 = (TH1F*)h1->Clone("h4");
+    // h1->SetStats(0); 
+
+    TH1F* h2 = new TH1F("h2", "Avg Amplitude RMS", 100, 0, 100);
+    h2->SetXTitle("Pedestal RMS (ADC)");
+    h2->SetYTitle("Counts");
+    h2->GetXaxis()->SetTitleOffset(1.1); // Adjust X-axis title offset
+    h2->GetYaxis()->SetTitleOffset(1.0); // Adjust Y-axis title offset
+    // h2->SetStats(0);
+    TH1F* h3 = (TH1F*)h2->Clone("h3");
+    
+
+    
+
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
-    // for(int f = 45; f<60; f++){ // use for testing with a few files
+    // for(int f = 45; f<60; f++){
         try {
             std::string FilePath = Form("%s%s",FolderPath.c_str(),fileNamesVec[f].c_str());
             if (!util->isBranchPresentInFile(FilePath, "Test")) {
@@ -75,6 +94,11 @@ int main(int argc, char **argv){
                         pulse = new Pulse(ev->GetSignalValue(k));
                         // AmplitudesTest.push_back(pulse->GetAmplitude());
                         Amplitudes.push_back(pulse->GetAmplitude());        
+                        // PedestalRMSTest.push_back(pulse->GetPedestalRMS());      
+                        // if (PedestalRMSTest[k] == 0){
+                        //     cout << "Event Test" << EventCounter-nEntries << " has a Pedestal RMS of " << PedestalRMSTest[k] << endl;
+                        //     cout << "The amplitude is " << pulse->GetAmplitude() << endl;
+                        // }             
                         delete pulse;
                     }
                     
@@ -85,17 +109,51 @@ int main(int argc, char **argv){
                         Amplitudes.push_back(pulse->GetAmplitude());
                         // PedestalRMSHLED.push_back(pulse->GetPedestalRMS()); 
                         WhichEvent = "HLED";
+                        // if (PedestalRMSHLED[k] == 0){
+                        //     cout << "Event HLED " << EventCounter-nEntries << " has a Pedestal RMS of " << PedestalRMSHLED[k] << endl;
+                        //     cout << "The amplitude is " << pulse->GetAmplitude() << endl;
+                        // }
                         delete pulse;
                     }
                 }
 
+                float sumsq = 0;
+                float RMS = 0;
+                for (int i = 0; i < MaxNofChannels; i++){
+                    sumsq += Amplitudes[i]*Amplitudes[i];
+                    // cout << "sumsq: " << sumsq << endl;
+                    RMS = sqrt(sumsq)/MaxNofChannels;
+                    // cout << "RMS: " << RMS << endl;
+                }
+
+                if (WhichEvent == "Test"){
+                    h1->Fill(util->GetEventAmplitudeSum(Amplitudes)/MaxNofChannels);
+                    if (RMS < 2){
+                        cout << "Event Test " << EventCounter << " has a Pedestal RMS of " << RMS << endl;
+                    }
+                    h2->Fill(RMS);
+                    
+                } else {
+                    h4->Fill(util->GetEventAmplitudeSum(Amplitudes)/MaxNofChannels);
+                    // if (RMS < 20){
+                    //     cout << "Event HLED " << EventCounter-nEntries << " has a Pedestal RMS of " << RMS << endl;
+                    // }
+                    h3->Fill(RMS);
+                    
+                }
 
                 // cout << std::accumulate(PedestalRMS.begin(), PedestalRMS.end(), 0.0) / MaxNofChannels << endl;
                 delete hEvent;
                 if (folString < "20241001"){
                     FlasherEventsCutOff = 350;
                 }
-                if (util->GetEventAmplitudeSum(Amplitudes)/MaxNofChannels >= FlasherEventsCutOff){                
+                if (folString >= "20251017"){
+                    FlasherEventsCutOff = 835;
+                }
+                if (folString >= "20251204"){
+                    FlasherEventsCutOff = 700;
+                }
+                if (util->GetEventAmplitudeSum(Amplitudes)/MaxNofChannels >= FlasherEventsCutOff){    
                     hled_event_counter +=1;
                     for(int j = 0; j<MaxNofChannels; j++){
                         TotalAmplitudeValues[j] = TotalAmplitudeValues[j]+Amplitudes[j];
@@ -122,12 +180,19 @@ int main(int argc, char **argv){
     if (folString < "20241001"){
         dead_pixel_cutoff = 250;
     }
+    if (folString >= "20251017"){
+        dead_pixel_cutoff = 700;
+    }
+    if (folString >= "20251204"){
+        dead_pixel_cutoff = 700;
+    }
     for(int j = 0; j<MaxNofChannels; j++){
         AvgAmplitudeValuesPixels[j] = TotalAmplitudeValues[j]/hled_event_counter;
         if (AvgAmplitudeValuesPixels[j] < dead_pixel_cutoff){
             AvgAmplitudeValuesPixels[j] = -1;
         } else {
             AvgAmplitudeValuesPixelsMedian.push_back(TotalAmplitudeValues[j]/hled_event_counter);
+
         }
     }
 
@@ -167,8 +232,38 @@ int main(int argc, char **argv){
     
     file = new TFile(Form("%s%s_FlasherCalibration_Factor.root", outDir.c_str(), folString.c_str()), "RECREATE");  // "RECREATE" to overwrite if it exists
     hcam_calib->Write("CamFlasher");
+    h1->Write("AvgAmpDistributionTest");
+    h4->Write("AvgAmpDistributionHLED");
+    h2->Write("RMSTestDistribution");
+    h3->Write("RMSHLEDDistribution");
     hcam_calib->SetMinimum(minimum-0.01);
     c_cleaned->Write("CanvasDisplayFlasherCalibration");
+
+    c_cleaned->cd(0);
+   
+    h4->SetLineColor(kRed);
+    h4->Draw("HIST");
+    h1->Draw("SAME");
+    TLegend* leg = new TLegend(0.6,0.7,0.9,0.9);
+    leg->AddEntry(h1, "Avg Amplitude Distribution Test", "l");
+    leg->AddEntry(h4, "Avg Amplitude Distribution HLED", "l");
+    leg->Draw("SAME");
+    c_cleaned->Write("AvgAmp");
+    delete leg;
+    
+    c_cleaned->cd(0);
+
+    
+    h3->SetLineColor(kRed);
+    h3->Draw("HIST");
+    h2->Draw("SAME");
+    leg = new TLegend(0.6,0.7,0.9,0.9);
+    leg->AddEntry(h2, "Avg Amplitude RMS Distribution Test", "l");
+    leg->AddEntry(h3, "Avg Amplitude RMS Distribution HLED", "l");
+    leg->Draw("SAME");
+    c_cleaned->Write("AvgAmplitudeRMS");
+    delete leg;
+
 
     file->Close();
     util->setFilePermissions(Form("%s%s_FlasherCalibration_Factor.root", outDir.c_str(), folString.c_str()));
