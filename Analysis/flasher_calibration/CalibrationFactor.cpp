@@ -59,7 +59,7 @@ int main(int argc, char **argv){
     
 
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
-    // for(int f = 45; f<60; f++){
+    // for(int f = 65; f<90; f++){
         try {
             std::string FilePath = Form("%s%s",FolderPath.c_str(),fileNamesVec[f].c_str());
             if (!util->isBranchPresentInFile(FilePath, "Test")) {
@@ -144,15 +144,18 @@ int main(int argc, char **argv){
 
                 // cout << std::accumulate(PedestalRMS.begin(), PedestalRMS.end(), 0.0) / MaxNofChannels << endl;
                 delete hEvent;
-                if (folString < "20241001"){
+                // cout << "Date" << stoi(folString) << endl;
+                if (stoi(folString) < 20241001){
                     FlasherEventsCutOff = 350;
                 }
-                if (folString >= "20251017"){
+                if (stoi(folString) >= 20241017){
                     FlasherEventsCutOff = 835;
                 }
-                if (folString >= "20251204"){
+                if (stoi(folString) >= 20251204){
                     FlasherEventsCutOff = 700;
                 }
+                // cout << util->GetEv/entAmplitudeSum(Amplitudes)/MaxNofChannels << endl;
+                // cout << "FlasherEventsCutOff: " << FlasherEventsCutOff << endl;
                 if (util->GetEventAmplitudeSum(Amplitudes)/MaxNofChannels >= FlasherEventsCutOff){    
                     hled_event_counter +=1;
                     for(int j = 0; j<MaxNofChannels; j++){
@@ -177,13 +180,13 @@ int main(int argc, char **argv){
     
     std::vector<double> AvgAmplitudeValuesPixelsMedian;
     double dead_pixel_cutoff = 750;
-    if (folString < "20241001"){
+    if (stoi(folString) < 20241001){
         dead_pixel_cutoff = 250;
     }
-    if (folString >= "20251017"){
+    if (stoi(folString) >= 20241017){
         dead_pixel_cutoff = 700;
     }
-    if (folString >= "20251204"){
+    if (stoi(folString) >= 20251204){
         dead_pixel_cutoff = 700;
     }
     for(int j = 0; j<MaxNofChannels; j++){
