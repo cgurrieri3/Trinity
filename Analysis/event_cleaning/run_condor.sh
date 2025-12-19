@@ -10,53 +10,68 @@ export LD_LIBRARY_PATH=/exact/dict:/usr/lib/oracle/21/client64/lib:/usr/local/li
 
 DATE=$1
 FILENAME=$2
-echo "Running job for $DATE with file $FILENAME "
+
+echo "Running job for $DATE with file $FILENAME"
+# echo "Running job for $DATE with file $FILENAME as user $USER_NAME"
+
 echo "Directories"
 ls -lh
+
 
 # Create necessary directories if they don't exist
 
 mkdir -p DataAnalysis/MergedData/Output/$DATE/
 mkdir -p DataAnalysis/event_cleaning/ClusterCleaning/
-mkdir -p DataAnalysis/event_cleaning/Output/
 mkdir -p DataAnalysis/flasher_calibration/Output/
 mkdir -p DataAnalysis/event_cleaning/Output/
+# mkdir -p DataAnalysis/event_cleaning/Output/
 
-mv $FILENAME DataAnalysis/MergedData/Output/$DATE/
+mv $DATE DataAnalysis/MergedData/Output/
+# mv $DATE DataAnalysis/MergedData/Output/.
+echo "Moved $DATE to DataAnalysis/MergedData/Output/"
+cd DataAnalysis/MergedData/Output/$DATE/
+pwd
+ls -lh
+cd $DATE
+ls -lh
+cd 
+
 mv neighbors DataAnalysis/event_cleaning/ClusterCleaning/
+echo "Moved neighbors to DataAnalysis/event_cleaning/ClusterCleaning/"
 # mv EventInfo.h DataAnalysis/event_cleaning/ClusterCleaning/
 # mv EventInfoDict_rdict.pcm DataAnalysis/event_cleaning/ClusterCleaning/
 # mv LinkDef.h DataAnalysis/event_cleaning/ClusterCleaning/
 # mv EventCleaning DataAnalysis/event_cleaning/ClusterCleaning/
 mv ${DATE}_FlasherCalibration_Factor.root DataAnalysis/flasher_calibration/Output/
 
+##
+mv EventCleaning DataAnalysis/event_cleaning/ClusterCleaning/EventCleaning
+mv EventInfo.h DataAnalysis/event_cleaning/ClusterCleaning/EventInfo.h
+mv EventInfoDict_rdict.pcm DataAnalysis/event_cleaning/ClusterCleaning/EventInfoDict_rdict.pcm
+mv LinkDef.h DataAnalysis/event_cleaning/ClusterCleaning/LinkDef.h
 echo "Running eventcleaning for $DATE and File $FILENAME"
-# ldd ./FileMerge
-
-./EventCleaning $DATE ~/ $FILENAME
-# # sleep 10
-# echo "Running Calibration for $DATE and File $FILENAME"
-# ./AddCalibData $DATE /srv/ Merged_$FILENAME
+##
+cd DataAnalysis/event_cleaning/ClusterCleaning/
 ls -lh
-# cd DataAnalysis/event_cleaning/Output/
-# rm *.pdf
-# rm *.root
-# for f in *.root; do
-#     [ -e "$f" ] || continue  # skip if no .root files
-#     time=$(echo "$FILENAME" | grep -oP '\d{4}-\d{2}-\d{2}T\K\d{2}:\d{2}')
-#     echo "Time extracted: $time"
-#     newname="${f%.root}_$time.root"
-#     echo "Renaming: $f → $newname"
-#     mv "$f" "$newname"
-# done
+chmod +x EventCleaning
+./EventCleaning $DATE ~/ $FILENAME
 
-cd DataAnalysis/event_cleaning/Output/DataFiles/
+ls -lh
+
+cd 
+cd DataAnalysis/event_cleaning/Output/
+
+mv DataFiles ${USER}_DataFiles
+cd ${USER}_DataFiles
+
+pwd
 for f in *.root; do
     [ -e "$f" ] || continue  # skip if no .root files
+    echo "Processing file: $FILENAME"
     time=$(echo "$FILENAME" | grep -oP '\d{4}-\d{2}-\d{2}T\K\d{2}:\d{2}')
     echo "Time extracted: $time"
     newname="${f%.root}_$time.root"
-    echo "Renaming: $f → $newname"
+    echo "Renaming: $f -> $newname"
     mv "$f" "$newname"
 done
 
