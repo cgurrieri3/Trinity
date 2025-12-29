@@ -12,6 +12,8 @@ import requests
 from datetime import datetime, timezone, timedelta, time as time_obj
 import pandas as pd
 import time
+import math
+import numpy as np
 import communicate as lets
 
 latitude = 38.5202  # Latitude of Frisco Peak
@@ -297,9 +299,65 @@ def check_current_time():
         lets.communicate('TIME: Current time UNSAFE')
         return 0
         
+def get_hv_value():
+    df = pd.read_csv('/data/TrinityLabComputer/obs_prgm/HVvalue_Angle.txt', header=0)
+    
+    #print(df)
+
+
+    observer = ephem.Observer()
+    observer.lat = str(latitude)
+    observer.lon = str(longitude)
+    observer.elevation = elevation
+    observer.date = datetime.now(timezone.utc) +timedelta(hours=7)
+    print(f"Observer date (UTC): {observer.date}")
+    moon = ephem.Moon()
+    moon.compute(observer)
+    #print( f"{np.rad2deg(float(repr(moon.alt)))}, {np.rad2deg(float(repr(moon.az)))}")
+    #print(f"moon phase: {moon.phase}")
+
+    # convert polar to cartesian
+    # start with telescope at -0.5 deg altitude, -80 deg azimuth
+    # r, phi, theta
+    tp_polar = [1,-80.0, 90.5]
+    tp_cart= [tp_polar[0]*math.sin(math.radians(tp_polar[2]))*math.cos(math.radians(tp_polar[1])),tp_polar[0]*math.sin(math.radians(tp_polar[2]))*math.sin(math.radians(tp_polar[1])),tp_polar[0]*math.cos(math.radians(tp_polar[2]))]
+    #print(tp_cart)
+    mp_polar = [1, float(np.rad2deg(float(repr(moon.az)))),float(np.rad2deg(float(repr(moon.alt))))]
+    if mp_polar[2] < 0:
+        mp_polar[2] = 90 + abs(mp_polar[2])
+    mp_cart= [mp_polar[0]*math.sin(math.radians(mp_polar[2]))*math.cos(math.radians(mp_polar[1])),mp_polar[0]*math.sin(math.radians(mp_polar[2]))*math.sin(math.radians(mp_polar[1])),mp_polar[0]*math.cos(math.radians(mp_polar[2]))]
+    print(mp_polar)
+    #print(mp_cart)
+    
+
+    angle = (tp_cart[0] * mp_cart[0]) + (tp_cart[1] * mp_cart[1]) + (tp_cart[2] * mp_cart[2])
+    angle = math.degrees(math.acos(angle))
+    print(f"Angle between telescope pointing and moon: {angle} degrees")
+
+
+    if float(np.rad2deg(float(repr(moon.alt)))) > 0.0:
+        print("Moon is above the horizon - Getting starting HV value from table")
+        # round to nearst 0.10
+        moon_phase_rounded = int(round(moon.phase,-1))
+        angle_rounded = int(round(angle/10,0))
+        print(moon_phase_rounded, angle_rounded)
+        #print(df[str(moon_phase_rounded)][angle_rounded])
+        return df[str(moon_phase_rounded)][angle_rounded]
+
+    else:
+        print("Moon is below the horizon - Setting HV to 44.0")
+        return 44.0
+    # print((telescope_position[0] * moon_position[0]))
+    # print((telescope_position[1] * moon_position[1]))
+    # while angle > 360.0:
+    #     angle -= 360.0
+
+    # while angle < 0.0:
+    #     angle += 360.0
+    # print(180 -angle)
 
 
 
-
+print(f"Output of HV: {get_hv_value()}")
 create_file()
 check_current_time()
