@@ -90,7 +90,7 @@ def sun_position_over_time(latitude, longitude, start_date, interval_minutes):
             sun_altitudes.append(s_altitude)
             sun_times.append(current_time_with_minute)
 
-    sunrise_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > -18 and sun_altitudes[i - 1] <= -18), None)
+    sunrise_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] > -15 and sun_altitudes[i - 1] <= -15), None)
     time_of_sunrise_crit = sun_times[sunrise_index] if sunrise_index is not None else None
 
     sunset_index = next((i for i in range(1, len(sun_times)) if sun_altitudes[i] < -18 and sun_altitudes[i - 1] >= -18), None)
