@@ -25,7 +25,8 @@ int main(int argc, char **argv) {
     // Load in all the files
     std::string FolderPath = Form("%s%s/",dataDir.c_str(),folString.c_str());
     std::vector<std::string>fileNamesVec;
-    if (filename_argument != "Merged_n"){ // if the file name not specified then do all files in the directory
+    cout << "Folder Path: " << FolderPath << endl;
+    if (filename_argument != "n"){ // if the file name not specified then do all files in the directory
         std::cout << "using specific file name" << std::endl;
         // std::string specificfile = Form("%s%s",FolderPath.c_str(),filename_argument.c_str());
         fileNamesVec.push_back(filename_argument);
@@ -74,6 +75,7 @@ int main(int argc, char **argv) {
             std::vector<double> tempCorrection(256);
             std::vector<double> relOverVoltage(256);
             std::vector<double> amplitudeToPE(256);
+            std::vector<double> pedestal(256);
 
             double hvSettingPx, relOverV, overV;
 
@@ -92,20 +94,29 @@ int main(int argc, char **argv) {
 
                     Pulse* pulse = new Pulse(ev->GetSignalValue(j));
                     double amplitude = pulse->GetAmplitude();
+                    double ped = pulse->GetPedestal();
+                    // cout << ped << endl;
                     delete pulse;
 
                     absoluteGain[j] = GAIN_REF * (1.0 / tempCorrection[j]);
                     amplitudeToPE[j] = amplitude / absoluteGain[j];
                     relOverVoltage[j] = relOverV;
+                    pedestal[j] = ped;
                 }
 
                 sipmInfo->SetGain(absoluteGain);
                 sipmInfo->SetTCorrection(tempCorrection);
                 sipmInfo->SetAmplToPE(amplitudeToPE);
+                // cout << pedestal[0] << endl;
+                sipmInfo->SetPedestal(pedestal);
                 sipmInfo->SetRelOverV(relOverVoltage);
 
                 sipmBranch->Fill();
+
+                // auto pedestalVec = sipmInfo->GetPedestal();
+                // cout <<"yo" <<pedestalVec[0] << endl;
             }
+            // tree->Write();
             tree->Write("", TObject::kOverwrite);
 
             delete ev;
