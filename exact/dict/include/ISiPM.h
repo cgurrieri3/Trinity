@@ -66,7 +66,16 @@ class ISiPM{
 		 * 
 		 * @param values A std::vector of size nPixels that contains the ADC to photo-electron values for each SiPM in the camera.
 		 * */
-		//void SetChgToPE(std::vector<double> values);
+		 //void SetChgToPE(std::vector<double> values);
+
+		/**
+		 * Public method to set the Pedestal value for each of the event for the noise in each pixel
+		 * 
+		 * @param values A std::vector of size nPixels that contains the pedestal values from the trace for each SiPM in the camera.
+		 * */
+
+		void SetPedestal(std::vector<double> values);
+		
 
 		/**
 		 * Public method to get the gain as stored in the object
@@ -105,6 +114,12 @@ class ISiPM{
 		 * @return a std::vector<double> of size nPixels with the charge in ADC to photo-electron values
 		 * */
 		//std::vector<double> GetChgToPE();
+		/**
+		 * Public method to get the gain as stored in the object
+		 * 
+		 * @return a std::vector<double> of size nPixels with the gain values
+		 * */
+		std::vector<double> GetPedestal();
 
 	private:
 		std::vector <double> gain; /**< A std::vector containing the gain values for all the pixels*/
@@ -112,6 +127,7 @@ class ISiPM{
 		std::vector <double> gainTCorrection;/**< A std::vector containing the temperature correction values for all the pixels*/
 		std::vector <double> amplToPE;/**< A std::vector containing the amplitude in ADC to photo-electron values for all the pixels*/
 		std::vector <double> relOverV;/**< A std::vector containing the relative overvoltage values for all the pixels*/
-};
+		std::vector <double> pedestal;/**< A std::vector containing the pedestal values for all the pixels*/
+	};
 
 #endif // ISIPM_H
