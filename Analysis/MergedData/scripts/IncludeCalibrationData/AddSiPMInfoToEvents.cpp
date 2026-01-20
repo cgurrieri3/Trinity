@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     std::string FolderPath = Form("%s%s/",dataDir.c_str(),folString.c_str());
     std::vector<std::string>fileNamesVec;
     cout << "Folder Path: " << FolderPath << endl;
-    if (filename_argument != "n"){ // if the file name not specified then do all files in the directory
+    if (filename_argument != "Merged_n"){ // if the file name not specified then do all files in the directory
         std::cout << "using specific file name" << std::endl;
         // std::string specificfile = Form("%s%s",FolderPath.c_str(),filename_argument.c_str());
         fileNamesVec.push_back(filename_argument);
