@@ -310,7 +310,7 @@ def get_hv_value():
     observer.lon = str(longitude)
     observer.elevation = elevation
     observer.date = datetime.now(timezone.utc) +timedelta(hours=7)
-    print(f"Observer date (UTC): {observer.date}")
+    # print(f"Observer date (UTC): {observer.date}")
     moon = ephem.Moon()
     moon.compute(observer)
     #print( f"{np.rad2deg(float(repr(moon.alt)))}, {np.rad2deg(float(repr(moon.az)))}")
@@ -326,13 +326,13 @@ def get_hv_value():
     if mp_polar[2] < 0:
         mp_polar[2] = 90 + abs(mp_polar[2])
     mp_cart= [mp_polar[0]*math.sin(math.radians(mp_polar[2]))*math.cos(math.radians(mp_polar[1])),mp_polar[0]*math.sin(math.radians(mp_polar[2]))*math.sin(math.radians(mp_polar[1])),mp_polar[0]*math.cos(math.radians(mp_polar[2]))]
-    print(mp_polar)
+    # print(mp_polar)
     #print(mp_cart)
     
 
     angle = (tp_cart[0] * mp_cart[0]) + (tp_cart[1] * mp_cart[1]) + (tp_cart[2] * mp_cart[2])
     angle = math.degrees(math.acos(angle))
-    print(f"Angle between telescope pointing and moon: {angle} degrees")
+    print(f"Angle between telescope pointing and moon: {np.round(angle)} degrees")
 
 
     if float(np.rad2deg(float(repr(moon.alt)))) > 0.0:
@@ -358,6 +358,6 @@ def get_hv_value():
 
 
 
-print(f"Output of HV: {get_hv_value()}")
+# print(f"Output of HV: {get_hv_value()}")
 create_file()
 check_current_time()

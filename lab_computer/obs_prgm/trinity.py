@@ -105,6 +105,9 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 				ssh.door('up')
 				door_status='o'
 				lets.communicate('Door is UP')
+				ssh.CTM_LVPS_HV(44)
+				bias_voltage=44
+				lets.communicate('Raising the bias voltage to 44 V')
 			
 			# 1<2
 			if safe_light < prior_time_check and door_status != 'never':
@@ -128,6 +131,7 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 			safe_proceed = csm.query_last_SM(180,35,35,1,1,9,bias_voltage,1830,240,1,4)
 			lets.log_file(f'SM check returned {safe_proceed}')
 			if isinstance(safe_proceed, str):
+				formessage = safe_proceed
 				safe_proceed = 0
 			if errors < 20:
 				if safe_proceed == 1:
@@ -139,7 +143,9 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 					if bias_voltage==44 and door_status=='o':
 						lets.communicate(f'Lowering HV to {secondary_voltage} V')
 						ssh.CTM_LVPS_HV(secondary_voltage)
+						time.sleep(75)
 						bias_voltage=secondary_voltage
+						lets.communicate("sleeping for 15 seconds after lowering HV")
 					elif bias_voltage==secondary_voltage and door_status=='o':
 						lets.communicate('Closing the door')
 						ssh.door('down')
@@ -164,6 +170,8 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 			else:
 				lets.communicate('Monitor: SM errors persisted to long, SHUTTING DOWN... ')
 				exit_message = f"State Messages: {safe_proceed}"
+				if safe_proceed == 0:
+					exit_message = f"State Messages: {formessage}"
 				break
 
 			#lets.communicate(f'Monitor: Number or errors StateMessages #{errors}.')
@@ -215,9 +223,19 @@ def monitor_observations(state,intrigs_nfiles=10,wx_override = 'no',door_status=
 					lets.communicate(f'Monitor: Weather out of bounds # {errors_WX}/4')
 
 			else:
-				lets.communicate('Monitor: WX conditions unsafe, SHUTTING DOWN...')
-				exit_message = 'Monitor: WX condition unsafe'
-				break
+				# lets.communicate('Monitor: WX conditions unsafe, SHUTTING DOWN...')
+				# exit_message = 'Monitor: WX condition unsafe'
+				# break
+				lets.communicate('Monitor: WX has become unsafe door is now closed and switched to never')
+				lets.communicate('Closing the door')
+				ssh.door('down')
+				door_status='never'
+				time.sleep(10)
+				if bias_voltage != 44:
+					lets.communicate('Raising the bias voltage to 44 V')
+					ssh.CTM_LVPS_HV(44)
+					bias_voltage=44
+				wx_override = 'yes'
 
 
 		else:
@@ -249,6 +267,7 @@ def shut_down_CT():
 		ssh.MagnaPS('off')
 		ssh.MicroTSA('off')
 		ssh.chiller('off')
+		ssh.FlasherMat('off')
 
 ####################################################################################################
 # Failsafe Shutdown -Adam ##########################################################################
@@ -277,6 +296,7 @@ def turn_on_CT_init():
 	ssh.MicroTSA('on')
 	ssh.chiller('on')
 	ssh.LVPS('on')
+	ssh.FlasherMat('on')
 
 	lets.fancy_communicate('Sequence init starting')
 	ssh.CTM_init()
@@ -596,9 +616,18 @@ def body_extrigs(wx_override = 'no',noise_runs='no'):
 		while True:
 			inputbyuser = input("To OPEN the door type: \"o\"\nTo keep the door CLOSED type: \"cl\" \nTo NEVER open the door: \"never\" \nTo return to the main prompt type: \"q\"\n") 
 			if inputbyuser == "o":
+				# user wants to open the door lets set the HV value accordingly
+				set_hv=clt.get_hv_value()
+				lets.communicate(f'Setting HV to {set_hv} V before opening the door')
+				
+				ssh.CTM_LVPS_HV(set_hv)
+				time.sleep(30)
+
 				ssh.door('up')
 				lets.fancy_communicate('Door Up')
 				lets.log_file('Door up ')
+
+				
 
 				monitor_to_shutdown(wx_override,"o")
 				break
@@ -615,7 +644,7 @@ def body_extrigs(wx_override = 'no',noise_runs='no'):
 			elif inputbyuser == "never":
 				lets.fancy_communicate("Never opening the door.")
 				lets.log_file("Never opening the door.")
-
+				wx_override = 'yes'
 				monitor_to_shutdown(wx_override,"never")
 				break
 
@@ -1016,6 +1045,8 @@ def main():
 				double_check = input("This is to reconfigure after DAQ starts do you want to proceed enter a trigger threshold!: ")
 				if double_check.isdigit():
 					door_status = input("Is the door open or closed or never open? ex. (o/c/never):")
+					if door_status == 'never':
+						wx_override = 'yes'
 					daqRECONFIGURE(double_check,wx_override,door_status)
 
 		elif com_in == 'triggerScan':
@@ -1077,6 +1108,10 @@ def main():
 					wx_override = 'no'
 
 			door_status = input("Is the door open or closed or never open? ex. (o/c/never):")
+			if door_status == 'never':
+				wx_override = 'yes'
+			# hv_status = float(input("Is the HV 44.0 or 41.5:"))
+			lets.log_file(f'Starting external monitor with door {door_status}')
 			monitor_to_shutdown(wx_override,door_status)
 
 
