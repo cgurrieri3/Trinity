@@ -1,9 +1,16 @@
 #!/bin/bash
 # run_script.sh
 
-DATE=$1
-FILE=$2
+# Change only this to run on a new machine
+LocalPath="/home/sofia.stepanoff" 
+
+# Variables date and files 
+DATE=$1 # YYYYMMDD
+FILE=$2 # *.root or n
+# -------------------------------------------------
 echo "Running for $DATE and File $FILE"
-apptainer exec --bind /storage/osg-otte1/shared/TrinityDemonstrator:/mnt /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/MergedData/scripts/MergeData/FileMerge $DATE /mnt/ $FILE
-sleep 10
-apptainer exec --bind /storage/osg-otte1/shared/TrinityDemonstrator:/mnt /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/MergedData/scripts/IncludeCalibrationData/AddCalibData $DATE /mnt/ Merged_$FILE
+apptainer exec --bind $LocalPath/TrinityDemonstrator:/mnt $LocalPath/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/MergedData/scripts/MergeData/FileMerge $DATE /mnt/ $FILE
+apptainer exec --bind $LocalPath/TrinityDemonstrator:/mnt $LocalPath/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/MergedData/scripts/IncludeCalibrationData/AddCalibData $DATE /mnt/ Merged_$FILE
+apptainer exec --bind $LocalPath/TrinityDemonstrator:/mnt $LocalPath/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/MergedData/scripts/ReduceInfo/ReduceDataInfoSaved $DATE /mnt/ Merged_$FILE
+chmod 774 Output/$DATE
+chmod 664 Output/$DATE/*

@@ -1,15 +1,20 @@
 #!/bin/bash
+# submit_by_date_or_file.sh
+# Submits Condor jobs for one or more dates.
+# Accepts either a single YYYYMMDD or a file containing multiple dates.
+
+# Change only this to run on a new machine
+LocalPath="/home/sofia.stepanoff" 
 
 INPUT=$1
-# Check for date argument
+
 if [ -z "$INPUT" ]; then
   echo "Usage: $0 <YYYYMMDD | date_file>"
   exit 1
 fi
 
 SUBMIT_TEMPLATE="condense_SM.submit"
-BASE_DIR="/storage/osg-otte1/shared/TrinityDemonstrator/Data"
-# BASE_DIR="/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/Output"
+BASE_DIR="$LocalPath/TrinityDemonstrator/Data/"
 
 # Determine if input is a file or a single date
 if [ -f "$INPUT" ]; then
@@ -24,6 +29,14 @@ else
   DATES="$INPUT"
 fi
 
+##
+LOG_DIR="$LocalPath/TrinityDemonstrator/DataAnalysis/MergedData/.logs"
+USER_LOG_DIR="${LOG_DIR}/${USER}"
+echo "ensuring user log directory exists: $USER_LOG_DIR"
+mkdir -p "$USER_LOG_DIR"
+chmod 775 "$USER_LOG_DIR"
+##
+
 echo "Using submit template: $SUBMIT_TEMPLATE"
 echo "---------------------------------------------"
 
@@ -37,13 +50,13 @@ for DATE in $DATES; do
 
   echo "Processing date: $DATE"
   
-  OUTLIST="/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/data_lists/file_list_${DATE}.txt"
+  OUTLIST="condor_lists/file_list_${DATE}.txt"
 
   rm -f "$OUTLIST"
   for f in "$TARGET_DIR"/*.root; do
       echo "${f##*/}" >> "$OUTLIST"
   done
-
+  cp "$OUTLIST" $LocalPath/TrinityDemonstrator/DataAnalysis/data_lists/
   echo "Created $OUTLIST with $(wc -l < "$OUTLIST") files"
   #echo "Submitting job for: $BASENAME"
   condor_submit Date="$DATE" "$SUBMIT_TEMPLATE"
@@ -54,29 +67,3 @@ done
 
 echo "All submissions complete."
 
-
-
-
-mkdir -p /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/Output/$DATE
-echo "Watcher started..."
-apptainer exec --bind /storage/osg-otte1/shared/TrinityDemonstrator:/mnt \
-  /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers/python3_10.sif \
-  python3 /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/watcher.py \
-  -i /mnt/DataAnalysis/MergedData/ \
-  -o /mnt/DataAnalysis/MergedData/Output/ \
-  -l /mnt/DataAnalysis/MergedData/.logs/watcher.log \
-  -t 500
-echo "Watcher finished."
-
-
-# DATE=$1
-
-# # Loop through files matching the date
-# for FILE in "$TARGET_DIR"*; do
-#   [ -e "$FILE" ] || continue  # skip if no match
-
-#   BASENAME=$(basename "$FILE")
-#   echo "Submitting job for file: $FILE (basename: $BASENAME)"
-#   condor_submit Date=$DATE Filename=$BASENAME "$SUBMIT_TEMPLATE"
-# done
-# echo "Submitted all jobs for date $DATE"
