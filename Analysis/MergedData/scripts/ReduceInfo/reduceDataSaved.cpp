@@ -31,16 +31,7 @@ int main(int argc, char **argv) {
 
     // Load in all the files
     std::string FolderPath = Form("%s%s/",dataDir.c_str(),folString.c_str());
-    
-    std::vector<std::string>fileNamesVec;//=util->GetFilesInDirectory(FolderPath,".root");
-    if (filename_argument != "Merged_n"){ // if the file name not specified then do all files in the directory
-        std::cout << "using specific file name" << std::endl;
-        // std::string specificfile = Form("%s%s",FolderPath.c_str(),filename_argument.c_str());
-        fileNamesVec.push_back(filename_argument);
-    } else {
-        fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
-    }
-    
+    std::vector<std::string>fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
     cout << "Number of files: " << fileNamesVec.size() << endl;
 
     if (gSystem->MakeDirectory(outDir.c_str()) != 0) {
@@ -58,7 +49,7 @@ int main(int argc, char **argv) {
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
         std::string FilePath = Form("%s%s",FolderPath.c_str(),fileNamesVec[f].c_str());
         cout << "Processing file: " << FilePath << endl;
-        std::string outputFilePath = Form("%s/%s", outDir.c_str(), fileNamesVec[f].c_str());
+        std::string outputFilePath = Form("%s/Reduced_%s", outDir.c_str(), fileNamesVec[f].c_str());
         
         TFile* file = new TFile(FilePath.c_str(), "READ");
         TFile* outputFile = new TFile(outputFilePath.c_str(), "RECREATE");
@@ -118,9 +109,9 @@ int main(int argc, char **argv) {
                 
                 
                 // cout << PedstalValue << endl;
-                // cout << "SignalValue size: " << SignalValue[0].size() << endl;
+                cout << "SignalValue size: " << SignalValue[0].size() << endl;
                 vector<Int_t> trace(1, 0);
-                // cout << "Trace Size: " << trace.size() << endl;
+                cout << "Trace Size: " << trace.size() << endl;
                 for (int p = 0; p < SignalValue.size(); p++) {
                     pulse = new Pulse(SignalValue[p]);
                     // cout << pulse->GetPedestal() << endl;

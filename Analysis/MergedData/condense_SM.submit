@@ -1,5 +1,7 @@
 sysFilePath = /home/sofia.stepanoff/TrinityDemonstrator
-OSDF_path = osdf:///ospool/ap40/data/sofia.stepanoff/TrinityDemonstrator
+OSDF_path = osdf:///ospool/uw-shared/projects/GATech_Otte/TrinityDemonstrator
+# /ospool/uw-shared/projects/GATech_Otte for group use - cached so be careful 
+# /ospool/ap40/data/sofia.stepanoff/TrinityDemonstrator - personal cached stoages
 +SingularityImage = "$(OSDF_path)/DataAnalysis/containers/rootandexact.sif"
 
 
@@ -29,13 +31,13 @@ output = $(sysFilePath)/DataAnalysis/MergedData/.logs/$ENV(USER)/Program_$ENV(US
 
 
 transfer_input_files = \
-$(sysFilePath)/Data/$(Date)/RawDataMerged/$(Filename), \
+$(OSDF_path)/Data/$(Date)/RawDataMerged/$(Filename), \
 $(sysFilePath)/DataAnalysis/MergedData/scripts/MergeData/FileMerge, \
 $(sysFilePath)/DataAnalysis/MergedData/scripts/IncludeCalibrationData/AddCalibData, \
 $(sysFilePath)/DataAnalysis/MergedData/run_condor.sh, \ 
-$(sysFilePath)/DataAnalysis/AncillaryData/Data2/statemessages$(Date).csv, \
-$(sysFilePath)/DataAnalysis/AncillaryData/Data1/celestialPositions$(Date).csv, \
-$(sysFilePath)/MiscData/WeatherData/weather/weather_$(Date), \
+$(OSDF_path)/DataAnalysis/AncillaryData/Data2/statemessages$(Date).csv, \
+$(OSDF_path)/DataAnalysis/AncillaryData/Data1/celestialPositions$(Date).csv, \
+$(OSDF_path)/MiscData/WeatherData/weather/weather_$(Date), \
 $(sysFilePath)/DataAnalysis/exact/data/SiPMTempatureCorrections.csv, \
 $(sysFilePath)/DataAnalysis/exact/data/UCTempatureCorrections.csv, \
 $(sysFilePath)/DataAnalysis/MergedData/scripts/ReduceInfo/ReduceDataInfoSaved 
@@ -44,8 +46,14 @@ $(sysFilePath)/DataAnalysis/MergedData/scripts/ReduceInfo/ReduceDataInfoSaved
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT_OR_EVICT
-transfer_output_files = DataAnalysis/MergedData/Output, DataAnalysis/MergedData/ReducedInfoOutput
 
+OUTPATH1=DataAnalysis/MergedData/Output/$(Date)/Merged_$(Filename)
+OUTPATH2=DataAnalysis/MergedData/ReducedInfoOutput/$(Date)/Reduced_Merged_$(Filename)
+transfer_output_files = $(OUTPATH1), $(OUTPATH2)
+transfer_output_remaps = "$(OUTPATH1)=$(OSDF_path)/$(OUTPATH1);$(OUTPATH2)=$(OSDF_path)/$(OUTPATH2)"
+
+#transfer_output_files = DataAnalysis/MergedData/Output/$(Date)/Merged_$(Filename), DataAnalysis/MergedData/ReducedInfoOutput/$(Date)/Reduced_Merged_$(Filename)
+#transfer_output_remaps = "Merged_$(Filename)=$(OSDF_path)/DataAnalysis/MergedData/Output/$(Date)/Merged_$(Filename);Reduced_Merged_$(Filename)=$(OSDF_path)/DataAnalysis/MergedData/ReducedInfoOutput/$(Date)/Reduced_Merged_$(Filename)"
 
 request_cpus = 1
  # these are PER JOB
