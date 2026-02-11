@@ -3,6 +3,7 @@
 # Submits Condor jobs for one or more dates.
 # Accepts either a single YYYYMMDD or a file containing multiple dates.
 MNTPATH="/home/sofia.stepanoff/TrinityDemonstrator"
+OSDF_path="/ospool/uw-shared/projects/GATech_Otte/TrinityDemonstrator"
 INPUT=$1
 
 if [ -z "$INPUT" ]; then
@@ -12,7 +13,7 @@ fi
 
 SUBMIT_TEMPLATE="condense_SM.submit"
 BASE_DIR="$MNTPATH/DataAnalysis/MergedData/Output"
-
+OSDF_BASE_DIR="$OSDF_path/DataAnalysis/MergedData/Output"
 # Determine if input is a file or a single date
 if [ -f "$INPUT" ]; then
   echo "Reading dates from file: $INPUT"
@@ -39,7 +40,7 @@ echo "---------------------------------------------"
 
 for DATE in $DATES; do
   # echo "Checking directory: $DATE"
-  TARGET_DIR="${BASE_DIR}/${DATE}/"
+  TARGET_DIR="${OSDF_BASE_DIR}/${DATE}/"
   if [ ! -d "$TARGET_DIR" ]; then
     echo "Directory not found: $TARGET_DIR — skipping."
     continue

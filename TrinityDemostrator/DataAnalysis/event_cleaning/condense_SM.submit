@@ -1,5 +1,6 @@
 sysFilePath = /home/sofia.stepanoff/TrinityDemonstrator
-OSDF_path = osdf:///ospool/ap40/data/sofia.stepanoff/TrinityDemonstrator
+OSDF_path = osdf:///ospool/uw-shared/projects/GATech_Otte/TrinityDemonstrator
+#OSDF_path = osdf:///ospool/ap40/data/sofia.stepanoff/TrinityDemonstrator
 +SingularityImage = "$(OSDF_path)/DataAnalysis/containers/rootandexact.sif"
 
 
@@ -26,12 +27,12 @@ output = $(sysFilePath)/DataAnalysis/event_cleaning/.logs/$ENV(USER)/Program_$EN
 # program terminal output (not output files)
 
 ## removing $(Filename) from end of Merged data output path
-transfer_input_files = $(sysFilePath)/DataAnalysis/MergedData/Output/$(Date),\
+transfer_input_files = $(OSDF_path)/DataAnalysis/MergedData/Output/$(Date)/?recursive,\
 $(sysFilePath)/DataAnalysis/event_cleaning/ClusterCleaning/EventCleaning,\
 $(sysFilePath)/DataAnalysis/event_cleaning/ClusterCleaning/EventInfoDict_rdict.pcm,\
 $(sysFilePath)/DataAnalysis/event_cleaning/ClusterCleaning/EventInfo.h,\
 $(sysFilePath)/DataAnalysis/event_cleaning/ClusterCleaning/LinkDef.h,\
-$(OSDF_path)/DataAnalysis/event_cleaning/ClusterCleaning/neighbors, \
+$(OSDF_path)/DataAnalysis/event_cleaning/ClusterCleaning/neighbors/?recursive, \
 $(sysFilePath)/DataAnalysis/event_cleaning/run_condor.sh,\
 $(sysFilePath)/DataAnalysis/flasher_calibration/Output/$(Date)_FlasherCalibration_Factor.root
 #any file that needs to included for the job - everything minus executable
