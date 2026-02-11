@@ -1,5 +1,5 @@
 sysFilePath = /home/sofia.stepanoff/TrinityDemonstrator
-OSDF_path = osdf:///ospool/ap40/data/sofia.stepanoff/TrinityDemonstrator
+OSDF_path = osdf:///ospool/uw-shared/projects/GATech_Otte/TrinityDemonstrator
 +SingularityImage = "$(OSDF_path)/DataAnalysis/containers/rootandexact.sif"
 
 universe = vanilla
@@ -28,7 +28,7 @@ output = $(sysFilePath)/DataAnalysis/flasher_calibration/.log/$ENV(USER)/Program
 
 
 transfer_input_files = \
-$(sysFilePath)/DataAnalysis/MergedData/Output/$(Date), \
+$(OSDF_path)/DataAnalysis/MergedData/Output/$(Date)/?recursive, \
 $(sysFilePath)/DataAnalysis/flasher_calibration/FlasherCalibration
 
 
@@ -47,7 +47,7 @@ request_memory = 1GB
 JobBatchName = "FC_$(Date)"
 
 # space for all files input and output and intermediate files
-request_disk = 50GB
+request_disk = 20GB
 #max_retries = 3
 # these are PER JOB
 

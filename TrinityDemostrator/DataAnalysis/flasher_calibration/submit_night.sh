@@ -6,6 +6,7 @@
 
 # Change only this to run on a new machine
 LocalPath="/home/sofia.stepanoff" 
+OSDF_path="/ospool/uw-shared/projects/GATech_Otte"
 
 INPUT=$1
 # add user arg
@@ -23,7 +24,7 @@ SUBMIT_TEMPLATE="condense_SM.submit"
 # chmod output 775
 # ##
 BASE_DIR="$LocalPath/TrinityDemonstrator/DataAnalysis/MergedData/Output"
-
+OSDF_BASE_DIR="$OSDF_path/TrinityDemonstrator/DataAnalysis/MergedData/Output"
 # Determine if input is a file or a single date
 if [ -f "$INPUT" ]; then
   echo "Reading dates from file: $INPUT"
@@ -49,7 +50,7 @@ echo "Using submit template: $SUBMIT_TEMPLATE"
 echo "---------------------------------------------"
 
 for DATE in $DATES; do
-  TARGET_DIR="${BASE_DIR}/${DATE}/"
+  TARGET_DIR="${OSDF_BASE_DIR}/${DATE}/"
 
   if [ ! -d "$TARGET_DIR" ]; then
     echo "Directory not found: $TARGET_DIR — skipping."
