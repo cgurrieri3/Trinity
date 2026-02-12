@@ -11,7 +11,7 @@ From: python:3.10-trixie
 		python3-pip \
 
 	python3 -m pip install --upgrade pip
-	pip install numpy pandas ephem datetime
+	pip install numpy pandas ephem datetime matplotlib watchdog pdfplumber
 
 %environment
 	export PATH=/usr/local/bin:$PATH
