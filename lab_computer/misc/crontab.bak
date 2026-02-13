@@ -39,17 +39,24 @@
 0 1 * * * /data/TrinityLabComputer/cams/upload_vid.sh >> /data/TrinityLabComputer/cams/vid_log.txt 2>&1
 
 # Email Summaries of Data from prior night
-0 10 * * * /data/TrinityLabComputer/DataSummary/scripts/createDataSummary.sh >> /data/TrinityLabComputer/DataSummary/scripts/create.log 2>&1
-0 10 * * * /data/TrinityLabComputer/DataSummary/scripts/createEventCleaning.sh >> /data/TrinityLabComputer/DataSummary/scripts/create.log 2>&1
-31 10 * * * /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/create_csv.sh >> /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/cron.log 2>&1
-40 10 * * * /data/TrinityLabComputer/DataSummary/scripts/updateSMonHive.sh
+0 9 * * * /data/TrinityLabComputer/DataSummary/scripts/rsyncanddelete.sh >> /data/TrinityLabComputer/DataSummary/scripts/create.log 2>&1
+20 9 * * * /data/TrinityLabComputer/DataSummary/scripts/createDataSummary.sh >> /data/TrinityLabComputer/DataSummary/scripts/create.log 2>&1
+45 9 * * * /data/TrinityLabComputer/DataSummary/scripts/createEventCleaning.sh >> /data/TrinityLabComputer/DataSummary/scripts/create.log 2>&1
+20 9 * * * /data/TrinityLabComputer/DataSummary/scripts/createMergedData.sh >> /data/TrinityLabComputer/DataSummary/scripts/createMe.log 2>&1
+0 9 * * * /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/create_csv.sh >> /data/TrinityLabComputer/Database/ctcpu_state_mess/csv_saves/cron.log 2>&1
+10 9 * * * /data/TrinityLabComputer/DataSummary/scripts/updateSMonHive.sh >>/data/TrinityLabComputer/DataSummary/scripts/updateSMonHive.log 2>&1
 30 10 * * * /data/TrinityLabComputer/DataSummary/email_dataSummary.py >> /data/TrinityLabComputer/DataSummary/cemail.log 2>&1
 
+#Send out emails for observing
+59 11 * * * /usr/bin/bash /data/TrinityLabComputer/scheduling/Observation_email_reminder/run_send_reminder.sh
+*/5 * * * * python3 /data/TrinityLabComputer/scheduling/Observation_email_reminder/check_observation_start.py >> /data/TrinityLabComputer/scheduling/Observation_email_reminder/obs_check.log 2>&1
 
 #restart Grafana uploads upon reboot
 @reboot /data/TrinityLabComputer/Database/restartSM.sh
 @reboot /data/TrinityLabComputer/Database/restartWX.sh
 
+# clean up logs 
+58 11 * * 2 /data/TrinityLabComputer/obs_prgm/LOGS/renamelog.sh 
 
 * * * * * sudo -u sstepanoff3 /data/TrinityLabComputer/cams/statemessages/take_graphan_images.sh >> /data/TrinityLabComputer/cams/statemessages/update_grafana.log 2>&1
 
