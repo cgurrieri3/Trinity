@@ -12,9 +12,14 @@ int main(int argc, char **argv){
     if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
         std::cout << "using mounted directory path" << std::endl;
         mnt="/mnt/";
-        dataDir = "/mnt/DataAnalysis/MergedData/Output/";
-        outDir = "/mnt/DataAnalysis/flasher_calibration/Output/";
+    } else if (mount != "n"){
+        std::cout << "using specific directory path" << std::endl;
+        mnt=mount.c_str();
     }
+
+
+    dataDir = Form("%sDataAnalysis/MergedData/Output/",mnt.c_str());
+    outDir = Form("%sDataAnalysis/flasher_calibration/Output/",mnt.c_str());
 
     std::string folString = argv[1];
 
@@ -59,7 +64,7 @@ int main(int argc, char **argv){
     
 
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
-    // for(int f = 65; f<90; f++){
+    // for(int f = 45; f<60; f++){
         try {
             std::string FilePath = Form("%s%s",FolderPath.c_str(),fileNamesVec[f].c_str());
             if (!util->isBranchPresentInFile(FilePath, "Test")) {
@@ -144,18 +149,15 @@ int main(int argc, char **argv){
 
                 // cout << std::accumulate(PedestalRMS.begin(), PedestalRMS.end(), 0.0) / MaxNofChannels << endl;
                 delete hEvent;
-                // cout << "Date" << stoi(folString) << endl;
-                if (stoi(folString) < 20241001){
+                if (folString < "20241001"){
                     FlasherEventsCutOff = 350;
                 }
-                if (stoi(folString) >= 20241017){
+                if (folString >= "20251017"){
                     FlasherEventsCutOff = 835;
                 }
-                if (stoi(folString) >= 20251204){
+                if (folString >= "20251204"){
                     FlasherEventsCutOff = 700;
                 }
-                // cout << util->GetEv/entAmplitudeSum(Amplitudes)/MaxNofChannels << endl;
-                // cout << "FlasherEventsCutOff: " << FlasherEventsCutOff << endl;
                 if (util->GetEventAmplitudeSum(Amplitudes)/MaxNofChannels >= FlasherEventsCutOff){    
                     hled_event_counter +=1;
                     for(int j = 0; j<MaxNofChannels; j++){
@@ -180,13 +182,13 @@ int main(int argc, char **argv){
     
     std::vector<double> AvgAmplitudeValuesPixelsMedian;
     double dead_pixel_cutoff = 750;
-    if (stoi(folString) < 20241001){
+    if (folString < "20241001"){
         dead_pixel_cutoff = 250;
     }
-    if (stoi(folString) >= 20241017){
+    if (folString >= "20251017"){
         dead_pixel_cutoff = 700;
     }
-    if (stoi(folString) >= 20251204){
+    if (folString >= "20251204"){
         dead_pixel_cutoff = 700;
     }
     for(int j = 0; j<MaxNofChannels; j++){

@@ -31,6 +31,7 @@ echo "Moved $DATE to DataAnalysis/MergedData/Output/"
 cd DataAnalysis/MergedData/Output/
 ls -lh 
 cd $DATE
+pwd
 ls -lh
 cd $_CONDOR_SCRATCH_DIR
 mv FlasherCalibration DataAnalysis/flasher_calibration/.
