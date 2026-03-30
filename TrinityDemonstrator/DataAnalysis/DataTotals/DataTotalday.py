@@ -44,7 +44,7 @@ def removeDates(f):
     return f
 
 def main():
-    datapath = '/mnt/Data'
+    datapath = '/storage/hive/project/phy-otte/shared/Trinity/Data'
     runtime = 2 # Time for each run in minutes
     os.chdir(datapath)
     folderArray=removeDates(os.listdir())
@@ -57,19 +57,19 @@ def main():
     folderArray = [item for item in folderArray if "_" not in item]
     folderArray = [item for item in folderArray if "-" not in item]
     folderArray = [item for item in folderArray if "s" not in item]
-    # folderArray = [item for item in folderArray if "2023" not in item]
-    # folderArray = [item for item in folderArray if "202401" not in item]
-    # folderArray = [item for item in folderArray if "202402" not in item]
-    # folderArray = [item for item in folderArray if "202403" not in item]
-    # folderArray = [item for item in folderArray if "202404" not in item]
-    # folderArray = [item for item in folderArray if "202405" not in item]
-    # folderArray = [item for item in folderArray if "202406" not in item]
-    # folderArray = [item for item in folderArray if "202407" not in item]
-    # folderArray = [item for item in folderArray if "202408" not in item]
-    # folderArray = [item for item in folderArray if "202409" not in item]
-    folderArray = [item for item in folderArray if "202410" not in item]
-    folderArray = [item for item in folderArray if "202411" not in item]
-    folderArray = [item for item in folderArray if "202412" not in item]
+    folderArray = [item for item in folderArray if "2023" not in item]
+    folderArray = [item for item in folderArray if "202401" not in item]
+    folderArray = [item for item in folderArray if "202402" not in item]
+    folderArray = [item for item in folderArray if "202403" not in item]
+    folderArray = [item for item in folderArray if "202404" not in item]
+    folderArray = [item for item in folderArray if "202405" not in item]
+    folderArray = [item for item in folderArray if "202406" not in item]
+    folderArray = [item for item in folderArray if "202407" not in item]
+    folderArray = [item for item in folderArray if "202408" not in item]
+    folderArray = [item for item in folderArray if "202409" not in item]
+    # folderArray = [item for item in folderArray if "202410" not in item]
+    # folderArray = [item for item in folderArray if "202411" not in item]
+    # folderArray = [item for item in folderArray if "202412" not in item]
     print(folderArray)
     for folder in folderArray:
         if (os.path.isdir(folder)) & (folder[0] == '2'): #first few folders are only logs folders and aren't numbered according to YYYYMMDD
@@ -103,7 +103,6 @@ def main():
 if __name__ == '__main__':
     totalTime, ngcTime, txsTime = main()
     print(f"Total Observing Time (mins): {totalTime}")
-    print(f"Total Observing Time (hours): {totalTime/60}")
     print(f"Total NGC Observed Time (mins): {ngcTime:.2f}")
     print(f"Total TXS Observed Time (mins): {txsTime:.2f}") # The .xf rounds to x digits
 
