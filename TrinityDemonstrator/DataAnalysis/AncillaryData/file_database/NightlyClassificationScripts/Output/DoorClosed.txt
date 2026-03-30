@@ -1,0 +1,14 @@
+Operation Mode 3: Door Down
+File Name, Test Events, HLED Events, Forced Events, Avg Rounded Bias Voltage, Max Current
+Merged_CoBo0_AsAd0_2025-09-24T02:55:56.458_0000.root, 12, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T02:57:55.941_0000.root, 38, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T02:59:56.458_0000.root, 28, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:01:56.459_0000.root, 32, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:03:56.459_0000.root, 25, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:05:55.536_0000.root, 34, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:07:56.459_0000.root, 32, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:09:56.459_0000.root, 35, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:11:55.496_0000.root, 34, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:13:56.459_0000.root, 23, 97, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:15:56.130_0000.root, 25, 96, 0, 44.0, 3.6
+Merged_CoBo0_AsAd0_2025-09-24T03:17:56.459_0000.root, 27, 97, 0, 44.0, 3.6

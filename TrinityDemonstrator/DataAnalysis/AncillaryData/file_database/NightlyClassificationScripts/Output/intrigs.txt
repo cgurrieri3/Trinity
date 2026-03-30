@@ -1,0 +1,14 @@
+Operation Mode 0: Intrigs
+File Name, Test Events, HLED Events, Forced Events, Avg Rounded Bias Voltage, Max Current
+Merged_CoBo0_AsAd0_2025-09-24T02:25:16.943_0000.root, 0, 16, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:25:55.876_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:27:55.876_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:29:55.876_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:31:55.876_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:33:55.875_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:35:55.876_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:37:55.876_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:39:55.877_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:41:55.876_0000.root, 0, 97, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:43:55.876_0000.root, 0, 91, 0, 42.0, 2.8
+Merged_CoBo0_AsAd0_2025-09-24T02:52:49.525_0000.root, 0, 44, 0, 42.0, 2.8
