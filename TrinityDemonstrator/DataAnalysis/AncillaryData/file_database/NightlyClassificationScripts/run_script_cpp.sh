@@ -14,4 +14,4 @@ fi
 echo "Running for \"$DATE\""
 echo "Using: \"$P\""
 
-apptainer exec --bind /storage/osg-otte1/shared/TrinityDemonstrator:/mnt /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/AncillaryData/file_database/NightlyClassificationScripts/ClassifyData $DATE $P
+apptainer exec --bind /data/TrinityLabComputer/TrinityDemonstrator:/mnt /data/TrinityLabComputer/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/AncillaryData/file_database/NightlyClassificationScripts/ClassifyData $DATE $P

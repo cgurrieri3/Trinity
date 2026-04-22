@@ -1,3 +1,0 @@
-Other
-File Name, Test Events, HLED Events, Forced Events, Avg Rounded Bias Voltage, Max Current
-Merged_CoBo0_AsAd0_2025-09-24T02:53:56.457_0000.root, 34, 79, 0, 44.0, 2.8

@@ -77,10 +77,11 @@ TFile *fO;
 TFile *file;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataCalibration/MergedData/Output/";
-std::string outDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/AncillaryData/file_database/NightlyClassificationScripts/Output";
+std::string dataDir = "/data/TrinityLabComputer/TrinityDemonstrator/DataAnalysis/MergedData/Output/";
+std::string outDir = "/data/TrinityLabComputer/TrinityDemonstrator/DataAnalysis/AncillaryData/file_database/NightlyClassificationScripts/Output";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+std::string listDir = "/data/TrinityLabComputer/TrinityDemonstrator/Data/";
+std::string listOutDir = "/data/TrinityLabComputer/TrinityDemonstrator/DataAnalysis/data_lists/";
 // std::string dataDir = "/mnt/DataAnalysis/DataCalibration/MergedData/Output/";
 
 
