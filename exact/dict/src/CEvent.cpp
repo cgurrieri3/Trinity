@@ -31,10 +31,10 @@ void CEvent::SetAmplitudeValues(std::vector<float> amp) {
 }
 
 // setting the abs gain and the flasher calibration within the CEvent object for when you pull a time bin
-void CEvent::SetAmplitudeValuesTimeBin(std::vector<float> amp, std::string CalibrationFactorDir, std::string folString, std::vector<double> absgain) {
+void CEvent::SetAmplitudeValuesTimeBin(std::vector<float> amp, std::string CalibrationFactorDir, std::string folString, std::vector<double> absgain, double biasVoltage) {
     // sets the peak amplitude  and assumes that gain calibration as already been set to the CEvent object
     // Load the flasher calibration histogram
-    LoadFlasherCalibration(CalibrationFactorDir, folString);
+    LoadFlasherCalibration(CalibrationFactorDir, folString, biasVoltage);
     TH2F* hf = GetFlasherCalibration();
     
     // set the absolute gain from the ISiPM calss

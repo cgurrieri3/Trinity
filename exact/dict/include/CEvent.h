@@ -80,7 +80,7 @@ class CEvent {
 
         void SetAmplitudeValues(std::vector<float> amp);
         std::vector<float> GetAmplitudeValues() { return AmplitudeValues; }
-        void SetAmplitudeValuesTimeBin(std::vector<float> amp, std::string CalibrationFactorDir, std::string folString, std::vector<double> absGain); 
+        void SetAmplitudeValuesTimeBin(std::vector<float> amp, std::string CalibrationFactorDir, std::string folString, std::vector<double> absGain, double biasVoltage); 
         std::vector<float> GetAmplitudeValuesTimeBin() { return AmplitudeValuesTimeBin; }
 
         void SetPedestalValues(std::vector<float> ped) { PedestalValues = ped; }
