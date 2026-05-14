@@ -12,27 +12,10 @@ userUpdateDatabase.py - This script creates all the .sql files using python. The
 
 
 Lily: 
-**Must run NightlyClassification.cpp before userUpdateDatabase.py to create and pull from AllFiles.txt for that night
 
-path = '/mnt' for buzzard
+Nightly Classification runs as a cron job now and outputs yyyymmdd_AllFiles.txt nightly
 
-NightlyClassification.cpp:
-cd NightlyClassificationScripts/
-    outside container:
-        ./run_script_cpp.sh yyyymmdd path
-
-    inside container: s_cgroup
-        ./ClassifyData yyyymmdd path
--> outputs operation mode information for each file from that night into /Output/AllFiles.txt
-
-**
 if "attention needed" gets output, that means there's only one file for that night for some reason
-this can be rectified by merging the night. to do so:
-    cd MergedData/
-    ./run_script yyymmdd n
-this will run both FileMerge and AddCalibData for that night (the n makes it do all files for that night) and then you can run Nightly Classification for that night again
-see the MergedData readme as well
-**
 
 userUpdateDatabase.py:
 cd UpdateDB/
@@ -43,18 +26,27 @@ cd UpdateDB/
 input date, path, weather/data/ranking info
 -> outputs weather, datainfo, celestial, ranking sqls to file_database/UpdateDB/Output/
 
-
-Updated:
-to run NightlyClassification and userUpdateDatabase for a night all together:
-./run_script_both.sh yyyymmdd
-this creates the AllFiles.txt from NightlyClassification and immediately runs userUpdateDatabase using that file, input db info as normal
-uses /mnt as the path - dont need to input it anymore until prompted 
-
-
 To upload to database: TrinityLabComputer/Database/file_db/
     see file_db README
 
 
+----
+OLD:
+path = '/mnt' for buzzard
+NightlyClassification.cpp:
+cd NightlyClassificationScripts/
+    outside container:
+        ./run_script_cpp.sh yyyymmdd path
+
+    inside container: s_cgroup
+        ./ClassifyData yyyymmdd path
+-> outputs operation mode information for each file from that night into /Output/AllFiles.txt
+
+to run NightlyClassification and userUpdateDatabase for a night all together:
+./run_script_both.sh yyyymmdd
+this creates the AllFiles.txt from NightlyClassification and immediately runs userUpdateDatabase using that file, input db info as normal
+uses /mnt as the path - dont need to input it anymore until prompted 
+---
 
 
 OUTDATED

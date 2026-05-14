@@ -43,8 +43,9 @@ def send_email(date,data,expt,attachment_path=None,attachment_path_mp4=None):
     # SMTP server details
     # Email configuration
     sender_email = 'sstepanoff3@gatech.edu'
-    receiver_email = 'TrinityObservations@groups.gatech.edu'
+    # receiver_email = 'TrinityObservations@groups.gatech.edu'
     #receiver_email = 'sstepanoff3@gatech.edu'
+    receiver_email = 'lilygrace576@gatech.edu'
     # Set the subject and body of the email
     subject = f'Trinity Data Summary {date}'
     #subject = 'TEST'

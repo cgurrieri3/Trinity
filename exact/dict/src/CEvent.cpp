@@ -6,7 +6,7 @@ CEvent::CEvent() : TriggeredMUSICID(-1) {
     // Initialize TriggeredMUSICID to -1 (default value)
 }
 
-void CEvent::LoadFlasherCalibration(std::string CalibrationFactorDir, std::string folString) {
+void CEvent::LoadFlasherCalibration(std::string CalibrationFactorDir, std::string folString, double biasVoltage) {
     // Start by creating a histogram for panel 1 then use that to copy and create the 2nd panel
     // create the first panel, apply the Gain, apply the ADC to PE 
     TFile *flasher = new TFile(Form("%s%s_FlasherCalibration_Factor.root", CalibrationFactorDir.c_str(), folString.c_str()));
@@ -14,9 +14,10 @@ void CEvent::LoadFlasherCalibration(std::string CalibrationFactorDir, std::strin
         std::cerr << "Error: Could not open file " << Form("%s%s_FlasherCalibration_Factor.root", CalibrationFactorDir.c_str(), folString.c_str()) << std::endl;
     }
 
-    hflasher = (TH2F*)flasher->Get("CamFlasher");
+    std::string biasString = Form("CamFlasher%s", std::to_string(static_cast<int>(biasVoltage)).c_str());
+    hflasher = (TH2F*)flasher->Get(biasString.c_str());
     if (!hflasher || hflasher->IsZombie()) {
-        std::cerr << "Error: Could not find 'CamFlasher' in the file or it is invalid." << std::endl;
+        std::cerr << "Error: Could not find '" << biasString << "' in the file or it is invalid." << std::endl;
     }
     hflasher->SetDirectory(0);
     flasher->Close();

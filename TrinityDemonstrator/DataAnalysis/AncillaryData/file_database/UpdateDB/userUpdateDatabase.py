@@ -38,32 +38,33 @@ def checkDatainput():
 
 def getPath():
     # user input path
-    # /storage/osg-otte1/shared/TrinityDemonstrator: /mnt
+    # /data/TrinityLabComputer/TrinityDemonstrator: /mnt
     path=input(color.RED + "Source Path:" + color.END)
     print(path)
     return path
 
+#############################################################################################
 def loadDataFiles(d, p):
-    # WAS: /storage/hive/project/phy-otte/shared/Trinity
-    # NOW: /mtn 
-    folderPath = f"{p}/Data/{d}/RawDataMerged/"
-    dataList = os.listdir(folderPath)
+    # /mnt 
+    # folderPath = f"{p}/Data/{d}/RawDataMerged/"
+    listFileName = f"{p}/DataAnalysis/data_lists/file_list_{d}.txt"
+    with open(listFileName, 'r') as listFile:
+        dataList = [line.strip() for line in listFile]
+    # dataList = os.listdir(folderPath)
     dataList = np.sort(np.array(dataList))
     if len(dataList) == 0:
         dataList = [f"{d}T00:00:00.00_FolderEmpty"]
-    # print(dataList)
+    print(dataList)
     return dataList
+#############################################################################################
 
 def timeFromFile(file,n):
-    # file = file[12:]
-    # print(file)
     file = file[:-8]
     try: 
         ftime = datetime.strptime(file, 'CoBo0_AsAd0_%Y-%m-%dT%H:%M:%S.%f_0')
     except ValueError: 
         #print("here")
         ftime = datetime.strptime(file, '%Y%m%dT%H:%M:%S.%f_Fol')
-    #ftime = datetime.strptime(ftime,'%Y%m%d %H%M%S')
     if n == "w":
         ftime = ftime.strftime("%Y-%m-%d %H:%M:%S")
     else:
@@ -99,9 +100,7 @@ def getWeatherInfo():
 
 def writeDataInfoSQL(d, p, fileList, badPixels, commentDataInfo):
     output_sql = f'{p}/DataAnalysis/AncillaryData/file_database/UpdateDB/Output/DataInfo_{d}.sql'  # Output SQL file
-    #dataSumFile = f"/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataSummary/Output/{d}.csv"
     dataSMFile = f"{p}/DataAnalysis/AncillaryData/Data2/statemessages{d}.csv"
-    #dataSMFile = "/home/mpotts32/Sofia202501/DataCalibration/AncillaryData/Data2/Data2.csv"
     header = ["Timestamp","TriggerRate","HV1","HV2","HV3","HV4","HVCur1","HVCur2","HVCur3","HVCur4","UCTemp#1","UCTemp#10","UCTemp11","UCTemp#12","UCTemp#13","UCTemp#14","UCTemp#15","UCTemp#16","UCTemp#2","UCTemp#3","UCTemp#4","UCTemp#5","UCTemp#6","UCTemp#7","UCTemp#8","UCTemp#9","MUSICMPWR1","MUSICPWR10","MUSICPWR11","MUSICPWR12","MUSICPWR13","MUSICPWR14","MUSICPWR15","MUSICPWR16","MUSICPWR2","MUSICPWR3","MUSICPWR4","MUSICPWR5","MUSICPWR6","MUSICPWR7","MUSICPWR8","MUSICPWR9","HVSW1","HVSW10","HVSW11","HVSW12","HVSW13","HVSW14","HVSW15","HVSW16","HVSW2","HVSW3","HVSW4","HVSW5","HVSW6","HVSW7","HVSW8","HVSW9","SiPMTemp#1","SiPMTemp#10","SiPMTemp#11","SiPMTemp#12","SiPMTemp#13","SiPMTemp#14","SiPMTemp#15","SiPMTemp#16","SiPMTemp#2","SiPMTemp#3","SiPMTemp#4","SiPMTemp#5","SiPMTemp#6","SiPMTemp#7","SiPMTemp#8","SiPMTemp#9","ASADCurrent","SIABcurr#1","SIABcurr#10","SIABcurr#11","SIABcurr#12","SIABcurr#13","SIABcurr#14","SIABcurr#15","SIABcurr#16","SIABcurr#2","SIABcurr#3","SIABcurr#4","SIABcurr#5","SIABcurr#6","SIABcurr#7","SIABcurr#8","SIABcurr#9","TBCurr","UnixTime"]
 
     # load and datetime the weather csv
@@ -119,9 +118,7 @@ def writeDataInfoSQL(d, p, fileList, badPixels, commentDataInfo):
 
 
 
-    #dataSumFile = "/home/mpotts32/Sofia202501/DataSummary/Output/test.csv"
     dataSumFile = f"{p}/DataAnalysis/DataSummary/Output/{d}.csv"
-    #dataSumFile = f"/storage/hive/project/phy-otte/shared/Trinity/DataAnalysis/DataSummary/Output/test.csv"
     columns = ["AvgNumEvents","AmpDist", "HLEDmean", "HLEDnormmean", "Pedestalmean","PedestalRMSmean", "Chargemean", "Peaktimemean", "Sigma", "Threshold","ThresholdValue"] 
 
     with open(dataSumFile, mode='r') as file:
@@ -190,15 +187,20 @@ def writeDataInfoSQL(d, p, fileList, badPixels, commentDataInfo):
     
 def writeRankingSQL(d, p, fileList,ranking, rankingComment):
     output_sql = f'{p}/DataAnalysis/AncillaryData/file_database/UpdateDB/Output/Ranking_{d}.sql'  # Output SQL file
-    # output_sql = f'Output/Ranking_{d}.sql'  # Output SQL file
     OpModeFile = f'{p}/DataAnalysis/AncillaryData/file_database/NightlyClassificationScripts/Output/AllFiles.txt'
+    # OpModeFile = f'{p}/DataAnalysis/AncillaryData/file_database/NightlyClassificationScripts/Output/{d}_AllFiles.txt'
 
     df = pd.read_csv(OpModeFile, delimiter=',')
     csv_path = f'{p}/DataAnalysis/AncillaryData/file_database/UpdateDB/OpModeFile.csv'
+    # csv_path = f'{p}/DataAnalysis/AncillaryData/file_database/UpdateDB/Output/OpModeFile_{d}.csv'
+    print(f"Opmode file name {csv_path}")
     df.to_csv(csv_path, index = None)
+    print(df)
 
    # makes fileList name and File Name from csv in same format 
-    df['File Name'] = df['File Name'].str.replace('Merged_', '')
+    df['File Name'] = df['File Name'].str.replace('Merged_', '') 
+    for x in df['File Name']:
+        print(x)
 
     with open(output_sql, mode='w') as sql_file:
 
@@ -229,7 +231,6 @@ def writeRankingSQL(d, p, fileList,ranking, rankingComment):
 
 def writeWeatherSQL(d, p, fileList, clouds, cloudsFreq, snowGround, rain, comments):
     output_sql = f'{p}/DataAnalysis/AncillaryData/file_database/UpdateDB/Output/Weather_{d}.sql'
-    #weatherFile = f'/home/mpotts32/weather/weather_{d}'
     # print(p)
     weatherFile = f'{p}/MiscData/WeatherData/weather/weather_{d}'
     # print(f'{p}/MiscData/WeatherData/weather/weather_{d}')
@@ -302,7 +303,6 @@ def writeWeatherSQL(d, p, fileList, clouds, cloudsFreq, snowGround, rain, commen
         
 def writeCelestialSQL(d, p, fileList):
     output_sql = f'{p}/DataAnalysis/AncillaryData/file_database/UpdateDB/Output/Celestial_{d}.sql'
-    #celestialFile=f'/home/mpotts32/Sofia202501/DataCalibration/DataCalibration/CalibratedData/celestialPositions{d}.csv'
     celestialFile=f'{p}/DataAnalysis/AncillaryData/Data1/celestialPositions{d}.csv'
 
     df = pd.read_csv(celestialFile, delimiter=',')

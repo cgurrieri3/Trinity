@@ -22,8 +22,13 @@ int main(int argc, char **argv){
     if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
         std::cout << "using mounted directory path" << std::endl;
         mnt="/mnt/";
-        dataDir = "/mnt/Data/";
     }
+    else if(mount != "n"){
+        std::cout << "using specific directory path" << std::endl;
+        mnt=mount.c_str();
+    }
+
+    dataDir = Form("%sDataAnalysis/",mnt.c_str());
 
     string outStr = Form("%s%s",outDir.c_str(),argv[1]);
     DataSummary ds(argv[1]);
@@ -36,38 +41,82 @@ int main(int argc, char **argv){
         ds.PlotROIMusic();
         ds.t_disp->Print((outStr+".pdf").c_str());
 
-        ds.PlotFF();
-        ds.t_disp->Print((outStr+".pdf").c_str());
-        
-        ds.PlotHLED();
-        ds.t_disp->Print((outStr+".pdf").c_str());  
+        //
+        if(ds.hasData44()){
 
-        ds.PlotHLEDNorm();
-        ds.t_disp->Print((outStr+".pdf").c_str()); 
-    
-        ds.PlotPedestal();
-        ds.t_disp->Print((outStr+".pdf").c_str());    
+            ds.PlotFF44();
+            ds.t_disp->Print((outStr+".pdf").c_str());
 
-        ds.PlotPedestalRMS();
-        ds.t_disp->Print((outStr+".pdf").c_str()); 
+            ds.PlotHLED44();
+            ds.t_disp->Print((outStr+".pdf").c_str());  
 
-        ds.PlotAmplitude();
-        ds.t_disp->Print((outStr+".pdf").c_str());   
+            ds.PlotHLEDNorm44();
+            ds.t_disp->Print((outStr+".pdf").c_str()); 
 
-        ds.PlotCharge();
-        ds.t_disp->Print((outStr+".pdf").c_str()); 
+            ds.PlotPedestal44();
+            ds.t_disp->Print((outStr+".pdf").c_str()); 
 
-        ds.PlotTimePeak();
-        ds.t_disp->Print((outStr+".pdf").c_str());   
-        
-        ds.PlotPSF();
-        ds.t_disp->Print((outStr+".pdf").c_str()); 
+            ds.PlotPedestalRMS44();
+            ds.t_disp->Print((outStr+".pdf").c_str()); 
+
+            ds.PlotAmplitude44();
+            ds.t_disp->Print((outStr+".pdf").c_str());
+            
+            ds.PlotCharge44();
+            ds.t_disp->Print((outStr+".pdf").c_str());
+
+            ds.PlotTimePeak44();
+            ds.t_disp->Print((outStr+".pdf").c_str()); 
+
+            ds.PlotPSF44();
+            ds.t_disp->Print((outStr+".pdf").c_str());
+        }
+        if(ds.hasData415()){
+            if(ds.hasHLEDData415()){
+                ds.PlotFF415();
+                ds.t_disp->Print((outStr+".pdf").c_str());
+
+                ds.PlotHLED415();
+                ds.t_disp->Print((outStr+".pdf").c_str());  
+
+                ds.PlotHLEDNorm415();
+                ds.t_disp->Print((outStr+".pdf").c_str());
+            }
+            ds.PlotPedestal415();
+            ds.t_disp->Print((outStr+".pdf").c_str());    
+
+            ds.PlotPedestalRMS415();
+            ds.t_disp->Print((outStr+".pdf").c_str()); 
+
+            ds.PlotAmplitude415();
+            ds.t_disp->Print((outStr+".pdf").c_str());   
+
+            ds.PlotCharge415();
+            ds.t_disp->Print((outStr+".pdf").c_str()); 
+
+            ds.PlotTimePeak415();
+            ds.t_disp->Print((outStr+".pdf").c_str());  
+
+            ds.PlotPSF415();
+            ds.t_disp->Print((outStr+".pdf").c_str());
+        }
+        //
 
         ds.t_disp->Print((outStr+".pdf]").c_str());
 
         ofstream csvOutput;
         csvOutput.open((outStr+".csv"));
-        csvOutput << ds.GetAvgEv() << "," << ds.GetAmpDist() << "," << ds.GetHLEDMean() << "," << ds.GetHLEDNMean() << "," << ds.GetPedMean() << "," << ds.GetPedRMSMean() << "," << ds.GetqMean() << "," << ds.GetPTMean() << "," << ds.GetPSFSigma();
+
+        //
+        if(ds.hasData44()){
+             csvOutput << ds.GetAvgEv44() << "," << ds.GetAmpDist44() << "," << ds.GetHLEDMean44() << "," << ds.GetHLEDNMean44() << "," << ds.GetPedMean44() << "," << ds.GetPedRMSMean44() << "," << ds.GetqMean44() << "," << ds.GetPTMean44();
+        }
+        if(ds.hasData415()){
+             csvOutput << ds.GetAvgEv415() << "," << ds.GetAmpDist415() << "," << ds.GetHLEDMean415() << "," << ds.GetHLEDNMean415() << "," << ds.GetPedMean415() << "," << ds.GetPedRMSMean415() << "," << ds.GetqMean415() << "," << ds.GetPTMean415();
+        }
+        csvOutput << ds.GetPSFSigma();
+        //
+        
         for(vector<int>& vec : ds.GetTrTh()){
             csvOutput << ",(" << vec[0] << "," << vec[1] << ")";
         }

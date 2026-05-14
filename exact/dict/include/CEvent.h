@@ -150,7 +150,7 @@ class CEvent {
         int GetCleanedEvent() {return CleanedEvents; }
         int GetSurvivingEvent() {return SurvivingEvents; }
 
-        void LoadFlasherCalibration(std::string CalibrationFactorDir, std::string folderName); 
+        void LoadFlasherCalibration(std::string CalibrationFactorDir, std::string folderName, double biasVoltage); 
         TH2F* GetFlasherCalibration() const { return hflasher; }
         void SetPanel1(TH2F* hcam_panel1);
         void SetPanel2(TH2F* hcam_panel2, int CorePixelAmpCutOff);
