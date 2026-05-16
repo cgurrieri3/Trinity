@@ -151,7 +151,7 @@ nullptr
     };
     static const char* includePaths[] = {
 "/opt/root/include/",
-"/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/event_cleaning/ClusterCleaning/",
+"/data/TrinityLabComputer/TrinityDemonstrator/DataAnalysis/event_cleaning/ClusterCleaning/new_cleaning/",
 nullptr
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(

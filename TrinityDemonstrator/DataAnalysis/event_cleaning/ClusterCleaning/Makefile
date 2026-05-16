@@ -71,7 +71,7 @@ CP  := cp
 
 #Recipe
 
-.PHONY: all clean
+.PHONY: all clean rootcling
 all: $(EXE)
 
 # Generate dictionary source with rootcling
@@ -103,12 +103,11 @@ clean:
 	rm -f $(BIN_DIR)/EventInfoDict* $(EXE)
 	@echo "Clean complete."
 
-# rootcling: 
-# 	@echo "reseting rootcling"
-# 	rm -r $(BIN_DIR)/*.o 
-# 	rm -r $(BIN_DIR)/*.pcm
-# 	rootcling -f $(DICT_SRC) -c $(DICT_HDR) $(LINKDEF)
-# 	@echo "rootcling complete"
+rootcling:
+	@echo "Running rootcling..."
+	rm -f $(DICT_SRC) $(BIN_DIR)/EventInfoDict_rdict.pcm
+	/opt/root/bin/rootcling -f $(DICT_SRC) -c $(DICT_HDR) $(LINKDEF)
+	@echo "Rootcling complete"
 
 -include $(OBJ:.o=.d)
 

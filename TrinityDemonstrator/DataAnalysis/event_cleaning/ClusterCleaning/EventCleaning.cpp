@@ -107,8 +107,8 @@ int main(int argc, char **argv){
     
     // fileNamesVec.assign(fileNamesVec.begin() + 134, fileNamesVec.begin() + 135);
     
-    for(int f = 100; f<110; f++){
-    // for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
+    // for(int f = 100; f<110; f++){
+    for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
         if (whatData == "bkg" ||  whatData == "muon") {
             std::string date = fileNamesVec[f].substr(7, 10); // Extract date from filename
             // remove - from the date string
@@ -257,9 +257,9 @@ int main(int argc, char **argv){
                 
                 // CorePixelCutOff = 100;
                 std::vector<double> fakeGain(256, 1.0); 
-                cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, std::to_string(20241011),fakeGain);
+                cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, std::to_string(20241011),fakeGain,44.0);
             } else {
-                cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, std::to_string(cev->GetEventDate()),sipmInfo->GetGain());
+                cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, std::to_string(cev->GetEventDate()),sipmInfo->GetGain(),44.0);
 
             }
             cev->SetPeakTimeBin(PeakTimeBin);
@@ -613,6 +613,13 @@ int main(int argc, char **argv){
     plothelp->PlothnCoreSPC(c_cleaned, OutputFilePDF);
     plothelp->PlothCRSPC(c_cleaned, OutputFilePDF);
     plothelp->PlothSIZEWandL(c_cleaned, OutputFilePDF);
+    plothelp->PlotPixelsDistanceToMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlotPixelsRatioDistanceToMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlotdistRMSandWeightedRMS(c_cleaned, OutputFilePDF);
+    plothelp->PlotPixelsOnandOffMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlothRMSvsRatioDistance(c_cleaned, OutputFilePDF);
+    plothelp->PlothWRMSvsRatioDistance(c_cleaned, OutputFilePDF);
+    plothelp->PlothOnOffMajorAxisvsratio(c_cleaned, OutputFilePDF);
 
     file->Close();
     c_cleaned->Print(OutputFilePDFClose.c_str());

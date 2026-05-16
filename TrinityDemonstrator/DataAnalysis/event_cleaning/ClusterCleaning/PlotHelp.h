@@ -38,6 +38,13 @@ class PlotHelp {
         void AddtoCoreRatio(double cr);
         void AddtoNumberOfCores(double num);
 
+        void AddtoDistance2MajorAxis(double d);
+        void AddtoRMSMajorAxis(double r);
+        void AddtoWeightedRMSMajorAxis(double w);
+        void AddtoPixelsonMajorAxis(int p);
+        void AddtoPixelsoffMajorAxis(int p);
+        void AddtoRatioPixelsMajorAxis(double r);
+
         void PlothSize(TCanvas* c, std::string pdf);
         void PlothSizeConc(TCanvas* c, std::string pdf);
         void PlothSizeSPC(TCanvas* c, std::string pdf);
@@ -60,6 +67,13 @@ class PlotHelp {
         void PlothCRSPC(TCanvas* c, std::string pdf);
         void PlothSIZEWandL(TCanvas* c, std::string pdf);
         void PlotEventFlags(TCanvas* c, std::string pdf);
+        void PlotPixelsDistanceToMajorAxis(TCanvas* c, std::string pdf);
+        void PlotdistRMSandWeightedRMS(TCanvas* c, std::string pdf);
+        void PlotPixelsOnandOffMajorAxis(TCanvas* c, std::string pdf);
+        void PlothRMSvsRatioDistance(TCanvas* c, std::string pdf);
+        void PlothWRMSvsRatioDistance(TCanvas* c, std::string pdf);
+        void PlothOnOffMajorAxisvsratio(TCanvas* c, std::string pdf);
+        void PlotPixelsRatioDistanceToMajorAxis(TCanvas* c, std::string pdf);
 
         void AddEventFlags(int i);
         std::map<std::string, int> GetEventFlags() const;
@@ -85,6 +99,12 @@ class PlotHelp {
         std::vector<int> Datevecctor = {}; // date of events
         std::vector<double> RMSoverAVGvector = {}; //RMS over Average Amplitude
         std::vector<double> Flagvector = {};
+        std::vector<double> Distance2MajorAxisVector = {};
+        std::vector<double> RMSMajorAxisVector = {};
+        std::vector<double> WeightedRMSMajorAxisVector = {};
+        std::vector<int> PixelsonMajorAxisVector = {};
+        std::vector<int> PixelsoffMajorAxisVector = {};
+        std::vector<double> RatioPixelsMajorAxisVector = {};
         IPlotTools *plottools;
 
         // int TotalEvents = 0;
@@ -111,10 +131,17 @@ class PlotHelp {
         float CameraMin = -0.5;
         float CameraMax = 15.5;
 
-        int nCoreStep = 20;
+        int nCoreStep = 21;
         float nCoreMin = 0.5;
         float nCoreMax = 21.5;
 
+        int dStep = 21;
+        float dMin = -0.125;
+        float dMax = 5.125;
+
+        int pOnStep = 11;
+        float pOnMin = -0.5;
+        float pOnMax = 10.5;
         
 
         

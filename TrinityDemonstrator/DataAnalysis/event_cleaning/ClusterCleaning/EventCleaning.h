@@ -30,6 +30,7 @@
 #include <vector>
 #include <TLatex.h>
 #include <cmath>
+#include <limits>
 #include <algorithm>
 #include <cstdlib>
 #include <Event.h>
@@ -152,6 +153,7 @@ void saveEventInfo(EventInfo* evI, TTree* treeSims);
 
 void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp);
 std::vector<double> CreateWLRatio(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs);
+std::vector<int> CheckCrossPoints(TArrow* arrow, TH2F* hist, EventInfo* eventInfo);
 void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs, EventInfo* eventInfo);
 std::vector<double> getM3Long(double xcog,double ycog, std::vector<int> sur_pix, std::vector<float> amps);
 std::vector<double> generateRandomNumbers();
@@ -370,6 +372,87 @@ std::vector<double> CreateWLRatio(PCA& pca, TVectorD& eigenVals, TMatrixD& eigen
     return EllipicRatio;
 }
 
+std::vector<int> CheckCrossPoints(TArrow* arrow, TH2F* hist,EventInfo* eventInfo) {
+    // get the arrow slope
+    cout << "Checking cross points" << endl;
+    double x1 = arrow->GetX1();
+    double y1 = arrow->GetY1();
+    double x2 = arrow->GetX2();
+    double y2 = arrow->GetY2();
+
+    // Line vector components
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double len = std::sqrt(dx*dx + dy*dy);
+
+    // Degenerate line guard
+    if (len == 0.0) return {0, 0};
+
+    int cLineIntersectPixels    = 0;
+    int cLineNonIntersectPixels = 0;
+
+    int nBinsX = hist->GetNbinsX();
+    int nBinsY = hist->GetNbinsY();
+
+    double RMSMajorAxis = 0.0;
+    double WeightedRMSMajorAxis = 0.0;
+    double totalWeight = 0.0;
+
+    for (int ix = 1; ix <= nBinsX; ++ix) {
+        for (int iy = 1; iy <= nBinsY; ++iy) {
+
+            if (hist->GetBinContent(ix, iy) <= 0) continue;
+
+            // Bin center in axis coordinates
+            double cx = hist->GetXaxis()->GetBinCenter(ix);
+            double cy = hist->GetYaxis()->GetBinCenter(iy);
+
+            // Perpendicular distance from bin center to the infinite line
+            // d = |(P - P1) x d_hat|  (2D cross product gives scalar)
+            double dist = std::abs((cy - y1)*dx - (cx - x1)*dy) / len;
+            plothelp->AddtoDistance2MajorAxis(dist);
+            eventInfo->SetDistance2MajorAxis(dist);
+            RMSMajorAxis += dist*dist;
+            WeightedRMSMajorAxis += dist*dist*hist->GetBinContent(ix, iy);
+            totalWeight += hist->GetBinContent(ix, iy);
+            // Half-diagonal of the bin as intersection threshold
+            double hw = 0.5 * hist->GetXaxis()->GetBinWidth(ix);
+            double hh = 0.5 * hist->GetYaxis()->GetBinWidth(iy);
+            double threshold = 0.905*std::sqrt(hw*hw + hh*hh);
+            cout << threshold << endl;
+            if (dist <= threshold) {
+                ++cLineIntersectPixels;
+                cout << "Intersecting pixel at (" << cx << ", " << cy << ") with content " << hist->GetBinContent(ix, iy) << " distance " << dist << endl;
+
+            }
+            else {
+                ++cLineNonIntersectPixels;
+                cout << "Non-intersecting pixel at (" << cx << ", " << cy << ") with content " << hist->GetBinContent(ix, iy) << " distance " << dist << endl;
+            }
+        }
+    }
+    RMSMajorAxis = std::sqrt(RMSMajorAxis/(cLineIntersectPixels+cLineNonIntersectPixels));
+    WeightedRMSMajorAxis = std::sqrt(WeightedRMSMajorAxis/(totalWeight));
+    cout << "RMS Major Axis: " << RMSMajorAxis << endl;
+    cout << "Weighted RMS Major Axis: " << WeightedRMSMajorAxis << endl;
+
+    plothelp->AddtoPixelsonMajorAxis(cLineIntersectPixels);
+    plothelp->AddtoPixelsoffMajorAxis(cLineNonIntersectPixels);
+    plothelp->AddtoRatioPixelsMajorAxis((double)cLineIntersectPixels/(cLineIntersectPixels+cLineNonIntersectPixels));
+    plothelp->AddtoRMSMajorAxis(RMSMajorAxis);
+    plothelp->AddtoWeightedRMSMajorAxis(WeightedRMSMajorAxis);
+
+    eventInfo->SetRMSMajorAxis(RMSMajorAxis);
+    eventInfo->SetWeightedRMSMajorAxis(WeightedRMSMajorAxis);
+    eventInfo->SetPixelsonMajorAxis(cLineIntersectPixels);
+    eventInfo->SetPixelsoffMajorAxis(cLineNonIntersectPixels);
+    eventInfo->SetRatioPixelsMajorAxis((double)cLineIntersectPixels/(cLineIntersectPixels+cLineNonIntersectPixels));
+
+
+    return {cLineIntersectPixels, cLineNonIntersectPixels};
+
+}
+
 void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs,  EventInfo* eventInfo) {
     
     
@@ -390,6 +473,9 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     TArrow* arrow = new TArrow(meanx - 2*(r1*cos(anglerad)), meany - 2*(r1*sin(anglerad)), meanx + 2*(r1*cos(anglerad)), meany + 2*(r1*sin(anglerad)), 0.01, "|"); // "|>" option gives an arrowhead
     TArrow* arrow1 = new TArrow(meanx - 2*(r2*cos(anglerad+1.5708)), meany - 2*(r2*sin(anglerad+1.5708)), meanx + 2*(r2*cos(anglerad+1.5708)), meany + 2*(r2*sin(anglerad+1.5708)), 0.01, "|"); // "|>" option gives an arrowhead
     
+    std::vector<int> CrossPoints = CheckCrossPoints(arrow, hcam_panel4,eventInfo);
+    cout << "# Intersecting pixels with major axis: " << CrossPoints[0] << endl;
+    cout << "# Non-intersecting pixels with major axis: " << CrossPoints[1] << endl;
     arrow->SetLineColor(kRed); // Optional: Set the color of the arrow
     arrow->Draw("SAME");             // Draw the arrow on the same canvas
     arrow1->SetLineColor(kBlue); // Optional: Set the color of the arrow
