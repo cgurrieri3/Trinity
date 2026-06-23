@@ -119,7 +119,16 @@ int main(int argc, char **argv){
     TTree *treeSims = new TTree("EventCleaning", "Events tree");
     eventInfo = new EventInfo(1);
     treeSims->Branch("Cleaned", eventInfo); // Store only serializable data members, not TH2F pointers
-        
+
+    // For sim data: copy the input "Sim" (GrOptics / SimRunData) tree into the output
+    // Data_EventCleaning file exactly as-is, for ALL events (triggered or not, cleaned or not).
+    TTree *treeSimOut = nullptr;
+    SimRunData *simRunOut = new SimRunData();
+    if (whatData == "sim"){
+        treeSimOut = new TTree("Sim", "Events tree");
+        treeSimOut->Branch("GrOptics", &simRunOut);
+    }
+
     
     // fileNamesVec.assign(fileNamesVec.begin() + 134, fileNamesVec.begin() + 135);
     
@@ -202,9 +211,21 @@ int main(int argc, char **argv){
             simRunData = new SimRunData();
             simTree->SetBranchAddress("GrOptics", &simRunData);
             simTree->GetEntry(0);
-            simDate = simRunData->GetDate();  // date is constant across the run
+            
             simRun = simRunData->GetSumRun(); // run name is constant across the run
             cout << "Sim Run Date from SimRunData: " << simDate << endl;
+
+            // Copy every entry of the input "Sim" tree into the output Sim tree exactly as-is,
+            // so the truth info is saved for ALL events regardless of triggered/cleaning class.
+            if (treeSimOut){
+                Long64_t nSim = simTree->GetEntries();
+                for (Long64_t s = 0; s < nSim; s++){
+                    simTree->GetEntry(s);
+                    *simRunOut = *simRunData; // copy the SimRunData object exactly
+                    treeSimOut->Fill();
+                }
+                cout << "Copied " << nSim << " Sim entries to output" << endl;
+            }
 
             nEntries = tree->GetEntries();
             if (nEntries==0) {
@@ -228,6 +249,7 @@ int main(int argc, char **argv){
                     simEvent = simRunData->GetSimEventNumber();
                     simEnergy = simRunData->GetNeutrinoEnergy(); // switch to GetTauEnergy() for tau energy
                 }
+                simDate = simRunData->GetDate();  // date is constant across the run
                 cev->SetEventDate(simDate); // use the date from the SimRunData class for sim events
                 cev->SetFilename(simRun); // use the run name from the SimRunData class for sim events
                 cev->SetEventNumber(simEvent);
@@ -621,14 +643,47 @@ int main(int argc, char **argv){
             CompletePanel4(pca,hcam_panel4,cev,EllipicRatio,eigenVals,eigenVecs,eventInfo);            
             treeSims->Fill();
             
-            // create TH2D for Gain 
+            // For sims, draw the truth info (neutrino energy, distance to and
+            // location of the emergence point) in the middle of the 2x2 display.
+            // Drawn BEFORE the canvas is written so it is saved in the .root canvas too.
+            TPaveText *simInfo = nullptr;
+            if (whatData == "sim"){
+                // Distance to emergence point from telescope position vector
+                double Rx = simRunData->GetTelescope_Xpos();
+                double Ry = simRunData->GetTelescope_Ypos();
+                double Rz = simRunData->GetTelescope_Zpos();
+                double emergenceDistance = sqrt(Rx*Rx + Ry*Ry + Rz*Rz);
+
+                // Emergence angle: wrap azimuth to [-180,180] to measure from telescope axis
+                double azimuthDeg = simRunData->GetAzimuthAngle();
+                double emergenceAngle = (azimuthDeg > 180.0) ? (azimuthDeg - 360.0) : azimuthDeg;
+
+                c_cleaned->cd(0);
+                simInfo = new TPaveText(0.28, 0.49, 0.72, 0.57, "NDC");
+                simInfo->SetFillColorAlpha(0, 0.0);
+                simInfo->SetFillStyle(0);
+                simInfo->SetBorderSize(0);
+                simInfo->SetTextSize(0.018);
+                simInfo->AddText(Form("Neutrino Energy: %.3g GeV", simRunData->GetNeutrinoEnergy()));
+                simInfo->AddText(Form("Emergence Angle: %.3g deg", emergenceAngle));
+                simInfo->AddText(Form("Distance to Emergence Point: %.3g m", emergenceDistance));
+                simInfo->Draw();
+                c_cleaned->Update();
+            }
+
+            // create TH2D for Gain
             file = new TFile(OutputFileRoot.c_str(), "UPDATE");
             c_cleaned->Write(Form("N%i-F%s-E%i", cev->GetEventDate(),filenameTitle.c_str() ,cev->GetEventNumber()));
             hcam_panel1->Write(Form("PreN%i-F%s-E%iTH2F", cev->GetEventDate(),filenameTitle.c_str() ,cev->GetEventNumber()));
             hcam_panel4->Write(Form("PostN%i-F%s-E%iTH2F", cev->GetEventDate(),filenameTitle.c_str() ,cev->GetEventNumber()));
             file->Close();
+
             c_cleaned->Print(OutputFilePDF.c_str());
-            
+            if (simInfo){
+                c_cleaned->GetListOfPrimitives()->Remove(simInfo); // keep it off later pages
+                delete simInfo;
+            }
+
 
             delete hcam_panel1;
             delete hcam_panel2;
@@ -655,6 +710,7 @@ int main(int argc, char **argv){
     cout << "we here" << endl;
     fileOutput = new TFile(OutputFileEventCleaningDataRoot.c_str(), "UPDATE");
     treeSims->Write();
+    if (treeSimOut) treeSimOut->Write(); // sims: input Sim tree copied as-is for all events
     // fileOutput->Write();
     fileOutput->Close();
     file = new TFile(OutputFileRoot.c_str(), "UPDATE");
