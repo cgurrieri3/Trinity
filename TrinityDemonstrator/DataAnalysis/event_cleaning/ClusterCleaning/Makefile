@@ -10,9 +10,11 @@ EXE := $(BIN_DIR)/EventCleaning
 DICT_DIR := ${EXACT_DIR}/dict
 
 # Dictionary settings
+# Pass both EventInfo.h and SimRunData.h so rootcling generates the ROOT I/O
+# dictionary for both classes in a single pass (LinkDef.h pragma-links both).
 DICT_SRC := EventInfoDict.cpp
 DICT_OBJ := $(BIN_DIR)/EventInfoDict.o
-DICT_HDR := EventInfo.h
+DICT_HDR := EventInfo.h SimRunData.h
 LINKDEF  := LinkDef.h
 
 # # root cling

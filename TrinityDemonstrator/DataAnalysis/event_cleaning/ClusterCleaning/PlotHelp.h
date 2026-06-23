@@ -6,6 +6,7 @@
 #include <TMatrixDSymEigen.h>
 #include <TVectorD.h>
 #include <vector>
+#include <algorithm>
 #include <TH2F.h>
 #include <TH1D.h>
 #include <TFile.h>
@@ -76,6 +77,8 @@ class PlotHelp {
         void PlotPixelsRatioDistanceToMajorAxis(TCanvas* c, std::string pdf);
 
         void AddEventFlags(int i);
+        void SetSimEnergy(float energy, bool isSim); // sims only: energy of the current event + whether to track it
+        void PlothSimEnergySavedVsNotSaved(TCanvas* c, std::string pdf); // sims only: saved vs removed energy distribution
         std::map<std::string, int> GetEventFlags() const;
         void LogBinning(TH2F* hist);
         void LogBinning(TH1D* hist);
@@ -105,6 +108,13 @@ class PlotHelp {
         std::vector<int> PixelsonMajorAxisVector = {};
         std::vector<int> PixelsoffMajorAxisVector = {};
         std::vector<double> RatioPixelsMajorAxisVector = {};
+
+        // sims only: neutrino energy of saved (flag 5) vs removed events
+        std::vector<double> SimEnergySavedVector = {};
+        std::vector<double> SimEnergyNotSavedVector = {};
+        double currentSimEnergy = 0.0; // energy of the event currently being processed
+        bool trackSimEnergy = false;   // only true for sim events so other data is ignored
+
         IPlotTools *plottools;
 
         // int TotalEvents = 0;

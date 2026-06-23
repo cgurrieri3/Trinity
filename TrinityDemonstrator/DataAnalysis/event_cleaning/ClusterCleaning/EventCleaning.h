@@ -67,6 +67,7 @@
 #include <ISiPM.h>
 #include <execution>
 #include "EventInfo.h"
+#include "SimRunData.h"
 
 
 // Define variables (global)
@@ -113,22 +114,22 @@ std::string OutputFilePDFClose = "";
 std::string OutputFileEventCleaningDataRoot = "";
 std::string whatData = "Data";
 
-std::string mnt = "/storage/osg-otte1/shared/TrinityDemonstrator/";
-std::string dataDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/MergedData/Output/";
-std::string outDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/event_cleaning/Output/";
+std::string mnt = "/cedar/";
+std::string dataDir = "/cedar/DataAnalysis/MergedData/Output/";
+std::string outDir = "/cedar/DataAnalysis/event_cleaning/Output/";
 
 
-std::string neighborDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/event_cleaning/ClusterCleaning/neighbors/";
-std::string CalibrationFactorDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/flasher_calibration/Output/";
+std::string neighborDir = "/cedar/DataAnalysis/event_cleaning/ClusterCleaning/neighbors/";
+std::string CalibrationFactorDir = "/cedar/DataAnalysis/flasher_calibration/Output/";
 
 // FIX THESE 2025-09-23
-std::string muonDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/DataTxtFiles/Muon/";
-std::string bkgDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/DataTxtFiles/BackgroundSamples/RandomSampling/";
-std::string simDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/SimulationData/data/";
+std::string muonDir = "/cedar/DataAnalysis/DataTxtFiles/Muon/";
+std::string bkgDir = "/cedar/DataAnalysis/DataTxtFiles/BackgroundSamples/RandomSampling/";
+std::string simDir = "/cedar/DataAnalysis/SimulationAnalysis/data/";
 
-std::string outDirBkg = "/storage/osg-otte1/shared/TrinityDemonstrator/event_cleaning/OutputBkg/";
-std::string outDirMuon = "/storage/osg-otte1/shared/TrinityDemonstrator/event_cleaning/OutputSim/";
-std::string outDirSim = "/storage/osg-otte1/shared/TrinityDemonstrator/event_cleaning/OutputSim/";
+std::string outDirBkg = "/cedar/DataAnalysis/event_cleaning/OutputBkg/";
+std::string outDirMuon = "/cedar/DataAnalysis/event_cleaning/OutputSim/";
+std::string outDirSim = "/cedar/DataAnalysis/event_cleaning/OutputSim/";
 
 
 const int TriggeredChannelAmpCutOff = 481; // (200 ADC/8 PE) Cut off for the triggered music channel

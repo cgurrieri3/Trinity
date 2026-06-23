@@ -1,10 +1,7 @@
 #!/bin/bash
 # run_script.sh
 
-# Change only this to run on a new machine
-LocalPath="/data/TrinityLabComputer"  
-
 DATE=$1
-FILENAME=$2
+SIMRUN=$2
 echo "Running for $DATE"
-apptainer exec --bind $LocalPath/TrinityDemonstrator:/mnt $LocalPath/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /mnt/DataAnalysis/event_cleaning/ClusterCleaning/new_cleaning/EventCleaning $DATE y $FILENAME    
+apptainer exec --bind /data/TrinityLabComputer/TrinityDemonstrator:/mnt,/projects/cos-lab-aotte6/cos-4a17118/Trinity/TrinityDemonstrator:/cedar /projects/cos-lab-aotte6/cos-4a17118/Trinity/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif /cedar/DataAnalysis/event_cleaning/ClusterCleaning/EventCleaning $DATE /cedar/ $SIMRUN   

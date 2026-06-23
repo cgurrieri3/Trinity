@@ -39,6 +39,7 @@ int main(int argc, char **argv){
     // Load in all the files
     std::string FolderPath = Form("%s%s/",dataDir.c_str(),folString.c_str());
     cout << "FolderPath: " <<FolderPath << endl;
+    // cout << "folString: " << folString.c_str() << endl;
     // Createthe fileNames Vector based on the type of data found in the passes argument
     // Sim - Simulation data (Only Test Branch events)
     // muon - muon data (Forced Branch events)
@@ -54,11 +55,14 @@ int main(int argc, char **argv){
         fileNamesVec=util->readFileToVectorString(Form("%s%s.txt",muonDir.c_str(),folString.c_str()));
 
     } else if (folString.find("sim")==0) {
+        cout << "Simulation data detected" << endl;
         whatData = "sim";
         folString = folString.substr(3, 19); // Extract date from filename
         // cout << "Simulation Information: " << folString << endl;
         FolderPath = Form("%s%s/",simDir.c_str(),folString.c_str());
+        // cout << "Simulation Folder Path: " << FolderPath << endl;
         fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
+        // cout << "Simulation Files Found: " << fileNamesVec.size() << endl;
         // remove files in the vec that have plots_
         fileNamesVec.erase(
             std::remove_if(
@@ -70,6 +74,18 @@ int main(int argc, char **argv){
             ),
             fileNamesVec.end()
         );
+        fileNamesVec.erase(
+            std::remove_if(
+                fileNamesVec.begin(),
+                fileNamesVec.end(),
+                [](const std::string& name) {
+                    return name.find("datafiles_") != std::string::npos;
+                }
+            ),
+            fileNamesVec.end()
+        );
+
+
     } else {
         if (filename_argument != "n"){ // if the file name not specified then do all files in the directory
         // std::cout << "using specific file name" << std::endl;
@@ -107,8 +123,9 @@ int main(int argc, char **argv){
     
     // fileNamesVec.assign(fileNamesVec.begin() + 134, fileNamesVec.begin() + 135);
     
-    // for(int f = 100; f<110; f++){
+    // for(int f = 0; f<10; f++){
     for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
+        cout << "Processing file: " << fileNamesVec[f] << endl;
         if (whatData == "bkg" ||  whatData == "muon") {
             std::string date = fileNamesVec[f].substr(7, 10); // Extract date from filename
             // remove - from the date string
@@ -126,6 +143,12 @@ int main(int argc, char **argv){
 
         int TotalEvents;
         int nEntries;
+        int simDate = 0; // date pulled from the SimRunData class for sim events
+        std::string simRun = ""; // sim run number pulled from the SimRunData class for sim events
+        int simEvent = 0; // sim event number pulled from the SimRunData class for sim events
+        TFile *fSim = nullptr;            // sim file kept open so SimRunData can be read per event
+        TTree *simTree = nullptr;         // "Sim" tree holding one SimRunData entry per event
+        SimRunData *simRunData = nullptr; // reused across the event loop
         TotalEvents = 0;
         nEntries = 0;
         // loads the events based on the type of data for each file
@@ -171,7 +194,18 @@ int main(int argc, char **argv){
             // sipmInfo = new ISiPM();
             SetBranches(ev);
             // tree->SetBranchAddress("SiPM", &sipmInfo);
-            
+
+            // Open the "Sim" tree (GrOptics branch), which holds one SimRunData per event.
+            // Kept open for the whole event loop so the event number can be read per entry.
+            fSim = new TFile(FilePath.c_str(), "READ");
+            simTree = (TTree*)fSim->Get("Sim");
+            simRunData = new SimRunData();
+            simTree->SetBranchAddress("GrOptics", &simRunData);
+            simTree->GetEntry(0);
+            simDate = simRunData->GetDate();  // date is constant across the run
+            simRun = simRunData->GetSumRun(); // run name is constant across the run
+            cout << "Sim Run Date from SimRunData: " << simDate << endl;
+
             nEntries = tree->GetEntries();
             if (nEntries==0) {
                 continue;
@@ -183,10 +217,26 @@ int main(int argc, char **argv){
         
         // loops through each event in a file
         for(int EventCounter = 0; EventCounter < TotalEvents; EventCounter++){
-            cev = new CEvent(); // creates a new Clean Event object 
+            cev = new CEvent(); // creates a new Clean Event object
             eventInfo->Clear();
             cev->SetEventDate(stoi(folString));
-            cev->SetFilename(fileNamesVec[f]);
+            if (whatData == "sim"){
+                // read the SimRunData entry for THIS event so the event number changes per event
+                float simEnergy = 0.0;
+                if (simTree && EventCounter < simTree->GetEntries()){
+                    simTree->GetEntry(EventCounter);
+                    simEvent = simRunData->GetSimEventNumber();
+                    simEnergy = simRunData->GetNeutrinoEnergy(); // switch to GetTauEnergy() for tau energy
+                }
+                cev->SetEventDate(simDate); // use the date from the SimRunData class for sim events
+                cev->SetFilename(simRun); // use the run name from the SimRunData class for sim events
+                cev->SetEventNumber(simEvent);
+                plothelp->SetSimEnergy(simEnergy, true); // track this energy for the saved-vs-removed plot
+            } else {
+                cev->SetFilename(fileNamesVec[f]);
+                plothelp->SetSimEnergy(0.0, false); // non-sim: do not track energy
+
+            }
 
             std::vector<Int_t> TrigMus;
             std::vector<float> AmplitudesTimeBin;
@@ -223,7 +273,17 @@ int main(int argc, char **argv){
                     // pulse = new Pulse(ev->GetSignalValue(k));
                     Pedestals.push_back(pulse->GetPedestal());
                     PeakTimeBin.push_back(pulse->GetTimePeak());
-                    AmplitudesTimeBin.push_back(pulse1->GetAmplitude());
+                    if (whatData == "sim"){
+                        if (pulse->GetAmplitude() == -0) {
+                            AmplitudesTimeBin.push_back(0);
+                        } else {
+                            AmplitudesTimeBin.push_back(-1*pulse->GetAmplitude());
+                        }
+                        // cout << "Amplitude: " << pulse->GetAmplitude() << endl;
+                    } else {
+                        AmplitudesTimeBin.push_back(pulse1->GetAmplitude());
+
+                    }
                     delete pulse;
                     delete pulse1;
                 }
@@ -239,6 +299,7 @@ int main(int argc, char **argv){
                     Pedestals.push_back(pulse->GetPedestal());
                     PeakTimeBin.push_back(pulse->GetTimePeak());
                     AmplitudesTimeBin.push_back(pulse->GetAmplitude());
+                    
                     delete pulse;
 
                 }
@@ -248,22 +309,27 @@ int main(int argc, char **argv){
             
             cev->SetTriggeredMUSICID(TrigMus[0]);
             if (whatData == "sim"){
-                PixelSurviveCutOff=1;
-                sizeCutoff = 0; 
-                NumberOfCoresCutoff = 0; 
+                // cout << "we should be entering here" << endl;
+                // PixelSurviveCutOff=1;
+                // sizeCutoff = 0; 
+                // NumberOfCoresCutoff = 0; 
                 // PixelSurviveCutOff=5;
                 // sizeCutoff = 200; 
-                // NumberOfCoresCutoff = 3; 
-                
+                // NumberOfCoresCutoff = 3;
+
                 // CorePixelCutOff = 100;
                 std::vector<double> fakeGain(256, 1.0); 
-                cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, std::to_string(20241011),fakeGain,44.0);
+                cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, "all1new",fakeGain,44.0);
             } else {
                 cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, std::to_string(cev->GetEventDate()),sipmInfo->GetGain(),44.0);
 
             }
             cev->SetPeakTimeBin(PeakTimeBin);
             AmplitudesTimeBin = cev->GetAmplitudeValuesTimeBin(); // reset the  amplitudesTimeBin to be aboslute gain calibrated
+            for (int i = 0; i < AmplitudesTimeBin.size(); i++) {
+                cout << AmplitudesTimeBin[i] << " ";
+            }
+            cout << endl;
             cev->SetAverageAmplitude(util->GetEventAverageAmplitude(cev->GetAmplitudeValuesTimeBin()));
             cev->SetRMS(cev->GetAmplitudeValuesTimeBin());
             plothelp->AddtoRMSratioAVGamp(cev->GetRMSoverAvgAmp());
@@ -274,7 +340,9 @@ int main(int argc, char **argv){
             // if (cev->GetEventDate() < 20241001 && whatData != "muon") {
             //     FlasherEventsCutOff = 350; // 350 ADC/8 PE
             // }
-            cev->SetEventNumber(EventCounter);
+            if (whatData != "sim") {
+                cev->SetEventNumber(EventCounter);
+            }
             if (EventCounter > nEntries && whatData != "muon") {
                 cev->SetEventNumber(EventCounter-nEntries);
             } 
@@ -337,8 +405,11 @@ int main(int argc, char **argv){
                 // cout << "triggered Music pair: " << util->GetMUSICMate(cev->GetTriggeredMUSICID(), true) << endl;
             }
             
-            cout << "triggered  Music: " <<cev->GetTriggeredMUSICID() << endl;
+            cout << "triggered Music: " <<cev->GetTriggeredMUSICID() << endl;
             cev->SetMaxAmplitude(util->GetMaximum(cev->GetAmplitudeValuesTimeBin(),cev->GetTriggeredMUSICID()));
+            // cout << "GetAmplitude: " << cev->GetAmplitudeValuesTimeBin()[239] << endl;
+            cout << "Max Amplitude: " << cev->GetMaxAmplitude() << endl;
+            cout << "Amplitude Cutoff: " << TriggeredChannelAmpCutOff/util->GetADCtoPEratio() << endl;
             if (cev->GetMaxAmplitude() < TriggeredChannelAmpCutOff/util->GetADCtoPEratio()) {
                 plothelp->AddEventFlags(1);
                 eventInfo->SetEventFlag(1);
@@ -346,7 +417,6 @@ int main(int argc, char **argv){
                 delete cev;
                 continue;
             }
-            
 
             cev->SetPedestalValues(Pedestals);
             cev->SetMaxAmplitudePixelID(util->GetMaximumPixelID(cev->GetAmplitudeValuesTimeBin(),cev->GetTriggeredMUSICID()));
@@ -381,23 +451,12 @@ int main(int argc, char **argv){
             gPad->SetBottomMargin(0.25); // Increase bottom margin
             gPad->SetRightMargin(0.15);
             
-
             std::string filenameTitle = cev->GetFilename();
-            int pos = filenameTitle.find("T");
-            filenameTitle = filenameTitle.substr(pos+1, 5);
-            
-            if (whatData == "sim") {
-                std::string temp = (cev->GetFilename()).substr(52,3);
-                filenameTitle = folString.substr(9,6);
-                cout << filenameTitle << endl;
-                filenameTitle = filenameTitle.append("_");
-                filenameTitle = filenameTitle.append(temp);
-                filenameTitle.erase(std::remove(filenameTitle.begin(), filenameTitle.end(), '.'), filenameTitle.end());
-                filenameTitle.erase(std::remove(filenameTitle.begin(), filenameTitle.end(), 'r'), filenameTitle.end());
-                
-            }
+            if (whatData != "sim"){
+                int pos = filenameTitle.find("T");
+                filenameTitle = filenameTitle.substr(pos+1, 5);
+            } 
             // create TH2D for Camera
-            
             hcam_panel1 = new TH2F("hcam_panel1", Form("Calibrated Img --N# %i --F# %s-- E# %i ", cev->GetEventDate(), filenameTitle.c_str() ,cev->GetEventNumber()), 16, -0.5, 15.5, 16, -0.5, 15.5);
             hcam_panel1->SetDirectory(0);
             cev->SetPanel1(hcam_panel1);
@@ -430,6 +489,7 @@ int main(int argc, char **argv){
             hcam_panel2->SetDirectory(0);
             cev->SetPanel2(hcam_panel2,CorePixelAmpCutOff/util->GetADCtoPEratio());
             std::vector<int> survivingPanel2Pixels = cev->GetSurvivingPixelPanel2();
+            // cout<< PixelSurviveCutOff << endl;
             if (survivingPanel2Pixels.size() < static_cast<std::vector<int>::size_type>(PixelSurviveCutOff)) {
                 eventInfo->SetEventFlag(2);
                 plothelp->AddEventFlags(2);
@@ -582,6 +642,13 @@ int main(int argc, char **argv){
             delete treeHLED;
             delete evHLED;
         }
+        if (whatData == "sim"){
+            delete simRunData; // close the Sim tree opened for this file
+            delete fSim;       // also deletes simTree (owned by the file)
+            simRunData = nullptr;
+            simTree = nullptr;
+            fSim = nullptr;
+        }
         delete tree;
         delete ev;
     }
@@ -592,6 +659,7 @@ int main(int argc, char **argv){
     fileOutput->Close();
     file = new TFile(OutputFileRoot.c_str(), "UPDATE");
     plothelp->PlotEventFlags(c_cleaned, OutputFilePDF);
+    plothelp->PlothSimEnergySavedVsNotSaved(c_cleaned, OutputFilePDF); // sims only: saved vs removed energy
     plothelp->PlothWL(c_cleaned,OutputFilePDF,outDir,to_string(cev->GetEventDate()));
     plothelp->PlothdistLandW(c_cleaned,OutputFilePDF);
     plothelp->PlothSize(c_cleaned,OutputFilePDF);    

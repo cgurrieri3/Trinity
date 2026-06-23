@@ -59,6 +59,19 @@ void PlotHelp::AddtoNumberOfCores(double num){
 
 void PlotHelp::AddEventFlags(int i) {
     Flagvector.push_back(i);
+    // sims only: bin the current event's energy by whether it survived cleaning (flag 5)
+    if (trackSimEnergy) {
+        if (i == 5) {
+            SimEnergySavedVector.push_back(currentSimEnergy);
+        } else {
+            SimEnergyNotSavedVector.push_back(currentSimEnergy);
+        }
+    }
+}
+
+void PlotHelp::SetSimEnergy(float energy, bool isSim) {
+    currentSimEnergy = energy;
+    trackSimEnergy = isSim;
 }
 
 void PlotHelp::AddtoDistance2MajorAxis(double d){
@@ -141,6 +154,79 @@ void PlotHelp::PlotEventFlags(TCanvas* c, std::string pdf){
     hEventFlag->Write("EventFlagsTH1D");
     c->Print(pdf.c_str());
     delete hEventFlag;
+}
+
+// Sims only: overlay the energy distribution of saved (flag 5) vs removed events.
+// Safe to call for non-sim runs: both vectors are empty so it returns without plotting.
+void PlotHelp::PlothSimEnergySavedVsNotSaved(TCanvas* c, std::string pdf){
+    if (SimEnergySavedVector.empty() && SimEnergyNotSavedVector.empty()) {
+        return; // not a sim run, or no events processed
+    }
+
+    // common axis range across both samples; energy spans decades so use log10 (skip non-positive)
+    bool first = true;
+    double emin = 0.0, emax = 0.0;
+    auto scan = [&](const std::vector<double>& v){
+        for (double e : v){
+            if (e <= 0) continue; // log10 undefined
+            if (first){ emin = emax = e; first = false; }
+            else { if (e < emin) emin = e; if (e > emax) emax = e; }
+        }
+    };
+    scan(SimEnergySavedVector);
+    scan(SimEnergyNotSavedVector);
+    if (first) return; // no positive energies to plot
+
+    // bin in log space, snapped to whole decades, 10 bins per decade
+    double lo = TMath::Floor(TMath::Log10(emin));
+    double hi = TMath::Ceil(TMath::Log10(emax));
+    if (hi <= lo) hi = lo + 1.0; // at least one decade wide
+    int nbins = static_cast<int>((hi - lo) * 10);
+    if (nbins < 1) nbins = 1;
+
+    // axis range is given in log10 exponents; LogBinning() converts edges to powers of ten
+    TH1D* hSaved    = new TH1D("hSimEnergySaved",    "Sim Energy: Saved vs Removed;Neutrino Energy;Events", nbins, lo, hi);
+    TH1D* hNotSaved = new TH1D("hSimEnergyNotSaved", "Sim Energy: Saved vs Removed;Neutrino Energy;Events", nbins, lo, hi);
+    hSaved->SetStats(0);
+    hNotSaved->SetStats(0);
+    LogBinning(hSaved);
+    LogBinning(hNotSaved);
+
+    for (double e : SimEnergySavedVector)    hSaved->Fill(e);
+    for (double e : SimEnergyNotSavedVector) hNotSaved->Fill(e);
+
+    hNotSaved->SetLineColor(kRed);
+    hNotSaved->SetFillColorAlpha(kRed+2, 0.35);
+    hNotSaved->SetLineWidth(2);
+    hSaved->SetLineColor(kGreen+2);
+    hSaved->SetFillColorAlpha(kGreen+2, 0.35);
+    hSaved->SetLineWidth(2);
+
+    c->cd(0);
+    double ymax = std::max(hSaved->GetMaximum(), hNotSaved->GetMaximum());
+    hNotSaved->SetMaximum(ymax * 1.5); // headroom for log-y
+    hNotSaved->SetMinimum(0.5);        // keep empty bins off the log-y axis
+    hNotSaved->Draw("HIST");
+    hSaved->Draw("HIST SAME");
+
+    TLegend* leg = new TLegend(0.62, 0.75, 0.88, 0.88);
+    leg->AddEntry(hSaved,    Form("Saved (%d)",   (int)SimEnergySavedVector.size()),    "f");
+    leg->AddEntry(hNotSaved, Form("Removed (%d)", (int)SimEnergyNotSavedVector.size()), "l");
+    leg->Draw();
+
+    c->Update();
+    c->SetLogx();
+    c->SetLogy();
+    c->Write("SimEnergySavedVsRemoved");
+    hSaved->Write("SimEnergySavedTH1D");
+    hNotSaved->Write("SimEnergyNotSavedTH1D");
+    c->Print(pdf.c_str());
+
+    delete leg;
+    delete hSaved;
+    delete hNotSaved;
+    c->SetLogx(0); // reset for any plots that follow
+    c->SetLogy(0);
 }
 
 void PlotHelp::PlothWL(TCanvas* c, std::string pdf,std::string outDir,std::string date){
