@@ -63,14 +63,14 @@
 #include <IEvent.h>
 #include <IPlotTools.h>
 #include <ISiPM.h>
-#include "SimRunData.h"
+#include <SEvent.h>
 
 
 
 
 IUtilities *util;
 IPlotTools *plottools;
-SimRunData *simRun=0;
+SEvent *simRun=0;
 IEvent *ev=0;
 CEvent *cev;
 TFile *file;

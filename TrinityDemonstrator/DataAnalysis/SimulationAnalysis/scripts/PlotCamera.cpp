@@ -88,9 +88,9 @@ int main(int argc, char **argv){
                 // Create the TTree in the output file so the tree is not memory-resident only
                 
                 fileOutput->cd();
-                simRun = new SimRunData(vPhotonX->size());
+                simRun = new SEvent(vPhotonX->size());
                 treeSims = new TTree("Sim", "Events tree");
-                treeSims->Branch("GrOptics","SimRunData",&simRun);
+                treeSims->Branch("GrOptics","SEvent",&simRun);
                 ev = new IEvent();
                 treeNew = new TTree("Test", "Events tree");
                 treeNew->Branch("Events","IEvent",&ev);
@@ -184,7 +184,7 @@ int main(int argc, char **argv){
                         simRun->SetPosY(*vPhotonY);
 
 
-                        //locate the ISOG output in the same date and then open the text file and read them to SimRunData and then save to the root file
+                        //locate the ISOG output in the same date and then open the text file and read them to SEvent and then save to the root file
                         std::string ISOGFolderPath = Form("%s%s_%s/ISOG/Tilt_91.560000/",dataDir.c_str(),folString.c_str(),simrun.c_str());
                         // get all the files in the ISOG folder
                         std::vector<std::string> ISOGfileNamesVec;
@@ -271,14 +271,10 @@ int main(int argc, char **argv){
                                 continue;
                         }
                         
-                        // Emergence angle: wrap azimuth to [-180,180] to measure from telescope axis
-                        double azimuthDeg = simRun->GetAzimuthAngle();
-                        double emergenceAngle = (azimuthDeg > 180.0) ? (azimuthDeg - 360.0) : azimuthDeg;
-                        // Distance to emergence point from telescope position vector
-                        double Rx = simRun->GetTelescope_Xpos();
-                        double Ry = simRun->GetTelescope_Ypos();
-                        double Rz = simRun->GetTelescope_Zpos();
-                        double emergenceDistance = sqrt(Rx*Rx + Ry*Ry + Rz*Rz);
+                        // Emergence angle (azimuth wrapped to [-180,180] from the telescope axis)
+                        // and distance to the emergence point (magnitude of the telescope position vector)
+                        double emergenceAngle = util->GetEmergenceAngle(simRun->GetAzimuthAngle());
+                        double emergenceDistance = util->GetEmergenceDistance(simRun->GetTelescope_Xpos(), simRun->GetTelescope_Ypos(), simRun->GetTelescope_Zpos());
                         cout << "Emergence Angle (from telescope axis): " << emergenceAngle << " deg" << endl;
                         cout << "Distance to Emergence Point: " << emergenceDistance << " (units of telescope coords)" << endl;
 
