@@ -268,6 +268,17 @@ int main(int argc, char **argv){
                         treeSims->Fill();
                         if (!triggered) {
                                 cout << "Not enough photons detected in this simulation run, saving as untriggered..." << endl;
+                                // Clean up this iteration's histograms before skipping so they
+                                // are not left registered in the directory for the next event
+                                delete hPhotonDist1xPixels;
+                                delete hPhotonX;
+                                delete hPhotonY;
+                                delete hPhotonDcosX;
+                                delete hPhotonDcosY;
+                                delete hPhotonZ;
+                                delete hPhotonDist1x;
+                                delete hPhotonDist1x6mm;
+                                delete hPhotonDist4x;
                                 continue;
                         }
                         
