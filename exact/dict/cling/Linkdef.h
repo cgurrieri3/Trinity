@@ -17,6 +17,7 @@
 #pragma link C++ class IUtilities+;
 #pragma link C++ class ICalibration+;
 #pragma link C++ class ISiPM+;
+#pragma link C++ class SEvent+;
 
 
 #endif

@@ -14,6 +14,7 @@ class ISims
 class IUtilities
 class Pulse
 class ReadConfiguration
+class SEvent
 header BiFocal.h
 header Event.h
 header ExtractedData.h
@@ -28,3 +29,4 @@ header ISims.h
 header IUtilities.h
 header Pulse.h
 header ReadConfiguration.h
+header SEvent.h

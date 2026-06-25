@@ -45,11 +45,12 @@
 #include "IFile.h"
 #include "IHealthTools.h"
 #include "IPlotTools.h"
-#include "ISims.h"
 #include "ISiPM.h"
+#include "ISims.h"
 #include "IUtilities.h"
 #include "Pulse.h"
 #include "ReadConfiguration.h"
+#include "SEvent.h"
 
 // Header files passed via #pragma extra_include
 
@@ -423,7 +424,7 @@ namespace ROOT {
       ::IEvent *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::IEvent));
       static ::ROOT::TGenericClassInfo 
-         instance("IEvent", "IEvent.h", 18,
+         instance("IEvent", "IEvent.h", 19,
                   typeid(::IEvent), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &IEvent_Dictionary, isa_proxy, 4,
                   sizeof(::IEvent) );
@@ -581,6 +582,51 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
+   static TClass *ISiPM_Dictionary();
+   static void ISiPM_TClassManip(TClass*);
+   static void *new_ISiPM(void *p = nullptr);
+   static void *newArray_ISiPM(Long_t size, void *p);
+   static void delete_ISiPM(void *p);
+   static void deleteArray_ISiPM(void *p);
+   static void destruct_ISiPM(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::ISiPM*)
+   {
+      ::ISiPM *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::ISiPM));
+      static ::ROOT::TGenericClassInfo 
+         instance("ISiPM", "ISiPM.h", 7,
+                  typeid(::ISiPM), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &ISiPM_Dictionary, isa_proxy, 4,
+                  sizeof(::ISiPM) );
+      instance.SetNew(&new_ISiPM);
+      instance.SetNewArray(&newArray_ISiPM);
+      instance.SetDelete(&delete_ISiPM);
+      instance.SetDeleteArray(&deleteArray_ISiPM);
+      instance.SetDestructor(&destruct_ISiPM);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::ISiPM*)
+   {
+      return GenerateInitInstanceLocal(static_cast<::ISiPM*>(nullptr));
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::ISiPM*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *ISiPM_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::ISiPM*>(nullptr))->GetClass();
+      ISiPM_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void ISiPM_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
    static TClass *ISims_Dictionary();
    static void ISims_TClassManip(TClass*);
    static void *new_ISims(void *p = nullptr);
@@ -626,49 +672,71 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
-   static TClass *ISiPM_Dictionary();
-   static void ISiPM_TClassManip(TClass*);
-   static void *new_ISiPM(void *p = nullptr);
-   static void *newArray_ISiPM(Long_t size, void *p);
-   static void delete_ISiPM(void *p);
-   static void deleteArray_ISiPM(void *p);
-   static void destruct_ISiPM(void *p);
+   static void *new_SEvent(void *p = nullptr);
+   static void *newArray_SEvent(Long_t size, void *p);
+   static void delete_SEvent(void *p);
+   static void deleteArray_SEvent(void *p);
+   static void destruct_SEvent(void *p);
 
    // Function generating the singleton type initializer
-   static TGenericClassInfo *GenerateInitInstanceLocal(const ::ISiPM*)
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::SEvent*)
    {
-      ::ISiPM *ptr = nullptr;
-      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::ISiPM));
+      ::SEvent *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::SEvent >(nullptr);
       static ::ROOT::TGenericClassInfo 
-         instance("ISiPM", "ISiPM.h", 7,
-                  typeid(::ISiPM), ::ROOT::Internal::DefineBehavior(ptr, ptr),
-                  &ISiPM_Dictionary, isa_proxy, 4,
-                  sizeof(::ISiPM) );
-      instance.SetNew(&new_ISiPM);
-      instance.SetNewArray(&newArray_ISiPM);
-      instance.SetDelete(&delete_ISiPM);
-      instance.SetDeleteArray(&deleteArray_ISiPM);
-      instance.SetDestructor(&destruct_ISiPM);
+         instance("SEvent", ::SEvent::Class_Version(), "SEvent.h", 11,
+                  typeid(::SEvent), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &::SEvent::Dictionary, isa_proxy, 4,
+                  sizeof(::SEvent) );
+      instance.SetNew(&new_SEvent);
+      instance.SetNewArray(&newArray_SEvent);
+      instance.SetDelete(&delete_SEvent);
+      instance.SetDeleteArray(&deleteArray_SEvent);
+      instance.SetDestructor(&destruct_SEvent);
       return &instance;
    }
-   TGenericClassInfo *GenerateInitInstance(const ::ISiPM*)
+   TGenericClassInfo *GenerateInitInstance(const ::SEvent*)
    {
-      return GenerateInitInstanceLocal(static_cast<::ISiPM*>(nullptr));
+      return GenerateInitInstanceLocal(static_cast<::SEvent*>(nullptr));
    }
    // Static variable to force the class initialization
-   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::ISiPM*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
-
-   // Dictionary for non-ClassDef classes
-   static TClass *ISiPM_Dictionary() {
-      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const ::ISiPM*>(nullptr))->GetClass();
-      ISiPM_TClassManip(theClass);
-   return theClass;
-   }
-
-   static void ISiPM_TClassManip(TClass* ){
-   }
-
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const ::SEvent*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
 } // end of namespace ROOT
+
+//______________________________________________________________________________
+atomic_TClass_ptr SEvent::fgIsA(nullptr);  // static to hold class pointer
+
+//______________________________________________________________________________
+const char *SEvent::Class_Name()
+{
+   return "SEvent";
+}
+
+//______________________________________________________________________________
+const char *SEvent::ImplFileName()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::SEvent*)nullptr)->GetImplFileName();
+}
+
+//______________________________________________________________________________
+int SEvent::ImplFileLine()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::SEvent*)nullptr)->GetImplFileLine();
+}
+
+//______________________________________________________________________________
+TClass *SEvent::Dictionary()
+{
+   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::SEvent*)nullptr)->GetClass();
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+TClass *SEvent::Class()
+{
+   if (!fgIsA.load()) { R__LOCKGUARD(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::SEvent*)nullptr)->GetClass(); }
+   return fgIsA;
+}
 
 namespace ROOT {
    // Wrapper around operator delete
@@ -896,27 +964,6 @@ namespace ROOT {
 
 namespace ROOT {
    // Wrappers around operator new
-   static void *new_ISims(void *p) {
-      return  p ? new(p) ::ISims : new ::ISims;
-   }
-   static void *newArray_ISims(Long_t nElements, void *p) {
-      return p ? new(p) ::ISims[nElements] : new ::ISims[nElements];
-   }
-   // Wrapper around operator delete
-   static void delete_ISims(void *p) {
-      delete (static_cast<::ISims*>(p));
-   }
-   static void deleteArray_ISims(void *p) {
-      delete [] (static_cast<::ISims*>(p));
-   }
-   static void destruct_ISims(void *p) {
-      typedef ::ISims current_t;
-      (static_cast<current_t*>(p))->~current_t();
-   }
-} // end of namespace ROOT for class ::ISims
-
-namespace ROOT {
-   // Wrappers around operator new
    static void *new_ISiPM(void *p) {
       return  p ? new(p) ::ISiPM : new ::ISiPM;
    }
@@ -937,6 +984,60 @@ namespace ROOT {
 } // end of namespace ROOT for class ::ISiPM
 
 namespace ROOT {
+   // Wrappers around operator new
+   static void *new_ISims(void *p) {
+      return  p ? new(p) ::ISims : new ::ISims;
+   }
+   static void *newArray_ISims(Long_t nElements, void *p) {
+      return p ? new(p) ::ISims[nElements] : new ::ISims[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_ISims(void *p) {
+      delete (static_cast<::ISims*>(p));
+   }
+   static void deleteArray_ISims(void *p) {
+      delete [] (static_cast<::ISims*>(p));
+   }
+   static void destruct_ISims(void *p) {
+      typedef ::ISims current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class ::ISims
+
+//______________________________________________________________________________
+void SEvent::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class SEvent.
+
+   if (R__b.IsReading()) {
+      R__b.ReadClassBuffer(SEvent::Class(),this);
+   } else {
+      R__b.WriteClassBuffer(SEvent::Class(),this);
+   }
+}
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_SEvent(void *p) {
+      return  p ? new(p) ::SEvent : new ::SEvent;
+   }
+   static void *newArray_SEvent(Long_t nElements, void *p) {
+      return p ? new(p) ::SEvent[nElements] : new ::SEvent[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_SEvent(void *p) {
+      delete (static_cast<::SEvent*>(p));
+   }
+   static void deleteArray_SEvent(void *p) {
+      delete [] (static_cast<::SEvent*>(p));
+   }
+   static void destruct_SEvent(void *p) {
+      typedef ::SEvent current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class ::SEvent
+
+namespace ROOT {
    static TClass *vectorlEvectorlEintgRsPgR_Dictionary();
    static void vectorlEvectorlEintgRsPgR_TClassManip(TClass*);
    static void *new_vectorlEvectorlEintgRsPgR(void *p = nullptr);
@@ -951,7 +1052,7 @@ namespace ROOT {
       vector<vector<int> > *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<vector<int> >));
       static ::ROOT::TGenericClassInfo 
-         instance("vector<vector<int> >", -2, "vector", 423,
+         instance("vector<vector<int> >", -2, "vector", 389,
                   typeid(vector<vector<int> >), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &vectorlEvectorlEintgRsPgR_Dictionary, isa_proxy, 0,
                   sizeof(vector<vector<int> >) );
@@ -1016,7 +1117,7 @@ namespace ROOT {
       vector<unsigned short> *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<unsigned short>));
       static ::ROOT::TGenericClassInfo 
-         instance("vector<unsigned short>", -2, "vector", 423,
+         instance("vector<unsigned short>", -2, "vector", 389,
                   typeid(vector<unsigned short>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &vectorlEunsignedsPshortgR_Dictionary, isa_proxy, 0,
                   sizeof(vector<unsigned short>) );
@@ -1081,7 +1182,7 @@ namespace ROOT {
       vector<int> *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<int>));
       static ::ROOT::TGenericClassInfo 
-         instance("vector<int>", -2, "vector", 423,
+         instance("vector<int>", -2, "vector", 389,
                   typeid(vector<int>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &vectorlEintgR_Dictionary, isa_proxy, 0,
                   sizeof(vector<int>) );
@@ -1146,7 +1247,7 @@ namespace ROOT {
       vector<float> *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<float>));
       static ::ROOT::TGenericClassInfo 
-         instance("vector<float>", -2, "vector", 423,
+         instance("vector<float>", -2, "vector", 389,
                   typeid(vector<float>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &vectorlEfloatgR_Dictionary, isa_proxy, 0,
                   sizeof(vector<float>) );
@@ -1211,7 +1312,7 @@ namespace ROOT {
       vector<double> *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<double>));
       static ::ROOT::TGenericClassInfo 
-         instance("vector<double>", -2, "vector", 423,
+         instance("vector<double>", -2, "vector", 389,
                   typeid(vector<double>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &vectorlEdoublegR_Dictionary, isa_proxy, 0,
                   sizeof(vector<double>) );
@@ -1274,21 +1375,22 @@ namespace {
 "IFile.h",
 "IHealthTools.h",
 "IPlotTools.h",
-"ISims.h",
 "ISiPM.h",
+"ISims.h",
 "IUtilities.h",
 "Pulse.h",
 "ReadConfiguration.h",
+"SEvent.h",
 nullptr
     };
     static const char* includePaths[] = {
 "dict",
 "./inc/",
-"/storage/hive/project/phy-otte/sstepanoff3/Trinity/exact/dict/include",
+"/data/TrinityLabComputer/Trinity/exact/dict/include",
 "./dict/cling",
 "./",
-"/storage/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/include/",
-"/storage/hive/project/phy-otte/sstepanoff3/Trinity/exact/",
+"/opt/root/include/",
+"/data/TrinityLabComputer/Trinity/exact/",
 nullptr
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(
@@ -1309,8 +1411,9 @@ class __attribute__((annotate("$clingAutoload$IEvent.h")))  IEvent;
 class __attribute__((annotate("$clingAutoload$IFile.h")))  IFile;
 class __attribute__((annotate("$clingAutoload$Pulse.h")))  __attribute__((annotate("$clingAutoload$IHealthTools.h")))  Pulse;
 class __attribute__((annotate("$clingAutoload$IHealthTools.h")))  IHealthTools;
-class __attribute__((annotate("$clingAutoload$ISims.h")))  ISims;
 class __attribute__((annotate("$clingAutoload$ISiPM.h")))  ISiPM;
+class __attribute__((annotate("$clingAutoload$ISims.h")))  ISims;
+class __attribute__((annotate("$clingAutoload$SEvent.h")))  SEvent;
 )DICTFWDDCLS";
     static const char* payloadCode = R"DICTPAYLOAD(
 #line 1 "exactDict dictionary payload"
@@ -1328,11 +1431,12 @@ class __attribute__((annotate("$clingAutoload$ISiPM.h")))  ISiPM;
 #include "IFile.h"
 #include "IHealthTools.h"
 #include "IPlotTools.h"
-#include "ISims.h"
 #include "ISiPM.h"
+#include "ISims.h"
 #include "IUtilities.h"
 #include "Pulse.h"
 #include "ReadConfiguration.h"
+#include "SEvent.h"
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
@@ -1351,6 +1455,7 @@ class __attribute__((annotate("$clingAutoload$ISiPM.h")))  ISiPM;
 "IUtilities", payloadCode, "@",
 "Pulse", payloadCode, "@",
 "ReadConfiguration", payloadCode, "@",
+"SEvent", payloadCode, "@",
 nullptr
 };
     static bool isInitialized = false;
