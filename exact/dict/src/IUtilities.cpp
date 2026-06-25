@@ -1,5 +1,6 @@
 #include <string>
 #include <sstream>
+#include <cmath>
 
 #include "IUtilities.h"
 
@@ -560,4 +561,14 @@ Double_t IUtilities::Median(std::vector<double> v)
     }
     //If the number of elements is even, return the average of the two middle elements
     return(Double_t)(tempV[(n-1)/2]+tempV[n/2])/2.0;
+}
+
+double IUtilities::GetEmergenceAngle(double azimuthAngle){
+    // Wrap azimuth to [-180,180] to measure the emergence angle from the telescope axis
+    return (azimuthAngle > 180.0) ? (azimuthAngle - 360.0) : azimuthAngle;
+}
+
+double IUtilities::GetEmergenceDistance(double telescopeX, double telescopeY, double telescopeZ){
+    // Distance to the emergence point is the magnitude of the telescope position vector
+    return std::sqrt(telescopeX*telescopeX + telescopeY*telescopeY + telescopeZ*telescopeZ);
 }

@@ -346,6 +346,33 @@ class IUtilities{
 		*/
 		static Double_t Median(std::vector<double> v);
 
+		/**
+		* Public method to compute the tau emergence angle from the simulated azimuth angle.
+		*
+		* The azimuth angle is wrapped to the range [-180, 180] degrees so that it is
+		* measured from the telescope axis: any value greater than 180 has 360 subtracted
+		* from it.
+		*
+		* @param azimuthAngle A double with the azimuth angle in degrees (e.g. from SEvent::GetAzimuthAngle()).
+		*
+		* @return A double with the emergence angle in degrees, wrapped to [-180, 180].
+		*/
+		static double GetEmergenceAngle(double azimuthAngle);
+
+		/**
+		* Public method to compute the distance to the emergence point from the telescope position vector.
+		*
+		* The distance is the magnitude of the telescope position vector,
+		* sqrt(x^2 + y^2 + z^2), in the units of the telescope coordinates.
+		*
+		* @param telescopeX A double with the telescope x position.
+		* @param telescopeY A double with the telescope y position.
+		* @param telescopeZ A double with the telescope z position.
+		*
+		* @return A double with the distance to the emergence point in the telescope coordinate units.
+		*/
+		static double GetEmergenceDistance(double telescopeX, double telescopeY, double telescopeZ);
+
 		static float GetADCtoPEratio(){return ADCtoPEratio;}
 
 	private:
