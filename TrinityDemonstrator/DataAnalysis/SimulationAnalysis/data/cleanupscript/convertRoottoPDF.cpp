@@ -16,7 +16,8 @@
 #include <vector>
 #include <cmath>
 #include <limits>
-#include "SimRunData.h"
+#include <SEvent.h>
+#include <IUtilities.h>
 
 
 int main(int argc, char* argv[]) {
@@ -38,9 +39,9 @@ int main(int argc, char* argv[]) {
 
     gStyle->SetOptStat(0);
 
-    // --- Build shower-info lookup from the SimRunData tree -----------------
+    // --- Build shower-info lookup from the SEvent tree -----------------
     // The plots file (SIM_Plots_<DATE>.root) has a sibling data file
-    // (SIM_DataFiles_<DATE>.root) holding one SimRunData per shower.
+    // (SIM_DataFiles_<DATE>.root) holding one SEvent per shower.
     // Key = simrun + "_" + simEvent, which matches the histogram base name.
     struct ShowerInfo {
         double energy;            // neutrino energy [GeV]
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
             if (!t) {
                 std::cerr << "WARNING: no 'Sim' tree in " << datafile << std::endl;
             } else {
-                SimRunData *d = nullptr;
+                SEvent *d = nullptr;
                 t->SetBranchAddress("GrOptics", &d);
                 const Long64_t nentries = t->GetEntries();
                 for (Long64_t i = 0; i < nentries; ++i) {
@@ -83,16 +84,15 @@ int main(int argc, char* argv[]) {
                     std::string k = d->GetSumRun() + "_" +
                                     std::to_string(d->GetSimEventNumber());
 
-                    // Emergence angle: wrap azimuth to [-180,180] to measure
-                    // from the telescope axis.
-                    double azimuthDeg = d->GetAzimuthAngle();
+                    // Emergence angle (azimuth wrapped to [-180,180] from the
+                    // telescope axis) and distance to the emergence point
+                    // (magnitude of the telescope position vector).
                     double emergenceAngle =
-                        (azimuthDeg > 180.0) ? (azimuthDeg - 360.0) : azimuthDeg;
-                    // Distance to emergence point from telescope position vector.
-                    double Rx = d->GetTelescope_Xpos();
-                    double Ry = d->GetTelescope_Ypos();
-                    double Rz = d->GetTelescope_Zpos();
-                    double emergenceDistance = sqrt(Rx*Rx + Ry*Ry + Rz*Rz);
+                        IUtilities::GetEmergenceAngle(d->GetAzimuthAngle());
+                    double emergenceDistance =
+                        IUtilities::GetEmergenceDistance(d->GetTelescope_Xpos(),
+                                                         d->GetTelescope_Ypos(),
+                                                         d->GetTelescope_Zpos());
 
                     infoMap[k] = { d->GetNeutrinoEnergy(),
                                    emergenceAngle, emergenceDistance };
