@@ -67,7 +67,7 @@
 #include <ISiPM.h>
 #include <execution>
 #include "EventInfo.h"
-#include "SimRunData.h"
+#include <SEvent.h>
 
 
 // Define variables (global)

@@ -113,17 +113,19 @@ int main(int argc, char **argv){
     c_cleaned->Print(OutputFilePDFOpen.c_str());
 
 
-    // new output file
+    // new output file -- keep it OPEN so the trees created below are file-resident.
+    // Creating a TTree while no file is open makes it memory-resident; large branches
+    // like SEvent::posX/posY then fail to flush their baskets mid-Fill ("basket's
+    // WriteBuffer failed").
     TFile *fileOutput = new TFile(OutputFileEventCleaningDataRoot.c_str(), "RECREATE");
-    fileOutput->Close();  
     TTree *treeSims = new TTree("EventCleaning", "Events tree");
     eventInfo = new EventInfo(1);
     treeSims->Branch("Cleaned", eventInfo); // Store only serializable data members, not TH2F pointers
 
-    // For sim data: copy the input "Sim" (GrOptics / SimRunData) tree into the output
+    // For sim data: copy the input "Sim" (GrOptics / SEvent) tree into the output
     // Data_EventCleaning file exactly as-is, for ALL events (triggered or not, cleaned or not).
     TTree *treeSimOut = nullptr;
-    SimRunData *simRunOut = new SimRunData();
+    SEvent *simRunOut = new SEvent();
     if (whatData == "sim"){
         treeSimOut = new TTree("Sim", "Events tree");
         treeSimOut->Branch("GrOptics", &simRunOut);
@@ -152,12 +154,12 @@ int main(int argc, char **argv){
 
         int TotalEvents;
         int nEntries;
-        int simDate = 0; // date pulled from the SimRunData class for sim events
-        std::string simRun = ""; // sim run number pulled from the SimRunData class for sim events
-        int simEvent = 0; // sim event number pulled from the SimRunData class for sim events
-        TFile *fSim = nullptr;            // sim file kept open so SimRunData can be read per event
-        TTree *simTree = nullptr;         // "Sim" tree holding one SimRunData entry per event
-        SimRunData *simRunData = nullptr; // reused across the event loop
+        int simDate = 0; // date pulled from the SEvent class for sim events
+        std::string simRun = ""; // sim run number pulled from the SEvent class for sim events
+        int simEvent = 0; // sim event number pulled from the SEvent class for sim events
+        TFile *fSim = nullptr;            // sim file kept open so SEvent can be read per event
+        TTree *simTree = nullptr;         // "Sim" tree holding one SEvent entry per event
+        SEvent *simRunData = nullptr; // reused across the event loop
         TotalEvents = 0;
         nEntries = 0;
         // loads the events based on the type of data for each file
@@ -204,16 +206,16 @@ int main(int argc, char **argv){
             SetBranches(ev);
             // tree->SetBranchAddress("SiPM", &sipmInfo);
 
-            // Open the "Sim" tree (GrOptics branch), which holds one SimRunData per event.
+            // Open the "Sim" tree (GrOptics branch), which holds one SEvent per event.
             // Kept open for the whole event loop so the event number can be read per entry.
             fSim = new TFile(FilePath.c_str(), "READ");
             simTree = (TTree*)fSim->Get("Sim");
-            simRunData = new SimRunData();
+            simRunData = new SEvent();
             simTree->SetBranchAddress("GrOptics", &simRunData);
             simTree->GetEntry(0);
-            
+
             simRun = simRunData->GetSumRun(); // run name is constant across the run
-            cout << "Sim Run Date from SimRunData: " << simDate << endl;
+            cout << "Sim Run Date from SEvent: " << simDate << endl;
 
             // Copy every entry of the input "Sim" tree into the output Sim tree exactly as-is,
             // so the truth info is saved for ALL events regardless of triggered/cleaning class.
@@ -221,7 +223,7 @@ int main(int argc, char **argv){
                 Long64_t nSim = simTree->GetEntries();
                 for (Long64_t s = 0; s < nSim; s++){
                     simTree->GetEntry(s);
-                    *simRunOut = *simRunData; // copy the SimRunData object exactly
+                    *simRunOut = *simRunData; // copy the SEvent object exactly
                     treeSimOut->Fill();
                 }
                 cout << "Copied " << nSim << " Sim entries to output" << endl;
@@ -242,7 +244,7 @@ int main(int argc, char **argv){
             eventInfo->Clear();
             cev->SetEventDate(stoi(folString));
             if (whatData == "sim"){
-                // read the SimRunData entry for THIS event so the event number changes per event
+                // read the SEvent entry for THIS event so the event number changes per event
                 float simEnergy = 0.0;
                 if (simTree && EventCounter < simTree->GetEntries()){
                     simTree->GetEntry(EventCounter);
@@ -250,8 +252,8 @@ int main(int argc, char **argv){
                     simEnergy = simRunData->GetNeutrinoEnergy(); // switch to GetTauEnergy() for tau energy
                 }
                 simDate = simRunData->GetDate();  // date is constant across the run
-                cev->SetEventDate(simDate); // use the date from the SimRunData class for sim events
-                cev->SetFilename(simRun); // use the run name from the SimRunData class for sim events
+                cev->SetEventDate(simDate); // use the date from the SEvent class for sim events
+                cev->SetFilename(simRun); // use the run name from the SEvent class for sim events
                 cev->SetEventNumber(simEvent);
                 plothelp->SetSimEnergy(simEnergy, true); // track this energy for the saved-vs-removed plot
             } else {
@@ -648,15 +650,13 @@ int main(int argc, char **argv){
             // Drawn BEFORE the canvas is written so it is saved in the .root canvas too.
             TPaveText *simInfo = nullptr;
             if (whatData == "sim"){
-                // Distance to emergence point from telescope position vector
-                double Rx = simRunData->GetTelescope_Xpos();
-                double Ry = simRunData->GetTelescope_Ypos();
-                double Rz = simRunData->GetTelescope_Zpos();
-                double emergenceDistance = sqrt(Rx*Rx + Ry*Ry + Rz*Rz);
+                // Distance to emergence point (magnitude of the telescope position vector)
+                double emergenceDistance = util->GetEmergenceDistance(simRunData->GetTelescope_Xpos(),
+                                                                      simRunData->GetTelescope_Ypos(),
+                                                                      simRunData->GetTelescope_Zpos());
 
-                // Emergence angle: wrap azimuth to [-180,180] to measure from telescope axis
-                double azimuthDeg = simRunData->GetAzimuthAngle();
-                double emergenceAngle = (azimuthDeg > 180.0) ? (azimuthDeg - 360.0) : azimuthDeg;
+                // Emergence angle (azimuth wrapped to [-180,180] from the telescope axis)
+                double emergenceAngle = util->GetEmergenceAngle(simRunData->GetAzimuthAngle());
 
                 c_cleaned->cd(0);
                 simInfo = new TPaveText(0.28, 0.49, 0.72, 0.57, "NDC");
@@ -708,10 +708,9 @@ int main(int argc, char **argv){
         delete ev;
     }
     cout << "we here" << endl;
-    fileOutput = new TFile(OutputFileEventCleaningDataRoot.c_str(), "UPDATE");
+    fileOutput->cd();
     treeSims->Write();
     if (treeSimOut) treeSimOut->Write(); // sims: input Sim tree copied as-is for all events
-    // fileOutput->Write();
     fileOutput->Close();
     file = new TFile(OutputFileRoot.c_str(), "UPDATE");
     plothelp->PlotEventFlags(c_cleaned, OutputFilePDF);

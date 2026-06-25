@@ -14,7 +14,7 @@ DICT_DIR := ${EXACT_DIR}/dict
 # dictionary for both classes in a single pass (LinkDef.h pragma-links both).
 DICT_SRC := EventInfoDict.cpp
 DICT_OBJ := $(BIN_DIR)/EventInfoDict.o
-DICT_HDR := EventInfo.h SimRunData.h
+DICT_HDR := EventInfo.h
 LINKDEF  := LinkDef.h
 
 # # root cling
