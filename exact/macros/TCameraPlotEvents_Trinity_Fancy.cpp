@@ -237,7 +237,22 @@ void TCameraPlotEvents_Trinity_Fancy(string fileName,string treeString)
 	c_disp = new TCanvas("Display","CameraPlot",750,750);
 	c_disp->Divide(2,2);
 	LoadEvents(fileName, treeString);
-	ev = new Event();
+	// ev = new Event();
+
+    // Ask ROOT what class the "Events" branch actually stores on disk,
+	// then allocate that exact type. IEvent inherits from Event, so a
+	// base-class Event* can drive all the plotting code either way.
+	TBranch *evBranch = tree->GetBranch("Events");
+	TString branchClass = evBranch ? evBranch->GetClassName() : "";
+	cout << "Branch 'Events' stores class: " << branchClass << endl;
+    if (branchClass == "IEvent")
+	{
+		ev = new IEvent();   // full raw + auxiliary data
+	}
+	else
+	{
+		ev = new Event();    // fall back to raw event only
+	}
     tree->SetBranchAddress("Events", &ev);
 	//SetBranches(ev);
     but1 = new TButton("PE","PushButton()",.01,.95,.07,.99);

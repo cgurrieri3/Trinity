@@ -12,7 +12,7 @@ int eventCounter = 0;
 int eventFail = 0;
 TLatex *text = 0;
 TTree *tree = 0;
-Event *ev;
+Event *ev;   // base-class pointer: works for both Event and IEvent branches
 IPlotTools *plottools;
 
 TCanvas *c_disp = 0;
@@ -194,8 +194,23 @@ void TCameraPlotEvents_Trinity(string fileName,string treeString)
 	c_disp = new TCanvas("Display","CameraPlot",750,750);
 	c_disp->Divide(2,2);
 	LoadEvents(fileName, treeString);
-	ev = new Event();
-    tree->SetBranchAddress("Events", &ev);
-	//SetBranches(ev);
+
+	// Ask ROOT what class the "Events" branch actually stores on disk,
+	// then allocate that exact type. IEvent inherits from Event, so a
+	// base-class Event* can drive all the plotting code either way.
+	TBranch *evBranch = tree->GetBranch("Events");
+	TString branchClass = evBranch ? evBranch->GetClassName() : "";
+	cout << "Branch 'Events' stores class: " << branchClass << endl;
+
+	if (branchClass == "IEvent")
+	{
+		ev = new IEvent();   // full raw + auxiliary data
+	}
+	else
+	{
+		ev = new Event();    // fall back to raw event only
+	}
+
+	tree->SetBranchAddress("Events", &ev);
 	PlotEvent();
 }
