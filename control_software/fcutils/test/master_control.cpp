@@ -435,8 +435,7 @@ void Stop_Triggering()
 
 	Archive_Counters();
 	Run_Number++;
-
-	sleep(5);
+	
 	std::string Move_Files = CoBo_DIR+"scripts/MoveFilesDone.sh &";
 	system(Move_Files.c_str());
 	std::cout << "---------------------" << std::endl;
@@ -1010,7 +1009,7 @@ void Do_Trigger_Scan_SF_PBP(std::string& msg)
 	// Byte 4 and 5 are Step Size and Byte 6 is Step Duration.
 	//int NoOfPixels = 16*16;
 	//int NoOfPixels = 16;
-	int NoOfPixels = 1;
+	int NoOfPixels = 8;
 	int StartPoint   = stoi(msg.substr(0, 4),0,16);
 	int NofSteps     = stoi(msg.substr(4, 4),0,16);
 	int StepSize     = stoi(msg.substr(8, 4),0,16);
@@ -1076,13 +1075,13 @@ void Do_Trigger_Scan_SF_PBP(std::string& msg)
 		int musicLoc = ((((i/8)%2) + 1) << 4 | musicCh); //when i is pixel id (range 0-255)
 
 		int musicCh = (((i%8) + 4) & 0x7); //when i is siab channel id (range 0-15)
-		int musicLoc = (((i%8) + 1) << 4 | musicCh); //when i is siab channel id (range 0-15)
+		int musicLoc = (((i%8) + 1) << 4 | musicCh); //when i is siab channel id (range 0-15)*/
 
-		int musicLoc = (3 << 4 | i); //when i is music channel id (range 0-7)*/
+		int musicLoc = (3 << 4 | i); //when i is music channel id (range 0-7)
 
 		std::stringstream music_pos;
-		//music_pos << std::setfill('0') << std::setw(2) << std::hex << musicLoc;
-		music_pos << std::setfill('0') << std::setw(2) << std::hex << 0x30;
+		music_pos << std::setfill('0') << std::setw(2) << std::hex << musicLoc;
+		//music_pos << std::setfill('0') << std::setw(2) << std::hex << 0x30;
 
 		for(int j=0; j<NofSteps; j++){
 			int trg_threshold = StartPoint + j*StepSize;
