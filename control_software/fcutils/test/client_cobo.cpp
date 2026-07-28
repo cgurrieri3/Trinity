@@ -37,7 +37,7 @@ void StartECCServer()
 
 void StartDataRouter()
 {
-	std::string command = "cd "+CoBo_DIR+"format/ && dataRouter 192.168.41.20:46003 1912.168.41.20:46005 TCP FrameStorage 2>&1 &";
+	std::string command = "cd "+CoBo_DIR+"format/ && dataRouter 192.168.41.20:46003 192.168.41.20:46005 TCP FrameStorage 2>&1 &";
 	system(command.c_str());
 }
 
