@@ -83,10 +83,9 @@ def get_difference(png1):
 	
 	# Ensure the images have the same dimensions
 	if image1.shape != image2.shape:
-	    raise ValueError("Images must have the same dimensions")
-
+		raise ValueError("Images must have the same dimensions")
 	if image3.shape != image4.shape:
-	    raise ValueError("Images must have the same dimensions")
+		raise ValueError("Images must have the same dimensions")
 
 	# Compute the absolute difference between the two images
 	difference = cv2.absdiff(image1, image2)
@@ -147,12 +146,14 @@ def cloud_base_caluation(temp, dewpoint):
 	return cloud_base
 
 def airport_report():
-	
-    report=pm.main()
-    print('---')
-    print('Airports Weather Information:')
-    lets.communicate(report)
-    print('---')
+	try:
+		report=pm.main()
+	except:
+		report='No airport data available'
+	print('---')
+	print('Airports Weather Information:')
+	lets.communicate(report)
+	print('---')
 
 
 def query_last_wx():
@@ -200,22 +201,24 @@ def query_last_wx():
 		wx_influx = datetime.strptime(wx_influx, "%Y-%m-%dT%H:%M:%SZ")
 	except:
 		wx_influx = datetime.strptime(wx_influx, "%Y-%m-%dT%H:%M:%S.%fZ")
-	#print(wx_influx)
+#	lets.log_file(wx_influx)
 	current_utc_time = datetime.utcnow()
 
 	#print(current_utc_time)
 
 	# Calculate the time difference
 	time_difference = abs(current_utc_time - wx_influx)
-	#print(time_difference)
+	lets.log_file(f'{time_difference}')
 
 	# Define a time duration of 1 hour
 	one_hour = timedelta(hours=1)
-	#print(time_difference)
+	#lets.log_file(time_difference)
 	# weather stations is updating
 	if time_difference <= one_hour:
 		all_good = 1 + all_good
 		#print('WX: time good')
+	else:
+		lets.communicate('WX: Weather station not updating')
 
 	Rhumidity = points[0]['Relative_Humidity']
 	TempC = points[0]['Temperature']
@@ -225,14 +228,23 @@ def query_last_wx():
 	# print(TempC)
 	# print(dewpoint)
 	# print(cloud_base_caluation(TempC, dewpoint))
-	cloud_base=cloud_base_caluation(TempC,dewpoint)
-	lets.communicate(f'Cloud base: {cloud_base:.0f} ft a.s.l.')
+	try:
+		cloud_base=cloud_base_caluation(TempC,dewpoint)
+		lets.communicate(f'Cloud base: {cloud_base:.0f} ft a.s.l.')
+	except:
+		cloud_base = 1234567
+		lets.communicate('Cloud base: not available')
 
-	radar=get_difference('radar')
+	try:
+		radar=get_difference('radar')
+	except:
+		lets.communicate('Radar: not available')
+		radar = 0	
 	#clouds=get_difference('clouds')
 	# add another spot that will check a smaller region around milford
 	if radar == 0: # clouds == 0 #cloud_base < 11000 or
 		lets.log_file('Testing: Weather seems bad ')
+		all_good = 1 + all_good 
 	else:
 		all_good = 1 + all_good 
 
@@ -240,7 +252,7 @@ def query_last_wx():
 		if TempC <= 0:
 			all_good = 1 + all_good
 
-		elif Rhumidity < 75 and TempC > 0: # add cloud base?
+		elif Rhumidity < 90 and TempC > 0: # add cloud base?
 			all_good = 1 + all_good
 			#print('WX: hum good')
 		else:

@@ -39,17 +39,24 @@ def main():
         try:
             raws.append(getMetarData(code))
         except:
-            texts.append('No connection available')
+            raws.append('No connection available')
     texts = []
     for raw in raws:
-        if raw.text == '':
+        if raw == '':
             texts.append('No data available')
         else:
-            texts.append(getCloudInfo(raw.text))
+            try:
+                texts.append(getCloudInfo(raw.text))
+            except:
+                texts.append("no api data")
     # Outputting values
     
-
-    return(f"Milford: {normalizeHeight(texts[0], milfordHeight)}\nBeaver: {normalizeHeight(texts[1], beaverHeight)}\nCedar: {normalizeHeight(texts[2], cedarHeight)}")
-
+    try:
+        return(f"Milford: {normalizeHeight(texts[0], milfordHeight)}\nBeaver: {normalizeHeight(texts[1], beaverHeight)}\nCedar: {normalizeHeight(texts[2], cedarHeight)}")
+    except:
+        return("No airport data available")
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except:
+        print("No airport data available")
