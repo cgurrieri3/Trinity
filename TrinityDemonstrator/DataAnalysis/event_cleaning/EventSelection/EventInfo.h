@@ -47,7 +47,16 @@ class EventInfo : public TObject {
         void SetNumberOfCores(Float_t v);
         void SetM3Longx(string v);
         void SetM3Longy(string v);
+
+        void SetDistance2MajorAxis(Float_t v);
+        void SetRMSMajorAxis(Float_t v);
+        void SetWeightedRMSMajorAxis(Float_t v);
+        void SetPixelsonMajorAxis(Int_t v);
+        void SetPixelsoffMajorAxis(Int_t v);
+        void SetRatioPixelsMajorAxis(Float_t v);
         
+
+
         // Getters
         Int_t GetDate() const;
         string GetFile() const;
@@ -79,6 +88,13 @@ class EventInfo : public TObject {
         Float_t GetNumberOfCores() const;
         string GetM3Longx() const;
         string GetM3Longy() const;
+
+        Float_t GetDistance2MajorAxis() const;
+        Float_t GetRMSMajorAxis() const;
+        Float_t GetWeightedRMSMajorAxis() const;
+        Int_t GetPixelsonMajorAxis() const;
+        Int_t GetPixelsoffMajorAxis() const;
+        Float_t GetRatioPixelsMajorAxis() const;
 
     protected:
 
@@ -112,6 +128,13 @@ class EventInfo : public TObject {
         Float_t NumberOfCores;
         string M3Longx;
         string M3Longy;
+
+        Float_t Distance2MajorAxis;
+        Float_t RMSMajorAxis;
+        Float_t WeightedRMSMajorAxis;
+        Int_t PixelsonMajorAxis;
+        Int_t PixelsoffMajorAxis;
+        Float_t RatioPixelsMajorAxis;
 
         ClassDef(EventInfo, 1);  // ROOT I/O support
 

@@ -45,6 +45,13 @@ EventInfo::EventInfo(int size){
     NumberOfCores = 0;
     M3Longx = "0";
     M3Longy = "0";
+
+    Distance2MajorAxis = 0;
+    RMSMajorAxis = 0;
+    WeightedRMSMajorAxis = 0;
+    PixelsonMajorAxis = 0;
+    PixelsoffMajorAxis = 0;
+    RatioPixelsMajorAxis = 0;
 }
 
 EventInfo::~EventInfo(){
@@ -90,6 +97,13 @@ void EventInfo::Clear() {
     NumberOfCores = 0;
     M3Longx = "0";
     M3Longy = "0";
+
+    Distance2MajorAxis = 0;
+    RMSMajorAxis = 0;
+    WeightedRMSMajorAxis = 0;
+    PixelsonMajorAxis = 0;
+    PixelsoffMajorAxis = 0;
+    RatioPixelsMajorAxis = 0;
 }
 
 // Setters
@@ -123,6 +137,12 @@ void EventInfo::SetNumberOfCores(Float_t v) {NumberOfCores = v; }
 void EventInfo::SetM3Longx(string v) {M3Longx = v; }
 void EventInfo::SetM3Longy(string v) {M3Longy = v; }
 
+void EventInfo::SetDistance2MajorAxis(Float_t v) {Distance2MajorAxis = v; }
+void EventInfo::SetRMSMajorAxis(Float_t v) {RMSMajorAxis = v; }
+void EventInfo::SetWeightedRMSMajorAxis(Float_t v) {WeightedRMSMajorAxis = v; }
+void EventInfo::SetPixelsonMajorAxis(Int_t v) {PixelsonMajorAxis = v; }
+void EventInfo::SetPixelsoffMajorAxis(Int_t v) {PixelsoffMajorAxis = v; }
+void EventInfo::SetRatioPixelsMajorAxis(Float_t v) {RatioPixelsMajorAxis = v; }
 
 
 // Getters
@@ -155,3 +175,10 @@ Float_t EventInfo::GetCoreRatio() const { return CoreRatio; }
 Float_t EventInfo::GetNumberOfCores() const { return NumberOfCores; }
 string EventInfo::GetM3Longx() const { return M3Longx; }
 string EventInfo::GetM3Longy() const { return M3Longy; }
+
+Float_t EventInfo::GetDistance2MajorAxis() const { return Distance2MajorAxis; }
+Float_t EventInfo::GetRMSMajorAxis() const { return RMSMajorAxis; }
+Float_t EventInfo::GetWeightedRMSMajorAxis() const { return WeightedRMSMajorAxis; }
+Int_t EventInfo::GetPixelsonMajorAxis() const { return PixelsonMajorAxis; }
+Int_t EventInfo::GetPixelsoffMajorAxis() const { return PixelsoffMajorAxis; }
+Float_t EventInfo::GetRatioPixelsMajorAxis() const { return RatioPixelsMajorAxis; }

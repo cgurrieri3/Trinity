@@ -1,11 +1,38 @@
 #include "eventSelection.h"
 
+// ---------------------------------------------------------------------------
+// Which half of the data to keep. Change this by hand and recompile.
+//   'o' door open   : only events from files that ARE in the file list
+//   'c' door closed : only events from files that are NOT in the file list
+//   'a' all         : every event, list membership is only counted
+// Ignored when there is no file list (file_list == "n") or for sims.
+// ---------------------------------------------------------------------------
+const char selection = 'a';
+
+// Door open / door closed cut for one event, based on the cleaning file it came from.
+// Sims and runs with no list have no door state so they always pass. Every event that
+// reaches here is counted, so the door open/closed totals cover the whole run in all
+// three modes.
+bool PassesDoorSelection(const std::string& currentfilename) {
+    if (isSim || file_list == "n") return true;
+
+    bool inList = std::find(allowedFilesVec.begin(), allowedFilesVec.end(), currentfilename)
+                  != allowedFilesVec.end();
+    if (inList) { dooropen++; } else { doorclosed++; }
+
+    if (selection == 'o') return inList;
+    if (selection == 'c') return !inList;
+    return true; // 'a'
+}
+
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        printf("Usage: %s <mount>%s <folder>%s <filelist>%s \n", argv[0], argv[1], argv[2], argv[3]);
+    if (argc < 4) {
+        printf("Usage: %s <mount> <folder> <filelist>\n", argv[0]);
+        printf("  filelist : path to the door open list, or n for no list\n");
+        printf("  door open/closed selection is the 'selection' constant at the top of eventSelection.cpp\n");
         return 1;
     }
-    
+
     mount = argv[1];
     folder = argv[2];
     file_list = argv[3]; // set globals declared in eventSelection.h
@@ -23,7 +50,7 @@ int main(int argc, char* argv[]) {
     }
     // add the mount path to the any paths
     // if the file list refers to simulation data (contains "sim") read from OutputSim
-    bool isSim = (file_list.find("sim") != std::string::npos);
+    isSim = (file_list.find("sim") != std::string::npos);
     if (isSim) {
         std::cout << "simulation file list detected, using OutputSim path" << std::endl;
         FolderPath = Form("%s/DataAnalysis/event_cleaning/OutputSim/%s/", mnt.c_str(), folder.c_str());
@@ -69,15 +96,25 @@ int main(int argc, char* argv[]) {
         EventInfo* event = nullptr;
         tree->SetBranchAddress("Cleaned", &event); // Replace "EventInfo" with your branch name
 
-        // For simulation data, EventCleaning copies the input "Sim" (GrOptics / SimRunData)
+        // Older EventCleaning files were written before the major axis quantities existed, so the
+        // branch is missing and the getter would silently hand back the EventInfo default of 0.
+        // When it is absent fall back to recomputing the ratio the same way CheckCrossPoints does
+        // in ../ClusterCleaning/EventCleaning.h; when it is there just read the stored value.
+        bool hasRatioBranch = (tree->GetBranch("RatioPixelsMajorAxis") != nullptr) ||
+                              (tree->FindLeaf("RatioPixelsMajorAxis") != nullptr);
+        if (!hasRatioBranch) {
+            printf("No RatioPixelsMajorAxis branch in %s, recomputing it from the panel 4 histogram.\n", f.c_str());
+        }
+
+        // For simulation data, EventCleaning copies the input "Sim" (GrOptics / SEvent)
         // tree into the output file aligned 1:1 with the EventCleaning entries. Read it so the
         // per-event neutrino energy is available for the saved-vs-removed plot.
         TTree* simTree = nullptr;
-        SimRunData* simRunData = nullptr;
+        SEvent* simRunData = nullptr;
         if (isSim) {
             simTree = (TTree*)file->Get("Sim");
             if (simTree) {
-                simRunData = new SimRunData();
+                simRunData = new SEvent();
                 simTree->SetBranchAddress("GrOptics", &simRunData);
             } else {
                 printf("TTree 'Sim' not found in sim file %s; energies will be skipped.\n", f.c_str());
@@ -86,7 +123,7 @@ int main(int argc, char* argv[]) {
 
         Long64_t nEntries = tree->GetEntries();
         // load into the PlotHelp class 
-        // nEntries = 100;
+        //  nEntries = 10;
         for (Long64_t i = 0; i < nEntries; ++i) {
             // Testing on My Machine
             tree->GetEntry(i);
@@ -110,58 +147,31 @@ int main(int argc, char* argv[]) {
             
             
             
-            plothelp->AddtoEventDate(event->GetDate());
-            plothelp->AddtoRMSratioAVGamp(event->GetRMS_AvgAmp());
-            
             std::string currentfilename = (event->GetFile()).erase(0, 7);
             cout << "Current File Name: " << currentfilename << endl;
-            
-            if (event->GetEventFlag() != 5) {
-                plothelp->AddEventFlags(event->GetEventFlag());
-                if (event->GetEventFlag() == 9) {
-                    continue;
-                }
-                
-                if (isSim) {
-                    // simulation events are neither door open nor door closed
-                } else if (file_list == "n") {
-                    std::cout << ("no file list saving all  ") << std::endl;
 
-                } else if ( std::find(allowedFilesVec.begin(), allowedFilesVec.end(), currentfilename) != allowedFilesVec.end() ){
-                    // std::cout << ("File found in list saving") << std::endl;
-                    dooropen = dooropen + 1;
-
-                } else {
-                    // std::cout << ("Not in the list skipping") << std::endl;
-                    doorclosed = doorclosed + 1;
-
-
-                }
-
-
+            // door open / door closed cut, set by the 'selection' constant at the top of the file.
+            // Everything past this point belongs to the half of the data that was asked for.
+            TotalEvents++;
+            if (!PassesDoorSelection(currentfilename)) {
                 continue;
             }
-
-            if (isSim) {
-                // simulation events are neither door open nor door closed; save and continue to selection
-                plothelp->AddEventFlags(event->GetEventFlag());
-            } else if (file_list == "n") {
-                std::cout << ("no file list saving all  ") << std::endl;
-                plothelp->AddEventFlags(event->GetEventFlag());
-            } else if ( std::find(allowedFilesVec.begin(), allowedFilesVec.end(), currentfilename) != allowedFilesVec.end() ){
-                std::cout << ("File found in list saving") << std::endl;
-                plothelp->AddEventFlags(event->GetEventFlag());
-                dooropen = dooropen + 1;
-                continue; // add for door closed
-            } else {
-                std::cout << ("Not in the list skipping") << std::endl;
-                plothelp->AddEventFlags(4);
-                
-                doorclosed = doorclosed + 1;
-                // continue; // add for no closed door
-                
-            }
             
+            plothelp->AddtoEventDate(event->GetDate());
+            plothelp->AddtoRMSratioAVGamp(event->GetRMS_AvgAmp());
+            plothelp->AddEventFlags(event->GetEventFlag());
+            
+            
+            if (event->GetEventFlag() == 9) {
+                HLEDEvents++;   
+            }
+
+            // anything that is not flag 5 was cleaned away (9 = flasher) so there is nothing to select on
+            if (event->GetEventFlag() != 5) {
+                continue;
+            }
+            SurvivngEventCount++;
+
             cout << "Event Flag: " << event->GetEventFlag() << endl;
             // Event was never cleaned away so that means it survived and now needs
             // Event selection
@@ -174,6 +184,13 @@ int main(int argc, char* argv[]) {
             
             TH2F* hist = event->GetHPanel1();
             TH2F* hist4 = event->GetHPanel4();
+            // ratio of pixels on the major axis: read from the file when present, otherwise
+            // filled in below from hist4. Stays 0 for events with no panel 4 histogram.
+            double ratioPixelsMajorAxis  = hasRatioBranch ? event->GetRatioPixelsMajorAxis()  : 0.0;
+            int    pixelsonMajorAxis     = hasRatioBranch ? event->GetPixelsonMajorAxis()    : 0;
+            int    pixelsoffMajorAxis    = hasRatioBranch ? event->GetPixelsoffMajorAxis()   : 0;
+            double rmsMajorAxis          = hasRatioBranch ? event->GetRMSMajorAxis()         : 0.0;
+            double weightedRmsMajorAxis  = hasRatioBranch ? event->GetWeightedRMSMajorAxis() : 0.0;
             // std::vector<float> hvcurrent = event->Gethvc();
             // float hvsum = 0.0;
             // for (const auto& hv : hvcurrent) {
@@ -242,7 +259,83 @@ int main(int argc, char* argv[]) {
                 arrow->Draw("SAME");             // Draw the arrow on the same canvas
                 arrow1->SetLineColor(kBlue); // Optional: Set the color of the arrow
                 arrow1->Draw("SAME");             // Draw the arrow on the same canvas
-                
+
+                // Same major axis geometry as CheckCrossPoints in ../ClusterCleaning/EventCleaning.h.
+                // The per pixel distances are never stored in EventInfo (Distance2MajorAxis is a
+                // single value overwritten per pixel by the cleaning) so they are always recomputed
+                // here; the event level values are only recomputed when the file predates them.
+                // get the arrow slope
+                double x1 = arrow->GetX1();
+                double y1 = arrow->GetY1();
+                double x2 = arrow->GetX2();
+                double y2 = arrow->GetY2();
+
+                // Line vector components
+                double dx = x2 - x1;
+                double dy = y2 - y1;
+                double len = std::sqrt(dx*dx + dy*dy);
+
+                // Degenerate line guard
+                if (len != 0.0) {
+                    int cLineIntersectPixels    = 0;
+                    int cLineNonIntersectPixels = 0;
+
+                    int nBinsX = hist4->GetNbinsX();
+                    int nBinsY = hist4->GetNbinsY();
+
+                    double RMSMajorAxis = 0.0;
+                    double WeightedRMSMajorAxis = 0.0;
+                    double totalWeight = 0.0;
+
+                    for (int ix = 1; ix <= nBinsX; ++ix) {
+                        for (int iy = 1; iy <= nBinsY; ++iy) {
+
+                            if (hist4->GetBinContent(ix, iy) <= 0) continue;
+
+                            // Bin center in axis coordinates
+                            double cx = hist4->GetXaxis()->GetBinCenter(ix);
+                            double cy = hist4->GetYaxis()->GetBinCenter(iy);
+
+                            // Perpendicular distance from bin center to the infinite line
+                            double dist = std::abs((cy - y1)*dx - (cx - x1)*dy) / len;
+                            plothelp->AddtoDistance2MajorAxis(dist);
+                            RMSMajorAxis += dist*dist;
+                            WeightedRMSMajorAxis += dist*dist*hist4->GetBinContent(ix, iy);
+                            totalWeight += hist4->GetBinContent(ix, iy);
+                            // Half-diagonal of the bin as intersection threshold
+                            double hw = 0.5 * hist4->GetXaxis()->GetBinWidth(ix);
+                            double hh = 0.5 * hist4->GetYaxis()->GetBinWidth(iy);
+                            double threshold = 0.905*std::sqrt(hw*hw + hh*hh);
+                            if (dist <= threshold) {
+                                ++cLineIntersectPixels;
+                            }
+                            else {
+                                ++cLineNonIntersectPixels;
+                            }
+                        }
+                    }
+                    int nPixels = cLineIntersectPixels + cLineNonIntersectPixels;
+                    RMSMajorAxis = std::sqrt(RMSMajorAxis/nPixels);
+                    WeightedRMSMajorAxis = std::sqrt(WeightedRMSMajorAxis/(totalWeight));
+
+                    // only take the recomputed values when the file could not supply them
+                    if (!hasRatioBranch && nPixels > 0) {
+                        ratioPixelsMajorAxis = (double)cLineIntersectPixels/nPixels;
+                        pixelsonMajorAxis    = cLineIntersectPixels;
+                        pixelsoffMajorAxis   = cLineNonIntersectPixels;
+                        rmsMajorAxis         = RMSMajorAxis;
+                        weightedRmsMajorAxis = WeightedRMSMajorAxis;
+                    }
+
+                    plothelp->AddtoPixelsonMajorAxis(pixelsonMajorAxis);
+                    plothelp->AddtoPixelsoffMajorAxis(pixelsoffMajorAxis);
+                    plothelp->AddtoRMSMajorAxis(rmsMajorAxis);
+                    plothelp->AddtoWeightedRMSMajorAxis(weightedRmsMajorAxis);
+                    // repeat this event's ratio once per pixel so it lines up with the distances
+                    plothelp->AddtoRatioPixelsMajorAxisPerPixel(ratioPixelsMajorAxis, nPixels);
+                }
+
+
                 TEllipse* ell = new TEllipse(meanx, meany,r1,r2,0,360,angledeg);
                 ell->SetFillColorAlpha(kGreen,0.00);
                 ell->Draw("SAME");
@@ -325,6 +418,7 @@ int main(int argc, char* argv[]) {
             // cout << "Ratio core:" << event->GetCoreRatio() << endl;
             // sleep(1);
             plothelp->AddtoNumberOfCores(event->GetNumberOfCores());
+            plothelp->AddtoRatioPixelsMajorAxis(ratioPixelsMajorAxis);
             // cout << "# core:" << event->GetNumberOfCores() << endl;
             // sleep(1);
 
@@ -368,6 +462,17 @@ int main(int argc, char* argv[]) {
     plothelp->PlothCRSPC(c_cleaned, OutputPdfFile);
     plothelp->PlothSIZEWandL(c_cleaned, OutputPdfFile);
     plothelp->PlothSimEnergySavedVsNotSaved(c_cleaned, OutputPdfFile); // sims only: saved vs removed neutrino energy
+    plothelp->PlotPixelsDistanceToMajorAxis(c_cleaned, OutputPdfFile);
+    plothelp->PlotPixelsRatioDistanceToMajorAxis(c_cleaned, OutputPdfFile);
+    plothelp->PlotdistRMSandWeightedRMS(c_cleaned, OutputPdfFile);
+    plothelp->PlotPixelsOnMajorAxis(c_cleaned, OutputPdfFile);
+    plothelp->PlotPixelsOffMajorAxis(c_cleaned, OutputPdfFile);
+    plothelp->PlothRMSvsRatioDistance(c_cleaned, OutputPdfFile);
+    plothelp->PlothWRMSvsRatioDistance(c_cleaned, OutputPdfFile);
+    plothelp->PlothWLvsRatioPixelsMajorAxis(c_cleaned, OutputPdfFile);
+    plothelp->PlothDistancevsRatioPixelsMajorAxis(c_cleaned, OutputPdfFile);
+    plothelp->PlothCoreOverSPCvsRatioPixelsMajorAxis(c_cleaned, OutputPdfFile);
+    plothelp->PlothSPCvsRatioPixelsMajorAxis(c_cleaned, OutputPdfFile);
     
     file->Close();
     // c_cleaned->Print("EventSelectionPlots.pdf"Close.c_str());
@@ -378,16 +483,48 @@ int main(int argc, char* argv[]) {
     
     c_cleaned->Print((OutputPdfFile + "]").c_str());
 
+    // add this instead to a txt file
+    ofstream filetxt;
+    filetxt.open("OutputSummary.txt");
+    if (filetxt.is_open())
+    {
+        filetxt << "Total Events in door open and door closed + flasher: " << TotalEvents << endl;
+        // filetxt << "Total Surviving Events: " << plothelp->GetSurvivingEvent() << endl;
+        // filetxt << "Total Pre Cleaned Events: " << plothelp->GetPreCleanedEvent() << endl;
+        // filetxt << "Total Panel 2 Cleaned Events: " << plothelp->GetPanel2CleanedEvent() << endl;
+        // filetxt << "Total Panel 3 Cleaned Events: " << plothelp->GetPanel3CleanedEvent() << endl;
 
-    // cout << "Total Events Processed: " << plothelp->GetTotalEvent() << endl;
-    // cout << "Total Surviving Events: " << plothelp->GetSurvivingEvent() << endl;
-    // cout << "Total HLED Events: " << plothelp->GetHLEDEvent() << endl;
-    // cout << "Total Pre Cleaned Events: " << plothelp->GetPreCleanedEvent() << endl;
-    // cout << "Total Panel 2 Cleaned Events: " << plothelp->GetPanel2CleanedEvent() << endl;
-    // cout << "Total Panel 3 Cleaned Events: " << plothelp->GetPanel3CleanedEvent() << endl;
-    cout << "Door Open Event Total: " << dooropen << endl;
-    cout << "Door Closed Event Total: " << doorclosed << endl;
-    cout << "Completed" << endl;
+        filetxt << "Door Open Event Total with Flasher: " << dooropen << endl;
+        filetxt << "Door Closed Event Total with Flasher: " << doorclosed << endl;
+        
+
+        if (selection == 'o') {
+            filetxt << "Door Open selection" << endl;
+            filetxt << "Door Open Event Total without Flasher: " << dooropen - HLEDEvents << endl;
+            filetxt << "Total Flasher Only Events: " << HLEDEvents << endl;
+            filetxt << "Total Surviving Events: " << SurvivngEventCount << endl;
+        } else if (selection == 'c') {
+            filetxt << "Door Closed selection" << endl;
+            filetxt << "Door Closed Event Total without Flasher: " << doorclosed - HLEDEvents << endl;
+            filetxt << "Total Flasher Only Events: " << HLEDEvents << endl;
+            filetxt << "Total Surviving Events: " << SurvivngEventCount << endl;
+        } else {
+            filetxt << "All Events selection" << endl;
+            filetxt << "All events without Flasher: " << TotalEvents - HLEDEvents << endl;
+            filetxt << "Total Flasher Only Events: " << HLEDEvents << endl;
+            filetxt << "Total Surviving Events: " << SurvivngEventCount << endl;
+        }
+
+        // Close the file to free up resources.
+        filetxt.close();
+        cout << "File output summary created successfully." << endl;
+    }
+    else
+    {
+        cout << "ERROR: could not open OutputSummary.txt for writing." << endl;
+    }
+
+    
     
     
     return 0;
