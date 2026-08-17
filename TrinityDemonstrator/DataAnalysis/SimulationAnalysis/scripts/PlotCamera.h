@@ -63,21 +63,20 @@
 #include <IEvent.h>
 #include <IPlotTools.h>
 #include <ISiPM.h>
-#include <SEvent.h>
+#include "SimRunData.h"
 
 
 
 
 IUtilities *util;
 IPlotTools *plottools;
-SEvent *simRun=0;
+SimRunData *simRun=0;
 IEvent *ev=0;
 CEvent *cev;
 TFile *file;
 TFile *fileOutput;
 TFile *fileOutputPlots;
-TTree *treeSims;
-TTree *treeNew;
+
 
 TH1F *hPhotonX=0;
 TH1F *hPhotonY=0;
@@ -90,22 +89,8 @@ TH2F* hPhotonDist4x=0;
 
 TCanvas *canvas=0;
 
-
-
-std::vector<float>* vPhotonX = 0;
-std::vector<float>* vPhotonY = 0;
-std::vector<float>* vPhotonDcosX = 0;
-std::vector<float>* vPhotonDcosY = 0;
-int nResMult = 100;
-
-int CameraStep = 16;
-float CameraMin = -0.5;
-float CameraMax = 15.5;
-float RadtoDeg = 57.2958;
 float PtoPEconversion = 0.4*0.83;
-// 0.4? photon detection effiency 
-// 0.83 is the average mirror reflectivity 
-// simulations accounts for atmopsheric absorbtion
+
 
 
 // std::string dataDir = "/storage/hive/project/phy-otte/shared/Trinity/Simulations/TDemSims/";
@@ -161,16 +146,9 @@ std::string outDir = "/storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis
 //     Float_t humidity;
 // };
 void DrawMUSICBoundaries();
-void create_root_file(TH2F* hist, TTree* treeNew);
-std::ifstream& GotoLine(std::ifstream& file, unsigned int num);
+// void create_root_file(TH2F* hist,TFile* file);
+void create_root_file(TH2F* hist, TFile* file, std::vector<int>* vFADCTraces[256]);
 
-std::ifstream& GotoLine(std::ifstream& file, unsigned int num){
-    file.seekg(std::ios::beg);
-    for(int i=0; i < num - 1; ++i){
-        file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-    }
-    return file;
-}
 
 
 void DrawMUSICBoundaries()

@@ -1,6 +1,11 @@
 #!/bin/bash
 # run_script.sh
+# Change only this to run on a new machine
+LocalPath="/home/sstepanoff"
+
 
 echo "Opening container to compile code"
 value=$1
-apptainer exec --bind /projects/cos-lab-aotte6/cos-4a17118/Trinity/TrinityDemonstrator:/mnt /projects/cos-lab-aotte6/cos-4a17118/Trinity/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif make $value
+apptainer exec --bind $LocalPath/TrinityDemonstrator:/mnt $LocalPath/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif make $value
+
+chmod 775 * -R

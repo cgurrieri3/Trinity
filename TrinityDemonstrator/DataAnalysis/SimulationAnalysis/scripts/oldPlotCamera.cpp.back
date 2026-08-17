@@ -1,0 +1,308 @@
+#include "PlotCamera.h"
+
+
+int main(int argc, char **argv){
+        if(argc < 2){
+                cout << "Too few arguments; please include the date data directory to summarize" << endl;
+                        return 1;
+	}
+    
+        // Get the Arguments
+        std::string folString = argv[1];
+        std::string simrun = argv[2];
+
+        std::string mount = argv[3];
+    
+        if (mount == "y"){ // with usingin htcondor you need to have contianers and some use full paths and other use mounts this lets you specify
+                std::cout << "using mounted directory path" << std::endl;
+                mnt="/mnt/";
+                dataDir = "/mnt/simdata/roots/diffuse/";
+                outDir = "/mnt/DataAnalysis/SimulationAnalysis/data/";
+        } else if (mount != "n"){
+                std::cout << "using specific directory path" << std::endl;
+                mnt=mount.c_str();
+                dataDir = Form("%ssimdata/roots/diffuse/",mnt.c_str());
+                outDir = Form("%sDataAnalysis/SimulationAnalysis/data/",mnt.c_str());
+        }
+
+        // Load in all the files
+        // LEFT OFF hERE
+        std::string FolderPath = Form("%s%s_%s/GROPT/Tilt_91.5600000/",dataDir.c_str(),folString.c_str(),simrun.c_str());
+        cout << FolderPath << endl;
+        std::vector<std::string> fileNamesVec;
+        fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
+        for (auto i: fileNamesVec)
+                std::cout << i << ' ';
+        cout << endl;
+        if (mkdir(Form("%s%s",outDir.c_str(),folString.c_str()), 0775) == -1)
+        {
+                cout << "Error : possibly directory already exists" << endl;
+
+        } else{
+                cout << "Directory created" <<  endl;
+
+        }
+        cout << "Output Folder: " << Form("%s%s/",outDir.c_str(),folString.c_str()) << endl;
+        // Creates a root file that stores all the data    
+        // file = new TFile(OutputFileRoot.c_str(), "RECREATE");  // "RECREATE" to overwrite if it exists
+        // file->Close();
+        if (fileNamesVec.size()==0){
+                cout << "Folder empty moving on..." << endl;
+                cout << "Completed!"<< endl;
+                return 0;
+        }
+        
+        for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
+        // for(int f = 0; f<2; f++){
+                std::string FilePath = Form("%s%s",FolderPath.c_str(),fileNamesVec[f].c_str());
+                cout << "file path: " <<FilePath << endl;
+                // Create the struct instance
+                // SimEventData sim;
+                // SimRunData simRun;
+                // SimAuxData simAux;
+                if (!util->isBranchPresentInFile(FilePath, "Events/T0")) {
+                        continue; // Skip to the next branch if not present
+                        
+                }
+                        
+                canvas = new TCanvas("Display","Event Display",2500,1000);
+                canvas->Divide(2,1);
+                canvas->cd(1)->SetRightMargin(0.15);
+                canvas->cd(2)->SetRightMargin(0.15);
+                int nResMult = 100;
+                hPhotonX = new TH1F("hist photonX","PhotonX Distribution", 192, -96, 96);
+                hPhotonX->GetXaxis()->SetTitle("Photon X Position (mm)");
+                hPhotonX->GetYaxis()->SetTitle("Number of Photons");
+                hPhotonX->SetStats(0);
+
+                hPhotonY = new TH1F("hist photonY","PhotonY Distribution", 96, -48, 48);
+                hPhotonY->GetXaxis()->SetTitle("Photon Y Position (mm)");
+                hPhotonY->GetYaxis()->SetTitle("Number of Photons");
+                hPhotonY->SetStats(0);
+
+                hPhotonDcosX = new TH1F("hist photonDcosX","PhotonDcosX Distribution", 100, -1, 1);
+                hPhotonDcosX->GetXaxis()->SetTitle("PhotonDcosX");
+                hPhotonDcosX->GetYaxis()->SetTitle("Number of Photons");
+                hPhotonDcosX->SetStats(0);
+
+                hPhotonDcosY = new TH1F("hist photonDcosY","PhotonDcosY Distribution", 100, -1, 1);
+                hPhotonDcosY->GetXaxis()->SetTitle("PhotonDcosY");
+                hPhotonDcosY->GetYaxis()->SetTitle("Number of Photons");
+                hPhotonDcosY->SetStats(0);
+
+                hPhotonZ = new TH1F("hist photonZ","Photon Incidence Angle Distribution", 180, 0, 90);
+                hPhotonZ->GetXaxis()->SetTitle("Photon Incidence Angle (Deg)");
+                hPhotonZ->GetYaxis()->SetTitle("Number of Photons");
+                hPhotonZ->SetStats(0);
+
+                hPhotonDist1x = new TH2F("hist1x", "Camera View, incident photons, 1mm bins", 96, -48.5, 47.5, 96, -48.5, 47.5);
+                hPhotonDist1x->GetXaxis()->SetTitle("X (mm)");
+                hPhotonDist1x->GetYaxis()->SetTitle("Y (mm)");
+
+                hPhotonDist1x6mm = new TH2F("hist1x6mm", "Camera View, incident photons, 6mm bins", 16, -48.5, 47.5, 16, -48.5, 47.5);
+                hPhotonDist1x->GetXaxis()->SetTitle("X (mm)");
+                hPhotonDist1x->GetYaxis()->SetTitle("Y (mm)");
+
+                int CameraStep = 16;
+                float CameraMin = -0.5;
+                float CameraMax = 15.5;
+                TH2F* hPhotonDist1xPixels = new TH2F("hPhotonDist1xPixels", "Camera View;Pixels along camera x axis;Pixels along camera y axis;Photons", CameraStep, CameraMin, CameraMax, CameraStep, CameraMin, CameraMax);
+
+                hPhotonDist4x = new TH2F("hist4x", "Camera View (4x)", 32*nResMult, -96.5, 95.5, 16*nResMult, -48.5, 47.5);
+                hPhotonDist4x->GetXaxis()->SetTitle("X (mm)");
+                hPhotonDist4x->GetYaxis()->SetTitle("Y (mm)");
+                hPhotonDist4x->SetStats(0);
+
+                float RadtoDeg = 57.2958;
+                std::vector<float>* vPhotonX = 0;
+                std::vector<float>* vPhotonY = 0;
+                std::vector<float>* vPhotonDcosX = 0;
+                std::vector<float>* vPhotonDcosY = 0;
+                
+                TFile* file = TFile::Open(FilePath.c_str(), "READ");
+                TTree* tree = (TTree*)file->Get("Events/T0");
+                tree->SetBranchAddress("photonX", &vPhotonX);
+                tree->SetBranchAddress("photonY", &vPhotonY);
+                tree->SetBranchAddress("photonDcosX", &vPhotonDcosX);
+                tree->SetBranchAddress("photonDcosY", &vPhotonDcosY);
+                
+                tree->GetEntry(0);
+                // Save all the simulation information to the file
+                // Create a new ROOT file
+                // TFile *Ofile = new TFile("example.root", "RECREATE");
+                
+                // Ofile->Close();
+                // cout << 1 << endl;
+                
+                for (size_t j = 0; j < vPhotonX->size(); j++)
+                {
+                        hPhotonX->Fill((*vPhotonX)[j]);
+                        hPhotonY->Fill((*vPhotonY)[j]);
+                        hPhotonDcosX->Fill((*vPhotonDcosX)[j]);
+                        hPhotonDcosY->Fill((*vPhotonDcosY)[j]);
+                        hPhotonZ->Fill(TMath::ASin(sqrt(pow((*vPhotonDcosX)[j],2)+pow((*vPhotonDcosY)[j],2)))*RadtoDeg);
+                        hPhotonDist1x->Fill((*vPhotonX)[j], (*vPhotonY)[j]);
+                        hPhotonDist1x6mm->Fill((*vPhotonX)[j], (*vPhotonY)[j]);
+                        hPhotonDist4x->Fill((*vPhotonX)[j], (*vPhotonY)[j]);
+                        
+                }
+                
+                cout<< Form("%s%s/plots_%s_%s",outDir.c_str(),folString.c_str(),simrun.c_str(),fileNamesVec[f].c_str()) << endl;
+                fileOutputPlots = new TFile(Form("%s%s/plots_%s_%s",outDir.c_str(),folString.c_str(),simrun.c_str(),fileNamesVec[f].c_str()), "RECREATE");
+
+                canvas->cd(1);
+                hPhotonDist1x->SetMarkerSize(200.0);
+                hPhotonDist1x->SetStats(0);
+                hPhotonDist1x->Draw("colz");
+                // hPhotonDist1x->Write(fileNamesVec[f]);
+                DrawMUSICBoundaries();
+                canvas->cd(2);
+                hPhotonDist1x6mm->SetMarkerSize(200.0);
+                hPhotonDist1x6mm->SetStats(0);
+                hPhotonDist1x6mm->Draw("colz");
+                hPhotonDist1x6mm->Write(Form("h%s6mm",fileNamesVec[f].c_str()));
+                DrawMUSICBoundaries();
+                canvas->Write(Form("C%s",fileNamesVec[f].c_str()));
+                // cout << 2 << endl;
+                
+                
+                hPhotonDist1x6mm->Scale(PtoPEconversion);
+                // Loop through all bins (excluding underflow/overflow)
+                int nBinsX = hPhotonDist1x6mm->GetNbinsX();
+                int nBinsY = hPhotonDist1x6mm->GetNbinsY();
+                for (int ix = 1; ix <= nBinsX; ++ix) {
+                        for (int iy = 1; iy <= nBinsY; ++iy) {
+                                double content = hPhotonDist1x6mm->GetBinContent(ix, iy);
+                                hPhotonDist1xPixels->SetBinContent(ix,iy,content);
+                        }
+                }
+                canvas->cd(0);
+                hPhotonDist1xPixels->SetMarkerSize(200.0);
+                hPhotonDist1xPixels->SetStats(0);
+                // hPhotonDist1xPixels->SetMinimum(-0.01);
+                hPhotonDist1xPixels->Draw("colz");
+                hPhotonDist1xPixels->Write(Form("h%sPixelsPE",fileNamesVec[f].c_str()));
+                hPhotonDist1xPixels->GetZaxis()->SetTitleOffset(1.4);
+                plottools->DrawSIABBoundaries();
+                canvas->SetRightMargin(0.15);
+                canvas->SetRightMargin(0.15);
+                canvas->Write(Form("C%sPixelsPE",fileNamesVec[f].c_str()));
+                file->Close();
+                // fileOutputPlots->Write();
+                fileOutputPlots->Close();
+                
+                // cout << 3 << endl;
+                fileOutput = new TFile(Form("%s%s/%s_%s",outDir.c_str(),folString.c_str(),simrun.c_str(),fileNamesVec[f].c_str()), "RECREATE");
+                // Create the TTree
+                TTree *treeSims = new TTree("Sim", "Events tree");
+                
+                simRun = new SimRunData(vPhotonX->size());
+                int pos =  std::string(fileNamesVec[f]).find("E_");
+                simRun->SetEnergy(std::stof(std::string(fileNamesVec[f]).substr(pos+2, 8)));
+                pos =  std::string(fileNamesVec[f]).find("Ze_");
+                simRun->SetZenith(std::stof(std::string(fileNamesVec[f]).substr(pos+3,8)));
+                pos =  std::string(fileNamesVec[f]).find("Az_");
+                simRun->SetAzimuth(std::stof(std::string(fileNamesVec[f]).substr(pos+3,8)));
+                pos =  std::string(fileNamesVec[f]).find("BSM_");
+                simRun->SetBSM(std::stof(std::string(fileNamesVec[f]).substr(pos+4,5)));
+                pos =  std::string(FilePath).find("Tilt_");
+                simRun->SetTilt(std::stof(std::string(FilePath).substr(pos+5, 9)));
+                simRun->SetPosX(*vPhotonX);
+                simRun->SetPosY(*vPhotonY);
+                
+                treeSims->Branch("GrOptics","SimRunData",simRun);
+                treeSims->Fill();
+                
+                // fileOutput->Write();
+                // cout << 4 << endl;
+                
+                // create a root files like our telescope files
+                
+                create_root_file(hPhotonDist1xPixels,fileOutput);
+                fileOutput->Close();
+
+                // TO do make seperate outputs!
+                delete hPhotonDist1xPixels;
+                // delete treeSims;
+                delete simRun;
+                delete fileOutput;
+                delete fileOutputPlots;
+                // delete treeSims;
+
+                delete file;
+                // delete tree;
+                delete hPhotonX;
+                delete hPhotonY;
+                delete hPhotonDcosX;
+                delete hPhotonDcosY;
+                delete hPhotonZ;
+                delete hPhotonDist1x;
+                delete hPhotonDist1x6mm;
+                delete hPhotonDist4x;
+                delete canvas;
+
+                
+                // canvas->Print(outname);
+                util->setFilePermissions(Form("%s%s/%s%s",outDir.c_str(),folString.c_str(),simrun.c_str(),fileNamesVec[f].c_str()));
+                util->setFilePermissions(Form("%s%s/plots_%s%s",outDir.c_str(),folString.c_str(),simrun.c_str(),fileNamesVec[f].c_str()));
+        }
+        cout << "Completed!" << endl;   
+}
+
+
+void create_root_file(TH2F* hist, TFile* file) {
+
+    // Create a new ROOT file
+//     TFile *file = new TFile("example.root", "Update");
+    // Create the TTree
+    TTree *tree = new TTree("Test", "Events tree");
+
+    ev = new IEvent();
+
+    ev->SetCoBoTime(ULong64_t( 174000000000000ULL));
+    ev->SetUNIXTime(ULong64_t(0ULL));
+    ev->SetTBTime(ULong64_t( 174000000000000ULL));
+    ev->SetEventType(ULong64_t(3));
+    std::vector<vector<Int_t>> pixels;
+    for(int i =0; i < 256; i++){
+        std::vector<Int_t> trace;    
+        for(int j = 0; j<512; j++) {
+            trace.push_back(160);
+        }
+        // get the pixel nx, and ny
+
+        int nx,ny;
+        plottools->FindBin(i,&nx,&ny);
+        // trace[239] = 160.0 - hist->GetBinContent(nx+1,ny+1);
+        if (hist->GetBinContent(nx+1,ny+1) > 160){
+                trace[239] = 160.0 - 160.0;
+
+        } else {
+                trace[239] = 160.0 - hist->GetBinContent(nx+1,ny+1);
+
+        }
+        pixels.push_back(trace);
+    }
+    ev->SetSignalValue(pixels);
+    int maxBinX, maxBinY, dummy;
+    hist->GetMaximumBin(maxBinX, maxBinY, dummy);
+    hist->GetBinContent(maxBinX, maxBinY);
+    int MusicID = plottools->FindMUSIC(maxBinX-1, maxBinY-1);
+
+    ev->SetROIMusicID({MusicID,-1});
+    ev->SetROIPixelID({1});
+    std::vector<float> temp = {1.0};
+    std::string temp_str = "";
+    ev->SetParametersFromTimestamp(temp_str,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp,temp);
+    
+    tree->Branch("Events","IEvent",ev);
+    tree->Fill();
+    // Write and close the file
+    file->Write();
+    delete ev;
+    delete tree;
+
+
+}
+
+

@@ -14,7 +14,7 @@ tail -n +2 "$csv_file" | while IFS=, read -r date id_ers; do
     # Trim any extra whitespace
     date=$(echo "$date" | xargs)
     id_ers=$(echo "$id_ers" | xargs)
-    cd /projects/cos-lab-aotte6/cos-4a17118/Trinity/TrinityDemonstrator/DataAnalysis/SimulationAnalysis/scripts
+    cd /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/SimulationAnalysis/scripts
     echo "Running ./run_script $date $id_ers"
 
     ./run_script.sh "$date" "$id_ers"

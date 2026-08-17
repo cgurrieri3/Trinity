@@ -2,7 +2,6 @@ This script takes the simulation data and then convert them to mimic real data t
 
 to just run the script locally on a single file 
 ./run_script.sh <YYYYMMDD> 141350221_ers
-./run_script.sh 20260517 18001595_daro
 ./run_all this will run all on the local node (slow)
 
 to recompile 
@@ -15,7 +14,7 @@ then
 condor_submit convertsim2data.submit convertsim2data.submit
     uses ./run_condor.sh for inside the job
 
-
+ rootcling -f SimRunDataDict.cpp -c SimRunData.h LinkDef.h
 
 
 

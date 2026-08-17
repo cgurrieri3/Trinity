@@ -70,7 +70,7 @@ CP  := cp
 
 #Recipe
 
-.PHONY: all clean rootcling
+.PHONY: all clean
 all: $(EXE)
 
 $(EXE): $(OBJ) | $(BIN_DIR) 
@@ -87,14 +87,7 @@ clean:
 
 	@echo "Cleaning up..."
 	rm -f $(BIN_DIR)/*.o $(EXE)
-	rm -f $(BIN_DIR)/*.pcm $(EXE)
-	rm -f $(BIN_DIR)/*Dict* $(EXE)
 	@echo "Clean complete."
-rootcling:
-	@echo "Running rootcling..."
-	rm -f $(DICT_SRC) $(BIN_DIR)/EventInfoDict_rdict.pcm
-	/opt/root/bin/rootcling -f $(DICT_SRC) -c $(DICT_HDR) $(LINKDEF)
-	@echo "Rootcling complete"
 
 -include $(OBJ:.o=.d)
 

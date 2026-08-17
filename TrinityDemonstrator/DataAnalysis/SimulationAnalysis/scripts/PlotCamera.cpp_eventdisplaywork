@@ -46,12 +46,6 @@ int main(int argc, char **argv){
                 return 0;
         }
         
-        // --- Single PDF for all files and events ---
-        std::string pdfPath = Form("%s%s/pdf_%s%s.pdf", outDir.c_str(), folString.c_str(),folString.c_str(), simrun.c_str());
-        TCanvas* canvasPDF = new TCanvas("PDF","PDF Display",1200,1000);
-        canvasPDF->SetRightMargin(0.15);
-        canvasPDF->Print(Form("%s[", pdfPath.c_str())); // open PDF
-
         for(int f = 0; f<static_cast<int>(fileNamesVec.size()); f++){
                 std::string FilePath = Form("%s%s",FolderPath.c_str(),fileNamesVec[f].c_str());
                 cout << "file path: " << FilePath << endl;
@@ -66,7 +60,7 @@ int main(int argc, char **argv){
 
                 // One branch per pixel, each is a vector<int> of 200 timebins
                 const int nPixels = 256;
-                const int timebin = 25;
+                const int timebin = 100;
                 std::vector<int>* vFADCTraces[nPixels] = {};
                 for (int pix = 0; pix < nPixels; pix++) {
                         tree->SetBranchAddress(Form("vFADCTraces%d", pix), &vFADCTraces[pix]);
@@ -82,42 +76,19 @@ int main(int argc, char **argv){
 
                         TH2F* hPhotonDist1xPixels = new TH2F(
                                 Form("hPhotonDist1xPixels_ev%d", ev),
-                                Form("%s;Pixels along camera x axis;Pixels along camera y axis;PE Counts at timebin %i",fileNamesVec[f].c_str(),timebin),
+                                "Camera View;Pixels along camera x axis;Pixels along camera y axis;ADC Counts",
                                 CameraStep, CameraMin, CameraMax,
                                 CameraStep, CameraMin, CameraMax);
 
                         for (int pix = 0; pix < nPixels; pix++) {
-
-                                int pedestal = 0;
-                                for (int t =0; t < 10; t++){
-                                        pedestal += (*vFADCTraces[pix])[t];
-                                }
-                                pedestal /= 10; // average of first 10 bins
-                                cout << "Pedestal for pixel " << pix << ": " << pedestal << endl;
-                                
-                                
                                 if (!vFADCTraces[pix]) continue;
                                 float val = ((int)vFADCTraces[pix]->size() > timebin)
-                                                ? (*vFADCTraces[pix])[timebin] - pedestal
+                                                ? (*vFADCTraces[pix])[timebin]
                                                 : 0.0f;
                                 int nx, ny;
                                 plottools->FindBin(pix, &nx, &ny);
-                                if (val <= 0.0){
-                                        val = 0.001;
-                                }
-                                hPhotonDist1xPixels->SetBinContent(nx + 1, ny + 1, val/24.1);
+                                hPhotonDist1xPixels->SetBinContent(nx + 1, ny + 1, val);
                         }
-
-                        // --- PDF page for this event (reuse hPhotonDist1xPixels) ---
-                        canvasPDF->cd();
-                        hPhotonDist1xPixels->SetStats(0);
-                        hPhotonDist1xPixels->Draw("colz");
-                        hPhotonDist1xPixels->SetMinimum(0.0);
-
-                        hPhotonDist1xPixels->GetZaxis()->SetTitleOffset(1.4);
-                        plottools->DrawSIABBoundaries();
-                        canvasPDF->Print(pdfPath.c_str()); // write page
-                        gROOT->cd(); // restore root directory before opening output files
 
                         // --- Output plots file ---
                         fileOutputPlots = new TFile(
@@ -139,12 +110,12 @@ int main(int argc, char **argv){
 
                         // --- Output data file ---
                         fileOutput = new TFile(
-                                Form("%s%s/data_%s_ev%d_%s",
+                                Form("%s%s/%s_ev%d_%s",
                                      outDir.c_str(), folString.c_str(),
                                      simrun.c_str(), ev, fileNamesVec[f].c_str()),
                                 "RECREATE");
 
-                        create_root_file(hPhotonDist1xPixels, fileOutput, vFADCTraces);
+                        create_root_file(hPhotonDist1xPixels, fileOutput);
                         fileOutput->Close();
 
                         delete hPhotonDist1xPixels;
@@ -157,57 +128,17 @@ int main(int argc, char **argv){
                                 simrun.c_str(), ev, fileNamesVec[f].c_str()));
                         util->setFilePermissions(Form("%s%s/plots_%s_ev%d_%s",
                                 outDir.c_str(), folString.c_str(), 
-                                simrun.c_str(), ev, fileNamesVec[f].c_str()));
+                                simrun.c_str(),ev, fileNamesVec[f].c_str()));
                 }
-
-
-                // --- Overlay plot: 2D histogram of all traces, all pixels, all events ---
-                TH2F* hTraces = new TH2F("hTraces", "All FADC Traces;Timebin;ADC Counts",
-                                         200, -0.5, 199.5, 150, -0.5, 1499.5);
-                hTraces->SetStats(0);
-
-                for (int ev = 0; ev < nEntries; ev++) {
-                        tree->GetEntry(ev);
-                        for (int pix = 0; pix < nPixels; pix++) {
-                                if (!vFADCTraces[pix] || vFADCTraces[pix]->size() == 0) continue;
-                                for (int t = 0; t < (int)vFADCTraces[pix]->size(); t++) {
-                                        hTraces->Fill(t, (*vFADCTraces[pix])[t]);
-                                }
-                        }
-                }
-
-                TCanvas* canvasTraces = new TCanvas("Traces","FADC Traces",1600,800);
-                canvasTraces->SetRightMargin(0.15);
-                hTraces->Draw("colz");
-
-                TFile* fileTraces = new TFile(
-                        Form("%s%s/traces_%s_%s",
-                             outDir.c_str(), folString.c_str(),
-                             simrun.c_str(), fileNamesVec[f].c_str()),
-                        "RECREATE");
-                hTraces->Write(Form("hTraces_%s", fileNamesVec[f].c_str()));
-                canvasTraces->Write(Form("CTraces_%s", fileNamesVec[f].c_str()));
-                fileTraces->Close();
-                delete hTraces;
-                delete fileTraces;
-                delete canvasTraces;
-                util->setFilePermissions(Form("%s%s/traces_%s_%s",
-                        outDir.c_str(), folString.c_str(),
-                        simrun.c_str(), fileNamesVec[f].c_str()));
-
 
                 file->Close();
                 delete file;
         }
-        // --- Close single PDF ---
-        canvasPDF->Print(Form("%s]", pdfPath.c_str())); // close PDF
-        delete canvasPDF;
-        util->setFilePermissions(pdfPath);
         cout << "Completed!" << endl;   
 }
 
 
-void create_root_file(TH2F* hist, TFile* file, std::vector<int>* vFADCTraces[256]) {
+void create_root_file(TH2F* hist, TFile* file) {
 
     TTree *tree = new TTree("Test", "Events tree");
 
@@ -218,30 +149,16 @@ void create_root_file(TH2F* hist, TFile* file, std::vector<int>* vFADCTraces[256
     ev->SetTBTime(ULong64_t(174000000000000ULL));
     ev->SetEventType(ULong64_t(3));
 
-    const int traceLen = 512;
-    const int fadcLen  = 200;
-    const int offset   = (traceLen - fadcLen) / 2; // = 156, centers the 200-bin trace in 512
-
     std::vector<vector<Int_t>> pixels;
-    for (int i = 0; i < 256; i++) {
-        
-        // calculate the pedestal baseline for this pixel's trace
-        int pedestal = 0;
-        for (int t =0; t < 10; t++){
-                pedestal += (*vFADCTraces[i])[t];
+    for(int i = 0; i < 256; i++){
+        std::vector<Int_t> trace;    
+        for(int j = 0; j < 512; j++) {
+            trace.push_back(160);
         }
-        pedestal /= 10; // average of first 10 bins
-        cout << "Pedestal for pixel " << i << ": " << pedestal << endl;
-        
-        std::vector<Int_t> trace(traceLen, pedestal+3400); // fill with pedestal baseline
-
-
-        // Embed the 200-bin FADC trace centered in the 512-bin trace
-        if (vFADCTraces[i]) {
-            for (int t = 0; t < fadcLen && t < (int)vFADCTraces[i]->size(); t++) {
-                trace[offset + t] =(-1*(*vFADCTraces[i])[t])+2*pedestal+3400; // subtract pedestal to center around zero and then shift to match the demonstrator
-            }
-        }
+        int nx, ny;
+        plottools->FindBin(i, &nx, &ny);
+        double binVal = hist->GetBinContent(nx + 1, ny + 1);
+        trace[239] = (binVal > 160) ? 0 : (int)(160.0 - binVal);
         pixels.push_back(trace);
     }
     ev->SetSignalValue(pixels);
