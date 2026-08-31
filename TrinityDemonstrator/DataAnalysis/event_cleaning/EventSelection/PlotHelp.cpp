@@ -95,6 +95,12 @@ void PlotHelp::AddtoRatioPixelsMajorAxis(double r){
     RatioPixelsMajorAxisVector.push_back(r);
 }
 
+void PlotHelp::AddtoRatioPixelsMajorAxisPerPixel(double r, int nPixels){
+    for (int i = 0; i < nPixels; i++) {
+        RatioPixelsMajorAxisPerPixelVector.push_back(r);
+    }
+}
+
 // flag = 0 default flag
     // 1, pre cleaned before first cut
     // 2, cleaned after  first cuts (panel2)
@@ -724,6 +730,7 @@ void PlotHelp::PlotPixelsDistanceToMajorAxis(TCanvas* c, std::string pdf){
     }
     c->cd(0);
     hDistance->Draw();
+    c->SetLogy();
     c->Update();
     c->Write("Distance2MajorAxis");
     hDistance->Write("Distance2MajorAxisTH1D");
@@ -740,6 +747,7 @@ void PlotHelp::PlotPixelsRatioDistanceToMajorAxis(TCanvas* c, std::string pdf){
     }
     c->cd(0);
     hDistance->Draw();
+    c->SetLogy();
     c->Update();
     c->Write("Ratio2MajorAxis");
     hDistance->Write("Ratio2MajorAxisTH1D");
@@ -791,45 +799,58 @@ void PlotHelp::PlotdistRMSandWeightedRMS(TCanvas* c, std::string pdf){
 
 }
 
-void PlotHelp::PlotPixelsOnandOffMajorAxis(TCanvas* c, std::string pdf){
+
+void PlotHelp::PlotPixelsOnMajorAxis(TCanvas* c, std::string pdf){
     TH1D* hOn = new TH1D("hOn", "Pixels on Major Axis",pOnStep, pOnMin, pOnMax);
-    TH1D* hOff = new TH1D("hOff", "Pixels off Major Axis",pOnStep, pOnMin, pOnMax);
+
     hOn->SetStats(0);
-    hOff->SetStats(0);
     hOn->SetXTitle("Pixels");
-    hOff->SetXTitle("Pixels");
     for (std::vector<double>::size_type h = 0; h < PixelsonMajorAxisVector.size(); h++) {
         hOn->Fill(PixelsonMajorAxisVector[h]);
-        hOff->Fill(PixelsoffMajorAxisVector[h]);
     }
-    // hWL->SetXaxis()->SetLabelSize(0.03);
-    // hWL->SetXaxis()->SetTitleOffset(1.2); // Adjust X-axis title offset
-    // hWL->SetYaxis()->SetTitleOffset(1.5); // Adjust Y-axis title offset
     c->cd(0);
     hOn->SetLineColor(kBlue);
     hOn->SetFillColor(38);
     hOn->SetFillStyle(3017);
     hOn->Draw();
     
+    c->Update();
+    c->SetLogy();
+    c->Write("pixelsOnMajorAxis_Distribution");
+    hOn->SetXTitle("Pixels on Major Axis");
+    hOn->Write("OnMajorAxis_DistTH1D");
+    c->Print(pdf.c_str());
+    c->SetLogy(0);
+
+}
+
+
+void PlotHelp::PlotPixelsOffMajorAxis(TCanvas* c, std::string pdf){
+    
+    TH1D* hOff = new TH1D("hOff", "Pixels off Major Axis",pOnStep, pOnMin, pOnMax);
+    
+    hOff->SetStats(0);
+    hOff->SetXTitle("Pixels");
+    for (std::vector<double>::size_type h = 0; h < PixelsoffMajorAxisVector.size(); h++) {
+        
+        hOff->Fill(PixelsoffMajorAxisVector[h]);
+    }
+    c->cd(0);
+
     hOff->SetLineColor(kRed);
     hOff->SetFillColor(46);
     hOff->SetFillStyle(3017);
-    hOff->Draw("Same");
+    hOff->Draw();
   
     
-    auto legend = new TLegend(0.1,0.8,0.34,0.9);
-    // legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
-    legend->AddEntry(hOn,"On Major Axis","f");
-    legend->AddEntry(hOff,"Off Major Axis","f");
-    legend->Draw();
+    
     c->Update();
     c->SetLogy();
-    c->Write("WandL_Distribution");
+    c->Write("pixelsOffMajorAxis_Distribution");
     hOff->SetTitle("Distribution of Pixels off Major Axis");
     hOff->SetXTitle("Pixels off Major Axis");
-    hOn->SetXTitle("Pixels on Major Axis");
     hOff->Write("OffMajorAxis_DistTH1D");
-    hOn->Write("OnMajorAxis_DistTH1D");
+    
     c->Print(pdf.c_str());
     c->SetLogy(0);
 
@@ -844,11 +865,13 @@ void PlotHelp::PlothRMSvsRatioDistance(TCanvas* c, std::string pdf){
     c->cd(0);
     hRMSd->Draw("COLZ");
     c->Update();
+    c->SetLogz();
     c->Write("RMSd");
     hRMSd->Write("RMSd_TH2F");
     c->Print(pdf.c_str());
     delete hRMSd;
     c->SetLogx(0);
+    c->SetLogz(0);
 }
 
 void PlotHelp::PlothWRMSvsRatioDistance(TCanvas* c, std::string pdf){
@@ -860,11 +883,87 @@ void PlotHelp::PlothWRMSvsRatioDistance(TCanvas* c, std::string pdf){
     c->cd(0);
     hWRMSd->Draw("COLZ");
     c->Update();
+    c->SetLogz();
     c->Write("WRMSd");
     hWRMSd->Write("WRMSd_TH2F");
     c->Print(pdf.c_str());
     delete hWRMSd;
     c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothWLvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    TH2F* hWLRatio = new TH2F("hWLRatio", "WL vs ratio of pixels on Major Axis; ratio;WL ratio ",ONEstep/2, ONEmin,ONEmax, ONEstep,ONEmin,ONEmax);
+    hWLRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisVector.size(); h++) {
+        hWLRatio->Fill(RatioPixelsMajorAxisVector[h],WLvector[h] );
+    }
+    c->cd(0);
+    hWLRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("WL_RatioPixelsMajorAxis");
+    hWLRatio->Write("WL_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hWLRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothDistancevsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    // one entry per surviving pixel: its distance to the major axis vs its event's ratio
+    TH2F* hdRatio = new TH2F("hdRatio", "Distance to Major Axis vs ratio; ratio;Distance to Major Axis (pixels) ",ONEstep/2, ONEmin,ONEmax, dStep,dMin,dMax);
+    hdRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisPerPixelVector.size(); h++) {
+        hdRatio->Fill(RatioPixelsMajorAxisPerPixelVector[h],Distance2MajorAxisVector[h] );
+    }
+    c->cd(0);
+    hdRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("Distance2MajorAxis_RatioPixelsMajorAxis");
+    hdRatio->Write("Distance2MajorAxis_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hdRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothCoreOverSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    TH2F* hCoreSPCRatio = new TH2F("hCoreSPCRatio", "Core Pixels over Surviving Pixels vs ratio; ratio;Core Pixels / Surviving Pixels ",ONEstep/2, ONEmin,ONEmax, ONEstep,ONEmin,ONEmax);
+    hCoreSPCRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisVector.size(); h++) {
+        if (SPCvector[h] == 0) continue; // no surviving pixels, nothing to divide by
+        hCoreSPCRatio->Fill(RatioPixelsMajorAxisVector[h],NCorevector[h]/(double)SPCvector[h] );
+    }
+    c->cd(0);
+    hCoreSPCRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("CoreOverSPC_RatioPixelsMajorAxis");
+    hCoreSPCRatio->Write("CoreOverSPC_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hCoreSPCRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    TH2F* hSPCRatio = new TH2F("hSPCRatio", "Surviving Pixels vs ratio; ratio;Surviving Pixels ",ONEstep/2, ONEmin,ONEmax, SPstep,SPmin,SPmax);
+    hSPCRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisVector.size(); h++) {
+        hSPCRatio->Fill(RatioPixelsMajorAxisVector[h],SPCvector[h] );
+    }
+    c->cd(0);
+    hSPCRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("SPC_RatioPixelsMajorAxis");
+    hSPCRatio->Write("SPC_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hSPCRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
 }
 
 void PlotHelp::PlothOnOffMajorAxisvsratio(TCanvas* c, std::string pdf){
@@ -909,7 +1008,6 @@ void PlotHelp::PlothOnOffMajorAxisvsratio(TCanvas* c, std::string pdf){
     delete hOffRatio;
     c->SetLogx(0);
 }
-
 
 void PlotHelp::LogBinning(TH2F* hist){
     TAxis *axis = hist->GetXaxis();

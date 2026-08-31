@@ -7,7 +7,7 @@
 //   'a' all         : every event, list membership is only counted
 // Ignored when there is no file list (file_list == "n") or for sims.
 // ---------------------------------------------------------------------------
-const char selection = 'a';
+const char selection = 'o';
 
 // Door open / door closed cut for one event, based on the cleaning file it came from.
 // Sims and runs with no list have no door state so they always pass. Every event that

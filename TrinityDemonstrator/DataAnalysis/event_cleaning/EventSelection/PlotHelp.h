@@ -45,6 +45,8 @@ class PlotHelp {
         void AddtoPixelsonMajorAxis(int p);
         void AddtoPixelsoffMajorAxis(int p);
         void AddtoRatioPixelsMajorAxis(double r);
+        // repeats the event's ratio once per pixel so it lines up with Distance2MajorAxisVector
+        void AddtoRatioPixelsMajorAxisPerPixel(double r, int nPixels);
 
         void PlothSize(TCanvas* c, std::string pdf);
         void PlothSizeConc(TCanvas* c, std::string pdf);
@@ -70,11 +72,16 @@ class PlotHelp {
         void PlotEventFlags(TCanvas* c, std::string pdf);
         void PlotPixelsDistanceToMajorAxis(TCanvas* c, std::string pdf);
         void PlotdistRMSandWeightedRMS(TCanvas* c, std::string pdf);
-        void PlotPixelsOnandOffMajorAxis(TCanvas* c, std::string pdf);
+        void PlotPixelsOnMajorAxis(TCanvas* c, std::string pdf);
+        void PlotPixelsOffMajorAxis(TCanvas* c, std::string pdf);
         void PlothRMSvsRatioDistance(TCanvas* c, std::string pdf);
         void PlothWRMSvsRatioDistance(TCanvas* c, std::string pdf);
         void PlothOnOffMajorAxisvsratio(TCanvas* c, std::string pdf);
         void PlotPixelsRatioDistanceToMajorAxis(TCanvas* c, std::string pdf);
+        void PlothWLvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
+        void PlothDistancevsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
+        void PlothCoreOverSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
+        void PlothSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
 
         void AddEventFlags(int i);
         void SetSimEnergy(float energy, bool isSim); // sims only: energy of the current event + whether to track it
@@ -108,6 +115,7 @@ class PlotHelp {
         std::vector<int> PixelsonMajorAxisVector = {};
         std::vector<int> PixelsoffMajorAxisVector = {};
         std::vector<double> RatioPixelsMajorAxisVector = {};
+        std::vector<double> RatioPixelsMajorAxisPerPixelVector = {}; // one entry per pixel, matches Distance2MajorAxisVector
 
         // sims only: neutrino energy of saved (flag 5) vs removed events
         std::vector<double> SimEnergySavedVector = {};
