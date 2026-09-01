@@ -40,13 +40,14 @@ class EventInfo : public TObject {
         void SetRMS(Float_t v);
         void SetAvgAmp(Float_t v);
         void SetArea(Float_t v);
-        void SetSaturatedPixels(Int_t v); // 0 is no sat pixls and 1 is saturated pixels
+        // IDs of the pixels that saturated; the size is how many, the values are where
+        void SetSaturatedPixels(std::vector<Int_t> v);
         void SetCOGx(Float_t v);
         void SetCOGy(Float_t v);
         void SetCoreRatio(Float_t v);
         void SetNumberOfCores(Float_t v);
-        void SetM3Longx(string v);
-        void SetM3Longy(string v);
+        void SetM3Long(Float_t v);
+        void SetM3LongPow3(Float_t v);
 
         void SetDistance2MajorAxis(Float_t v);
         void SetRMSMajorAxis(Float_t v);
@@ -81,13 +82,13 @@ class EventInfo : public TObject {
         Float_t GetAvgAmp() const;
         Float_t GetRMS() const;
         Float_t GetArea() const;
-        Int_t GetSaturatedPixels() const;
+        std::vector<Int_t> GetSaturatedPixels() const;
         Float_t GetCOGx() const;
         Float_t GetCOGy() const;
         Float_t GetCoreRatio() const;
         Float_t GetNumberOfCores() const;
-        string GetM3Longx() const;
-        string GetM3Longy() const;
+        Float_t GetM3Long() const;
+        Float_t GetM3LongPow3() const;
 
         Float_t GetDistance2MajorAxis() const;
         Float_t GetRMSMajorAxis() const;
@@ -121,13 +122,13 @@ class EventInfo : public TObject {
         Float_t RMS;
         Float_t AvgAmp;
         Float_t Area;
-        Int_t SaturatedPixelsFlag;
+        std::vector<Int_t> SaturatedPixelIDs;
         Float_t COGx;
         Float_t COGy;
         Float_t CoreRatio;
         Float_t NumberOfCores;
-        string M3Longx;
-        string M3Longy;
+        Float_t M3Long;     // standard Hillas 3rd moment along the major axis, q^1 / sum(q)
+        Float_t M3LongPow3; // thesis variant, q^3 / N -- sign is NOT the same as M3Long
 
         Float_t Distance2MajorAxis;
         Float_t RMSMajorAxis;
@@ -136,7 +137,7 @@ class EventInfo : public TObject {
         Int_t PixelsoffMajorAxis;
         Float_t RatioPixelsMajorAxis;
 
-        ClassDef(EventInfo, 1);  // ROOT I/O support
+        ClassDef(EventInfo, 4);  // ROOT I/O support
 
 };
 #endif

@@ -38,13 +38,13 @@ EventInfo::EventInfo(int size){
     RMS = 0;
     AvgAmp = 0;
     Area = 0;
-    SaturatedPixelsFlag = 0; // 0 is no sat pixls and 1 is saturated pixels
+    SaturatedPixelIDs.clear(); // starts empty, filled with the IDs of the saturated pixels
     COGx = 0;
     COGy = 0;
     CoreRatio = 0;
     NumberOfCores = 0;
-    M3Longx = "0";
-    M3Longy = "0";
+    M3Long = 0;
+    M3LongPow3 = 0;
 
     Distance2MajorAxis = 0;
     RMSMajorAxis = 0;
@@ -90,13 +90,13 @@ void EventInfo::Clear() {
     RMS = 0;
     AvgAmp = 0;
     Area = 0;
-    SaturatedPixelsFlag = 0; // 0 is no sat pixls and 1 is saturated pixels
+    SaturatedPixelIDs.clear(); // starts empty, filled with the IDs of the saturated pixels
     COGx = 0;
     COGy = 0;
     CoreRatio = 0;
     NumberOfCores = 0;
-    M3Longx = "0";
-    M3Longy = "0";
+    M3Long = 0;
+    M3LongPow3 = 0;
 
     Distance2MajorAxis = 0;
     RMSMajorAxis = 0;
@@ -129,13 +129,13 @@ void EventInfo::SetRMS_AvgAmp(Float_t v) { RMS_AvgAmp = v; }
 void EventInfo::SetAvgAmp(Float_t v) {  AvgAmp = v; }
 void EventInfo::SetRMS(Float_t v)  { RMS = v; }
 void EventInfo::SetArea(Float_t v) { Area = v; }
-void EventInfo::SetSaturatedPixels(Int_t v) {SaturatedPixelsFlag = v;}
+void EventInfo::SetSaturatedPixels(std::vector<Int_t> v) {SaturatedPixelIDs = v;}
 void EventInfo::SetCOGx(Float_t v) {COGx = v; }
 void EventInfo::SetCOGy(Float_t v) {COGy = v; }
 void EventInfo::SetCoreRatio(Float_t v) {CoreRatio = v; }
 void EventInfo::SetNumberOfCores(Float_t v) {NumberOfCores = v; }
-void EventInfo::SetM3Longx(string v) {M3Longx = v; }
-void EventInfo::SetM3Longy(string v) {M3Longy = v; }
+void EventInfo::SetM3Long(Float_t v) {M3Long = v; }
+void EventInfo::SetM3LongPow3(Float_t v) {M3LongPow3 = v; }
 
 void EventInfo::SetDistance2MajorAxis(Float_t v) {Distance2MajorAxis = v; }
 void EventInfo::SetRMSMajorAxis(Float_t v) {RMSMajorAxis = v; }
@@ -168,13 +168,13 @@ Float_t EventInfo::GetRMS_AvgAmp() const { return RMS_AvgAmp; }
 Float_t EventInfo::GetAvgAmp() const { return AvgAmp; }
 Float_t EventInfo::GetRMS() const { return RMS; }
 Float_t EventInfo::GetArea() const { return Area; }
-Int_t EventInfo::GetSaturatedPixels() const { return SaturatedPixelsFlag; }
+std::vector<Int_t> EventInfo::GetSaturatedPixels() const { return SaturatedPixelIDs; }
 Float_t EventInfo::GetCOGx() const { return COGx; }
 Float_t EventInfo::GetCOGy() const { return COGy; }
 Float_t EventInfo::GetCoreRatio() const { return CoreRatio; }
 Float_t EventInfo::GetNumberOfCores() const { return NumberOfCores; }
-string EventInfo::GetM3Longx() const { return M3Longx; }
-string EventInfo::GetM3Longy() const { return M3Longy; }
+Float_t EventInfo::GetM3Long() const { return M3Long; }
+Float_t EventInfo::GetM3LongPow3() const { return M3LongPow3; }
 
 Float_t EventInfo::GetDistance2MajorAxis() const { return Distance2MajorAxis; }
 Float_t EventInfo::GetRMSMajorAxis() const { return RMSMajorAxis; }

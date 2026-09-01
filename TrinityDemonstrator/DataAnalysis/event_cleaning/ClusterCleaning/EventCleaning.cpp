@@ -59,8 +59,8 @@ int main(int argc, char **argv){
         whatData = "sim";
         folString = folString.substr(3, 19); // Extract date from filename
         // cout << "Simulation Information: " << folString << endl;
-        FolderPath = Form("%s%s/",simDir.c_str(),folString.c_str());
-        // cout << "Simulation Folder Path: " << FolderPath << endl;
+        FolderPath = Form("%s%s/CARE/",simDir.c_str(),folString.c_str());
+        cout << "Simulation Folder Path: " << FolderPath << endl;
         fileNamesVec=util->GetFilesInDirectory(FolderPath,".root");
         // cout << "Simulation Files Found: " << fileNamesVec.size() << endl;
         // remove files in the vec that have plots_
@@ -79,7 +79,7 @@ int main(int argc, char **argv){
                 fileNamesVec.begin(),
                 fileNamesVec.end(),
                 [](const std::string& name) {
-                    return name.find("datafiles_") != std::string::npos;
+                    return name.find("traces_") != std::string::npos;
                 }
             ),
             fileNamesVec.end()
@@ -406,8 +406,16 @@ int main(int argc, char **argv){
                 // }
                 
                 
+            // GetSaturatedPixels returns a 0/1 mask indexed by pixel ID, so the index of every 1
+            // is the ID of a saturated pixel. This runs before cleaning, so it is the raw list;
+            // CompletePanel4 narrows it to the pixels that actually survived. The cut below has
+            // to stay on the raw count because there are no surviving pixels yet.
             std::vector<int> SaturatedPixels = util->GetSaturatedPixels(ev->GetSignalValue());
-            cev->SetSaturatedPixels(std::accumulate(SaturatedPixels.begin(), SaturatedPixels.end(), 0));
+            SaturatedPixelIDsRaw.clear();
+            for (std::size_t p = 0; p < SaturatedPixels.size(); p++) {
+                if (SaturatedPixels[p] == 1) SaturatedPixelIDsRaw.push_back((Int_t)p);
+            }
+            cev->SetSaturatedPixels((int)SaturatedPixelIDsRaw.size());
             if (cev->GetSaturatedPixels() > SaturatedPixelCutoff && whatData != "muon" ) {
                 plothelp->AddEventFlags(1);
                 eventInfo->SetEventFlag(1);
@@ -739,10 +747,24 @@ int main(int argc, char **argv){
     plothelp->PlotPixelsDistanceToMajorAxis(c_cleaned, OutputFilePDF);
     plothelp->PlotPixelsRatioDistanceToMajorAxis(c_cleaned, OutputFilePDF);
     plothelp->PlotdistRMSandWeightedRMS(c_cleaned, OutputFilePDF);
-    plothelp->PlotPixelsOnandOffMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlotPixelsOnMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlotPixelsOffMajorAxis(c_cleaned, OutputFilePDF);
     plothelp->PlothRMSvsRatioDistance(c_cleaned, OutputFilePDF);
     plothelp->PlothWRMSvsRatioDistance(c_cleaned, OutputFilePDF);
-    plothelp->PlothOnOffMajorAxisvsratio(c_cleaned, OutputFilePDF);
+    plothelp->PlothWLvsRatioPixelsMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlothDistancevsRatioPixelsMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlothCoreOverSPCvsRatioPixelsMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlothSPCvsRatioPixelsMajorAxis(c_cleaned, OutputFilePDF);
+    plothelp->PlothSurvivingPixelsX(c_cleaned, OutputFilePDF);
+    plothelp->PlothSurvivingPixelsY(c_cleaned, OutputFilePDF);
+    plothelp->PlothCOGx(c_cleaned, OutputFilePDF);
+    plothelp->PlothCOGy(c_cleaned, OutputFilePDF);
+    plothelp->PlothAngle(c_cleaned, OutputFilePDF);
+    plothelp->PlothSaturatedPixels(c_cleaned, OutputFilePDF);
+    plothelp->PlothSaturatedOverSurviving(c_cleaned, OutputFilePDF);
+    plothelp->PlothSaturatedPixelsX(c_cleaned, OutputFilePDF);
+    plothelp->PlothSaturatedPixelsY(c_cleaned, OutputFilePDF);
+    //plothelp->PlothOnOffMajorAxisvsratio(c_cleaned, OutputFilePDF);
 
     file->Close();
     c_cleaned->Print(OutputFilePDFClose.c_str());

@@ -94,7 +94,29 @@ void PlotHelp::AddtoPixelsoffMajorAxis(int p){
 void PlotHelp::AddtoRatioPixelsMajorAxis(double r){
     RatioPixelsMajorAxisVector.push_back(r);
 }
+void PlotHelp::AddtoRatioPixelsMajorAxisPerPixel(double r, int nPixels){
+    for (int i = 0; i < nPixels; i++) {
+        RatioPixelsMajorAxisPerPixelVector.push_back(r);
+    }
+}
 
+void PlotHelp::AddtoSurvivingPixelPosition(double nx, double ny){
+    SurvivingPixelXVector.push_back(nx);
+    SurvivingPixelYVector.push_back(ny);
+}
+
+void PlotHelp::AddtoAngle(double angleRad){
+    Anglevector.push_back(angleRad*(180.0/TMath::Pi()));
+}
+
+void PlotHelp::AddtoSaturatedPixels(int count){
+    SatPixelCountVector.push_back(count);
+}
+
+void PlotHelp::AddtoSaturatedPixelPosition(double nx, double ny){
+    SaturatedPixelXVector.push_back(nx);
+    SaturatedPixelYVector.push_back(ny);
+}
 // flag = 0 default flag
     // 1, pre cleaned before first cut
     // 2, cleaned after  first cuts (panel2)
@@ -724,6 +746,7 @@ void PlotHelp::PlotPixelsDistanceToMajorAxis(TCanvas* c, std::string pdf){
     }
     c->cd(0);
     hDistance->Draw();
+    c->SetLogy();
     c->Update();
     c->Write("Distance2MajorAxis");
     hDistance->Write("Distance2MajorAxisTH1D");
@@ -740,6 +763,7 @@ void PlotHelp::PlotPixelsRatioDistanceToMajorAxis(TCanvas* c, std::string pdf){
     }
     c->cd(0);
     hDistance->Draw();
+    c->SetLogy();
     c->Update();
     c->Write("Ratio2MajorAxis");
     hDistance->Write("Ratio2MajorAxisTH1D");
@@ -791,45 +815,58 @@ void PlotHelp::PlotdistRMSandWeightedRMS(TCanvas* c, std::string pdf){
 
 }
 
-void PlotHelp::PlotPixelsOnandOffMajorAxis(TCanvas* c, std::string pdf){
+
+void PlotHelp::PlotPixelsOnMajorAxis(TCanvas* c, std::string pdf){
     TH1D* hOn = new TH1D("hOn", "Pixels on Major Axis",pOnStep, pOnMin, pOnMax);
-    TH1D* hOff = new TH1D("hOff", "Pixels off Major Axis",pOnStep, pOnMin, pOnMax);
+
     hOn->SetStats(0);
-    hOff->SetStats(0);
     hOn->SetXTitle("Pixels");
-    hOff->SetXTitle("Pixels");
     for (std::vector<double>::size_type h = 0; h < PixelsonMajorAxisVector.size(); h++) {
         hOn->Fill(PixelsonMajorAxisVector[h]);
-        hOff->Fill(PixelsoffMajorAxisVector[h]);
     }
-    // hWL->SetXaxis()->SetLabelSize(0.03);
-    // hWL->SetXaxis()->SetTitleOffset(1.2); // Adjust X-axis title offset
-    // hWL->SetYaxis()->SetTitleOffset(1.5); // Adjust Y-axis title offset
     c->cd(0);
     hOn->SetLineColor(kBlue);
     hOn->SetFillColor(38);
     hOn->SetFillStyle(3017);
     hOn->Draw();
     
+    c->Update();
+    c->SetLogy();
+    c->Write("pixelsOnMajorAxis_Distribution");
+    hOn->SetXTitle("Pixels on Major Axis");
+    hOn->Write("OnMajorAxis_DistTH1D");
+    c->Print(pdf.c_str());
+    c->SetLogy(0);
+
+}
+
+
+void PlotHelp::PlotPixelsOffMajorAxis(TCanvas* c, std::string pdf){
+    
+    TH1D* hOff = new TH1D("hOff", "Pixels off Major Axis",pOnStep, pOnMin, pOnMax);
+    
+    hOff->SetStats(0);
+    hOff->SetXTitle("Pixels");
+    for (std::vector<double>::size_type h = 0; h < PixelsoffMajorAxisVector.size(); h++) {
+        
+        hOff->Fill(PixelsoffMajorAxisVector[h]);
+    }
+    c->cd(0);
+
     hOff->SetLineColor(kRed);
     hOff->SetFillColor(46);
     hOff->SetFillStyle(3017);
-    hOff->Draw("Same");
+    hOff->Draw();
   
     
-    auto legend = new TLegend(0.1,0.8,0.34,0.9);
-    // legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
-    legend->AddEntry(hOn,"On Major Axis","f");
-    legend->AddEntry(hOff,"Off Major Axis","f");
-    legend->Draw();
+    
     c->Update();
     c->SetLogy();
-    c->Write("WandL_Distribution");
+    c->Write("pixelsOffMajorAxis_Distribution");
     hOff->SetTitle("Distribution of Pixels off Major Axis");
     hOff->SetXTitle("Pixels off Major Axis");
-    hOn->SetXTitle("Pixels on Major Axis");
     hOff->Write("OffMajorAxis_DistTH1D");
-    hOn->Write("OnMajorAxis_DistTH1D");
+    
     c->Print(pdf.c_str());
     c->SetLogy(0);
 
@@ -865,6 +902,81 @@ void PlotHelp::PlothWRMSvsRatioDistance(TCanvas* c, std::string pdf){
     c->Print(pdf.c_str());
     delete hWRMSd;
     c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothWLvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    TH2F* hWLRatio = new TH2F("hWLRatio", "WL vs ratio of pixels on Major Axis; ratio;WL ratio ",ONEstep/2, ONEmin,ONEmax, ONEstep,ONEmin,ONEmax);
+    hWLRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisVector.size(); h++) {
+        hWLRatio->Fill(RatioPixelsMajorAxisVector[h],WLvector[h] );
+    }
+    c->cd(0);
+    hWLRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("WL_RatioPixelsMajorAxis");
+    hWLRatio->Write("WL_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hWLRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothDistancevsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    // one entry per surviving pixel: its distance to the major axis vs its event's ratio
+    TH2F* hdRatio = new TH2F("hdRatio", "Distance to Major Axis vs ratio; ratio;Distance to Major Axis (pixels) ",ONEstep/2, ONEmin,ONEmax, dStep,dMin,dMax);
+    hdRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisPerPixelVector.size(); h++) {
+        hdRatio->Fill(RatioPixelsMajorAxisPerPixelVector[h],Distance2MajorAxisVector[h] );
+    }
+    c->cd(0);
+    hdRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("Distance2MajorAxis_RatioPixelsMajorAxis");
+    hdRatio->Write("Distance2MajorAxis_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hdRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothCoreOverSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    TH2F* hCoreSPCRatio = new TH2F("hCoreSPCRatio", "Core Pixels over Surviving Pixels vs ratio; ratio;Core Pixels / Surviving Pixels ",ONEstep/2, ONEmin,ONEmax, ONEstep,ONEmin,ONEmax);
+    hCoreSPCRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisVector.size(); h++) {
+        if (SPCvector[h] == 0) continue; // no surviving pixels, nothing to divide by
+        hCoreSPCRatio->Fill(RatioPixelsMajorAxisVector[h],NCorevector[h]/(double)SPCvector[h] );
+    }
+    c->cd(0);
+    hCoreSPCRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("CoreOverSPC_RatioPixelsMajorAxis");
+    hCoreSPCRatio->Write("CoreOverSPC_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hCoreSPCRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
+}
+
+void PlotHelp::PlothSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf){
+    TH2F* hSPCRatio = new TH2F("hSPCRatio", "Surviving Pixels vs ratio; ratio;Surviving Pixels ",ONEstep/2, ONEmin,ONEmax, SPstep,SPmin,SPmax);
+    hSPCRatio->SetStats(0);
+    for (std::vector<double>::size_type h = 0; h < RatioPixelsMajorAxisVector.size(); h++) {
+        hSPCRatio->Fill(RatioPixelsMajorAxisVector[h],SPCvector[h] );
+    }
+    c->cd(0);
+    hSPCRatio->Draw("COLZ");
+    c->Update();
+    c->SetLogz();
+    c->Write("SPC_RatioPixelsMajorAxis");
+    hSPCRatio->Write("SPC_RatioPixelsMajorAxisTH2F");
+    c->Print(pdf.c_str());
+    delete hSPCRatio;
+    c->SetLogx(0);
+    c->SetLogz(0);
 }
 
 void PlotHelp::PlothOnOffMajorAxisvsratio(TCanvas* c, std::string pdf){
@@ -910,6 +1022,205 @@ void PlotHelp::PlothOnOffMajorAxisvsratio(TCanvas* c, std::string pdf){
     c->SetLogx(0);
 }
 
+
+void PlotHelp::PlothSurvivingPixelsX(TCanvas* c, std::string pdf){
+    TH1D* hSurvX = new TH1D("hSurvX", "Every Surviving Pixel along x axis of Camera", CameraStep, CameraMin, CameraMax);
+    hSurvX->SetStats(0);
+    hSurvX->SetXTitle("Pixel Bin along x axis of Camera");
+    for (std::vector<double>::size_type h = 0; h < SurvivingPixelXVector.size(); h++) {
+        hSurvX->Fill(SurvivingPixelXVector[h]);
+    }
+    c->cd(0);
+    hSurvX->SetLineColor(kBlue);
+    hSurvX->SetFillColor(38);
+    hSurvX->SetFillStyle(3017);
+    hSurvX->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("SurvivingPixelsX_Distribution");
+    hSurvX->Write("SurvivingPixelsX_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hSurvX;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothSurvivingPixelsY(TCanvas* c, std::string pdf){
+    TH1D* hSurvY = new TH1D("hSurvY", "Every Surviving Pixel along y axis of Camera", CameraStep, CameraMin, CameraMax);
+    hSurvY->SetStats(0);
+    hSurvY->SetXTitle("Pixel Bin along y axis of Camera");
+    for (std::vector<double>::size_type h = 0; h < SurvivingPixelYVector.size(); h++) {
+        hSurvY->Fill(SurvivingPixelYVector[h]);
+    }
+    c->cd(0);
+    hSurvY->SetLineColor(kRed);
+    hSurvY->SetFillColor(46);
+    hSurvY->SetFillStyle(3017);
+    hSurvY->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("SurvivingPixelsY_Distribution");
+    hSurvY->Write("SurvivingPixelsY_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hSurvY;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothCOGx(TCanvas* c, std::string pdf){
+    // finer than CameraStep because the COG falls between pixel centres
+    TH1D* hCOGx = new TH1D("hCOGx", "Center of Gravity along x axis of Camera", 4*CameraStep, CameraMin, CameraMax);
+    hCOGx->SetStats(0);
+    hCOGx->SetXTitle("Pixel Bin along x axis of Camera");
+    for (std::vector<double>::size_type h = 0; h < COGxvector.size(); h++) {
+        hCOGx->Fill(COGxvector[h]);
+    }
+    c->cd(0);
+    hCOGx->SetLineColor(kBlue);
+    hCOGx->SetFillColor(38);
+    hCOGx->SetFillStyle(3017);
+    hCOGx->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("COGx_Distribution");
+    hCOGx->Write("COGx_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hCOGx;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothCOGy(TCanvas* c, std::string pdf){
+    // finer than CameraStep because the COG falls between pixel centres
+    TH1D* hCOGy = new TH1D("hCOGy", "Center of Gravity along y axis of Camera", 4*CameraStep, CameraMin, CameraMax);
+    hCOGy->SetStats(0);
+    hCOGy->SetXTitle("Pixel Bin along y axis of Camera");
+    for (std::vector<double>::size_type h = 0; h < COGyvector.size(); h++) {
+        hCOGy->Fill(COGyvector[h]);
+    }
+    c->cd(0);
+    hCOGy->SetLineColor(kRed);
+    hCOGy->SetFillColor(46);
+    hCOGy->SetFillStyle(3017);
+    hCOGy->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("COGy_Distribution");
+    hCOGy->Write("COGy_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hCOGy;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothAngle(TCanvas* c, std::string pdf){
+    // the angle comes from atan of the major axis eigenvector so it lives in (-90, 90)
+    TH1D* hAngle = new TH1D("hAngle", "Major Axis Angle", AngleStep, AngleMin, AngleMax);
+    hAngle->SetStats(0);
+    hAngle->SetXTitle("Major Axis Angle (deg)");
+    for (std::vector<double>::size_type h = 0; h < Anglevector.size(); h++) {
+        // a single pixel event has no axis to fit, which comes back as a NaN
+        if (std::isnan(Anglevector[h])) continue;
+        hAngle->Fill(Anglevector[h]);
+    }
+    c->cd(0);
+    hAngle->SetLineColor(kBlue);
+    hAngle->SetFillColor(38);
+    hAngle->SetFillStyle(3017);
+    hAngle->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("Angle_Distribution");
+    hAngle->Write("Angle_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hAngle;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothSaturatedPixels(TCanvas* c, std::string pdf){
+    TH1D* hSat = new TH1D("hSat", "Saturated Pixels per Event", SatStep, SatMin, SatMax);
+    hSat->SetStats(0);
+    hSat->SetXTitle("Saturated Pixels");
+    for (std::vector<int>::size_type h = 0; h < SatPixelCountVector.size(); h++) {
+        hSat->Fill(SatPixelCountVector[h]);
+    }
+    c->cd(0);
+    hSat->SetLineColor(kBlue);
+    hSat->SetFillColor(38);
+    hSat->SetFillStyle(3017);
+    hSat->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("SaturatedPixels_Distribution");
+    hSat->Write("SaturatedPixels_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hSat;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothSaturatedOverSurviving(TCanvas* c, std::string pdf){
+    // The stored saturated pixels are filtered down to those that survived cleaning, so this
+    // ratio is bounded by 1. Events with no surviving pixels have no ratio to form and are skipped.
+    TH1D* hSatRatio = new TH1D("hSatRatio", "Saturated Pixels over Surviving Pixels", 2*ONEstep, ONEmin, ONEmax);
+    hSatRatio->SetStats(0);
+    hSatRatio->SetXTitle("Saturated Pixels / Surviving Pixels");
+    for (std::vector<int>::size_type h = 0; h < SatPixelCountVector.size() && h < SPCvector.size(); h++) {
+        if (SPCvector[h] <= 0) continue;
+        hSatRatio->Fill((double)SatPixelCountVector[h]/SPCvector[h]);
+    }
+    c->cd(0);
+    hSatRatio->SetLineColor(kRed);
+    hSatRatio->SetFillColor(46);
+    hSatRatio->SetFillStyle(3017);
+    hSatRatio->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("SaturatedOverSurviving_Distribution");
+    hSatRatio->Write("SaturatedOverSurviving_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hSatRatio;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothSaturatedPixelsX(TCanvas* c, std::string pdf){
+    // Where saturation lands along the camera x axis. Compare against PlothSurvivingPixelsX: a
+    // column that saturates out of proportion to how often it survives is a hardware suspect.
+    TH1D* hSatX = new TH1D("hSatX", "Every Saturated Pixel along x axis of Camera", CameraStep, CameraMin, CameraMax);
+    hSatX->SetStats(0);
+    hSatX->SetXTitle("Pixel Bin along x axis of Camera");
+    for (std::vector<double>::size_type h = 0; h < SaturatedPixelXVector.size(); h++) {
+        hSatX->Fill(SaturatedPixelXVector[h]);
+    }
+    c->cd(0);
+    hSatX->SetLineColor(kBlue);
+    hSatX->SetFillColor(38);
+    hSatX->SetFillStyle(3017);
+    hSatX->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("SaturatedPixelsX_Distribution");
+    hSatX->Write("SaturatedPixelsX_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hSatX;
+    c->SetLogy(0);
+}
+
+void PlotHelp::PlothSaturatedPixelsY(TCanvas* c, std::string pdf){
+    TH1D* hSatY = new TH1D("hSatY", "Every Saturated Pixel along y axis of Camera", CameraStep, CameraMin, CameraMax);
+    hSatY->SetStats(0);
+    hSatY->SetXTitle("Pixel Bin along y axis of Camera");
+    for (std::vector<double>::size_type h = 0; h < SaturatedPixelYVector.size(); h++) {
+        hSatY->Fill(SaturatedPixelYVector[h]);
+    }
+    c->cd(0);
+    hSatY->SetLineColor(kRed);
+    hSatY->SetFillColor(46);
+    hSatY->SetFillStyle(3017);
+    hSatY->Draw();
+    c->Update();
+    // c->SetLogy();
+    c->Write("SaturatedPixelsY_Distribution");
+    hSatY->Write("SaturatedPixelsY_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hSatY;
+    c->SetLogy(0);
+}
 
 void PlotHelp::LogBinning(TH2F* hist){
     TAxis *axis = hist->GetXaxis();

@@ -20,6 +20,7 @@
 #include <TLegend.h>
 #include "TStyle.h"
 #include <THStack.h>
+#include <cmath>
 
 
 class PlotHelp { 
@@ -45,6 +46,14 @@ class PlotHelp {
         void AddtoPixelsonMajorAxis(int p);
         void AddtoPixelsoffMajorAxis(int p);
         void AddtoRatioPixelsMajorAxis(double r);
+        // repeats the event's ratio once per pixel so it lines up with Distance2MajorAxisVector
+        void AddtoRatioPixelsMajorAxisPerPixel(double r, int nPixels);
+        // camera position of every pixel that survived cleaning, one entry per pixel
+        void AddtoSurvivingPixelPosition(double nx, double ny);
+        void AddtoAngle(double angleRad); // major axis angle, kept in degrees
+        void AddtoSaturatedPixels(int count); // saturated pixels in the event, kept aligned with SPCvector
+        // camera position of every saturated pixel that survived cleaning, one entry per pixel
+        void AddtoSaturatedPixelPosition(double nx, double ny);
 
         void PlothSize(TCanvas* c, std::string pdf);
         void PlothSizeConc(TCanvas* c, std::string pdf);
@@ -70,11 +79,25 @@ class PlotHelp {
         void PlotEventFlags(TCanvas* c, std::string pdf);
         void PlotPixelsDistanceToMajorAxis(TCanvas* c, std::string pdf);
         void PlotdistRMSandWeightedRMS(TCanvas* c, std::string pdf);
-        void PlotPixelsOnandOffMajorAxis(TCanvas* c, std::string pdf);
+        void PlotPixelsOnMajorAxis(TCanvas* c, std::string pdf);
+        void PlotPixelsOffMajorAxis(TCanvas* c, std::string pdf);
         void PlothRMSvsRatioDistance(TCanvas* c, std::string pdf);
         void PlothWRMSvsRatioDistance(TCanvas* c, std::string pdf);
         void PlothOnOffMajorAxisvsratio(TCanvas* c, std::string pdf);
         void PlotPixelsRatioDistanceToMajorAxis(TCanvas* c, std::string pdf);
+        void PlothWLvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
+        void PlothDistancevsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
+        void PlothCoreOverSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
+        void PlothSPCvsRatioPixelsMajorAxis(TCanvas* c, std::string pdf);
+        void PlothSurvivingPixelsX(TCanvas* c, std::string pdf);
+        void PlothSurvivingPixelsY(TCanvas* c, std::string pdf);
+        void PlothCOGx(TCanvas* c, std::string pdf);
+        void PlothCOGy(TCanvas* c, std::string pdf);
+        void PlothAngle(TCanvas* c, std::string pdf);
+        void PlothSaturatedPixels(TCanvas* c, std::string pdf);
+        void PlothSaturatedOverSurviving(TCanvas* c, std::string pdf);
+        void PlothSaturatedPixelsX(TCanvas* c, std::string pdf);
+        void PlothSaturatedPixelsY(TCanvas* c, std::string pdf);
 
         void AddEventFlags(int i);
         void SetSimEnergy(float energy, bool isSim); // sims only: energy of the current event + whether to track it
@@ -108,6 +131,13 @@ class PlotHelp {
         std::vector<int> PixelsonMajorAxisVector = {};
         std::vector<int> PixelsoffMajorAxisVector = {};
         std::vector<double> RatioPixelsMajorAxisVector = {};
+        std::vector<double> RatioPixelsMajorAxisPerPixelVector = {}; // one entry per pixel, matches Distance2MajorAxisVector
+        std::vector<double> SurvivingPixelXVector = {}; // one entry per surviving pixel
+        std::vector<double> SurvivingPixelYVector = {}; // one entry per surviving pixel
+        std::vector<double> Anglevector = {}; // major axis angle in degrees
+        std::vector<int> SatPixelCountVector = {}; // saturated pixels per event, index matches SPCvector
+        std::vector<double> SaturatedPixelXVector = {}; // one entry per saturated surviving pixel
+        std::vector<double> SaturatedPixelYVector = {}; // one entry per saturated surviving pixel
 
         // sims only: neutrino energy of saved (flag 5) vs removed events
         std::vector<double> SimEnergySavedVector = {};
@@ -152,6 +182,15 @@ class PlotHelp {
         int pOnStep = 11;
         float pOnMin = -0.5;
         float pOnMax = 10.5;
+
+        int AngleStep = 36;
+        float AngleMin = -90.0;
+        float AngleMax = 90.0;
+
+        // saturated pixels are a subset of the surviving pixels, so they share that scale
+        int SatStep = SPstep;
+        float SatMin = SPmin;
+        float SatMax = SPmax;
         
 
         

@@ -83,6 +83,9 @@ std::vector<double> CameraAmplitudeAtTimeBin;
 IUtilities *util;
 IPlotTools *plottools;
 CEvent *cev;
+// Saturated pixel IDs as measured on the raw trace, before cleaning has run. Held here
+// so CompletePanel4 can intersect them with the surviving pixels once those are known.
+std::vector<Int_t> SaturatedPixelIDsRaw;
 PlotHelp *plothelp;
 EventInfo *eventInfo=0;
 
@@ -156,7 +159,10 @@ void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp);
 std::vector<double> CreateWLRatio(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs);
 std::vector<int> CheckCrossPoints(TArrow* arrow, TH2F* hist, EventInfo* eventInfo);
 void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs, EventInfo* eventInfo);
-std::vector<double> getM3Long(double xcog,double ycog, std::vector<int> sur_pix, std::vector<float> amps);
+bool projectOnMajorAxis(double xcog, double ycog, double anglerad, std::vector<int> sur_pix,
+                       std::vector<float> amps, std::vector<double>& d, std::vector<double>& q);
+double getM3Long(double xcog, double ycog, double anglerad, std::vector<int> sur_pix, std::vector<float> amps);
+double getM3LongPow3(double xcog, double ycog, double anglerad, std::vector<int> sur_pix, std::vector<float> amps);
 std::vector<double> generateRandomNumbers();
 void CreateFileName(std::string filename, bool bkg);
 
@@ -440,6 +446,8 @@ std::vector<int> CheckCrossPoints(TArrow* arrow, TH2F* hist,EventInfo* eventInfo
     plothelp->AddtoPixelsonMajorAxis(cLineIntersectPixels);
     plothelp->AddtoPixelsoffMajorAxis(cLineNonIntersectPixels);
     plothelp->AddtoRatioPixelsMajorAxis((double)cLineIntersectPixels/(cLineIntersectPixels+cLineNonIntersectPixels));
+    plothelp->AddtoRatioPixelsMajorAxisPerPixel((double)cLineIntersectPixels/(cLineIntersectPixels+cLineNonIntersectPixels),
+                                                cLineIntersectPixels+cLineNonIntersectPixels);
     plothelp->AddtoRMSMajorAxis(RMSMajorAxis);
     plothelp->AddtoWeightedRMSMajorAxis(WeightedRMSMajorAxis);
 
@@ -458,6 +466,9 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     
     
     
+    // The parameter text under the title needs two lines now, so pull the frame down to make
+    // room. Without this the second line lands inside the frame, on top of the y axis label.
+    gPad->SetTopMargin(0.20);
     hcam_panel4->Draw("colz");
     plottools->DrawMUSICBoundaries();
     
@@ -485,6 +496,17 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     TEllipse* ell = new TEllipse(meanx, meany,r1,r2,0,360,angledeg);
     ell->SetFillColorAlpha(kGreen,0.00);
     ell->Draw("SAME");
+    // Keep only the saturated pixels that also survived cleaning, so the stored IDs describe
+    // the cleaned image. Events that never reach here keep the empty list set by Clear().
+    std::vector<int> survivingPixels = cev->GetSurvivingPixelPanel3();
+    std::vector<Int_t> SaturatedSurvivingIDs;
+    for (std::vector<Int_t>::size_type s = 0; s < SaturatedPixelIDsRaw.size(); s++) {
+        if (std::find(survivingPixels.begin(), survivingPixels.end(),
+                      (int)SaturatedPixelIDsRaw[s]) != survivingPixels.end()) {
+            SaturatedSurvivingIDs.push_back(SaturatedPixelIDsRaw[s]);
+        }
+    }
+
     TLatex* title = new TLatex();
     title->SetNDC(); // Set to Normalized Device Coordinates (NDC)
     title->SetTextSize(0.03);
@@ -493,28 +515,24 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     double conc = (cev->GetTotalCoreAmp())/cev->GetSurvivingPixelTotalAmpPanel3();
     
     
-    std::vector<double> M3LongVar = getM3Long(meanx, meany, cev->GetSurvivingPixelPanel3(),cev->GetAmplitudeValuesTimeBin());
-    std::string M3Longx = "+";
-    if (M3LongVar[0] < 0){
-        M3Longx = "-";
-    } else if (M3LongVar[0] == 0){
-        M3Longx = "0";
-    }
-    std::string M3Longy = "+";
-    if (M3LongVar[1] < 0){
-        M3Longy = "-";
-    } else if (M3LongVar[1] == 0){
-        M3Longy = "0";
-    }
+    // Two longitudinal 3rd moments, both projected on the major axis. They do NOT agree in sign
+    // and are not interchangeable -- see the header comments on each function.
+    double M3Long     = getM3Long(meanx, meany, anglerad, cev->GetSurvivingPixelPanel3(),cev->GetAmplitudeValuesTimeBin());
+    double M3LongPow3 = getM3LongPow3(meanx, meany, anglerad, cev->GetSurvivingPixelPanel3(),cev->GetAmplitudeValuesTimeBin());
     // cev->GetSurvivingPixelTotalAmpPanel3()/util->GetADCtoPEratio(),
-    title->DrawLatex(0.1, 0.92, Form("WL:%.2f Pixels:%i Area:%.2f Size:%.2f Conc:%.2f M3Long:(%s,  %s)",
+    // Split over two lines: one line no longer fits the pad width now that it carries both
+    // moments. Sat is the saturated pixels that SURVIVED cleaning, matching Pixels and the
+    // SaturatedPixelIDs stored on EventInfo, not the raw count seen on the trace.
+    title->DrawLatex(0.1, 0.915, Form("WL:%.2f Pixels:%i Sat:%i Area:%.2f Size:%.2f Conc:%.2f",
         EllipicRatio[2],
         static_cast<int>((cev->GetSurvivingPixelPanel3()).size()),
+        static_cast<int>(SaturatedSurvivingIDs.size()),
         areaEllipse,
         cev->GetSurvivingPixelTotalAmpPanel3(),
-        conc,
-        M3Longx.data(),
-        M3Longy.data()));
+        conc));
+    title->DrawLatex(0.1, 0.870, Form("M3Long:%.2f M3Pow3:%.3g",
+        M3Long,
+        M3LongPow3));
     delete title;
 
     // add values  for creating the plots
@@ -529,6 +547,21 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     plothelp->AddtoTriggeredPixelsID(cev->GetMaxAmplitudePixelID());
     plothelp->AddtoCoreRatio(cev->GetCoreRatio());
     plothelp->AddtoNumberOfCores(cev->GetNumberofCorePixels());
+    plothelp->AddtoAngle(anglerad);
+    eventInfo->SetSaturatedPixels(SaturatedSurvivingIDs);
+    plothelp->AddtoSaturatedPixels((int)SaturatedSurvivingIDs.size());
+    // camera position of every saturated pixel that survived, one entry per pixel
+    for (std::vector<Int_t>::size_type s = 0; s < SaturatedSurvivingIDs.size(); s++) {
+        int satx, saty;
+        plottools->FindBin((int)SaturatedSurvivingIDs[s], &satx, &saty);
+        plothelp->AddtoSaturatedPixelPosition(satx, saty);
+    }
+    // camera position of every pixel that survived cleaning, one entry per pixel
+    for (int survivingPixelID : cev->GetSurvivingPixelPanel3()) {
+        int spx, spy;
+        plottools->FindBin(survivingPixelID, &spx, &spy);
+        plothelp->AddtoSurvivingPixelPosition(spx, spy);
+    }
     
     // add info for all the events
     eventInfo->SetHPanel4(hcam_panel4);
@@ -547,52 +580,94 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     eventInfo->SetCoreRatio(cev->GetCoreRatio());
     eventInfo->SetNumberOfCores(cev->GetNumberofCorePixels());
     eventInfo->SetArea(areaEllipse);
-    eventInfo->SetM3Longx(M3Longx.data());
-    eventInfo->SetM3Longy(M3Longy.data());
+    eventInfo->SetM3Long(M3Long);
+    eventInfo->SetM3LongPow3(M3LongPow3);
 
 
 
             
 }
 
-std::vector<double> getM3Long(double xcog,double ycog, std::vector<int> sur_pix, std::vector<float> amps){
-    // N = Max number of pixels survived
-    // i = pixel index
-    // x = pixel x location
-    // x cog = x comp. Center of Gravity
-    // q = charge of that pixel (start with amplitude for us)
-    std::vector<double> M3Long = {0.0,0.0};
-    int psize = sur_pix.size();
-
-    cout << "xcog: " << xcog << " ycog: "<< ycog << endl;
-    
-    std::vector<double> randomNumbers;
-    for(int p = 0; p < psize; p++) {
-        // randomNumbers = generateRandomNumbers();
+// Projects every surviving pixel onto the major axis and returns the signed distance d_i from the
+// charge-weighted centroid together with the charge q_i. Pixels with q <= 0 are dropped: in the
+// q^1 sum a negative charge flips the weighting, and in the q^3 sum it survives the cube with the
+// wrong sign. Returns false when there is nothing usable to form a moment from.
+//
+// The major axis angle comes from atan(), so it lies in (-90,+90) and cos(theta) > 0: the unit
+// vector always points toward +x, which is what makes the sign comparable across events. A
+// perfectly vertical axis leaves the direction riding on the arbitrary sign of the eigenvector,
+// so it is refused rather than reported as a coin flip.
+bool projectOnMajorAxis(double xcog, double ycog, double anglerad, std::vector<int> sur_pix,
+                        std::vector<float> amps, std::vector<double>& d, std::vector<double>& q){
+    d.clear();
+    q.clear();
+    double ct = cos(anglerad);
+    double st = sin(anglerad);
+    if (std::fabs(ct) < 1e-9) {
+        return false;
+    }
+    for (std::vector<int>::size_type p = 0; p < sur_pix.size(); p++) {
         int nx, ny;
         plottools->FindBin(sur_pix[p], &nx, &ny);
-        double p1x = std::pow((nx*1.0 - xcog*1.0),3.0);
-        double p1y = std::pow((ny*1.0 - ycog*1.0),3.0);
-        cout << "nx: " << nx << " ny: " << ny << endl;
-        // cout << (ny*1.0 - ycog*1.0) << endl;
-        double p2x = std::pow(amps[sur_pix[p]],3.0)*p1x;
-        double p2y = std::pow(amps[sur_pix[p]],3.0)*p1y;
-        // cout << amps[sur_pix[p]] << endl;
-        cout << "p2x: " << p2x << " p2y: " << p2y << endl;
-        M3Long[0] = M3Long[0] + (p2x);
-        M3Long[1] = M3Long[1] + (p2y);
-        cout << "M3 summingx: " << M3Long[0] << endl;
-        cout << "M3 summingy: " << M3Long[1] << endl;
+        double charge = amps[sur_pix[p]];
+        if (charge <= 0) continue;
+        d.push_back((nx*1.0 - xcog)*ct + (ny*1.0 - ycog)*st);
+        q.push_back(charge);
     }
-    // cout << "M3 summing2x: " << M3Long[0] << endl;
-    // cout << "M3 summing2y: " << M3Long[1] << endl;
-    // cout << psize << endl;
-    // double p3x = M3Long[0] / psize;
-    // double p3y = M3Long[1] / psize;
-    M3Long[0] = std::pow((M3Long[0]/psize),0.333333333);
-    M3Long[1] = std::pow((M3Long[0]/psize),0.333333333);
-    
-    // cout << "M3Long Complete: " << M3Long[0] << endl;
-    // cout << "M3Long Complete: " << M3Long[1] << endl;
-    return M3Long;
+    return !d.empty();
+}
+
+// Standard Hillas longitudinal third moment, weighted by q^1 and normalised by the total charge:
+//     M3Long = cbrt( sum(q_i * d_i^3) / sum(q_i) )
+//
+// The sign gives the direction of the SKEW, not of the bright end. (xcog,ycog) is the
+// charge-weighted centroid, so piling charge at one end drags the centroid there and leaves a long
+// faint tail at the other; the cubed distance makes that tail dominate the sum. So M3Long > 0
+// means the tail runs toward +x and the brighter, denser end sits toward -x.
+// Verified against a hand calculation and synthetic blobs in Claude/test_m3long.cpp.
+//
+// Note on normalisation: the thesis this analysis follows normalises by the pixel count N rather
+// than by sum(q). Both denominators are positive and cbrt preserves sign, so that choice cannot
+// change the sign and therefore cannot change any head-tail decision. It only rescales the value.
+//
+// cbrt is used rather than pow(x,1/3.), which returns NaN for a negative base. The sign is the
+// entire point of the quantity.
+double getM3Long(double xcog, double ycog, double anglerad, std::vector<int> sur_pix, std::vector<float> amps){
+    std::vector<double> d, q;
+    if (!projectOnMajorAxis(xcog, ycog, anglerad, sur_pix, amps, d, q)) {
+        return 0.0;
+    }
+    double num = 0.0, qsum = 0.0;
+    for (std::vector<double>::size_type i = 0; i < d.size(); i++) {
+        num  += q[i] * d[i] * d[i] * d[i];
+        qsum += q[i];
+    }
+    if (qsum <= 0) {
+        return 0.0; // no charge, no moment
+    }
+    return std::cbrt(num / qsum);
+}
+
+// M3LongPow3: the thesis variant that weights the third moment by the THIRD POWER of the charge
+// and normalises by the pixel count N:
+//     M3LongPow3 = cbrt( (1/N) * sum(q_i^3 * d_i^3) )
+//
+// Its purpose is low-energy images, which go roundish and lose their head-tail asymmetry in the
+// noise; giving bright pixels far more weight is meant to recover it.
+//
+// IMPORTANT: this is NOT a rescaled M3Long and its sign is not the same. Cubing the charge lets
+// the bright compact head dominate the sum instead of the faint extended tail, so in practice it
+// tends to come out with the OPPOSITE sign to M3Long on the same image. Decide which variable a
+// head-tail cut is written against and stay with it; do not mix the two.
+double getM3LongPow3(double xcog, double ycog, double anglerad, std::vector<int> sur_pix, std::vector<float> amps){
+    std::vector<double> d, q;
+    if (!projectOnMajorAxis(xcog, ycog, anglerad, sur_pix, amps, d, q)) {
+        return 0.0;
+    }
+    double num = 0.0;
+    for (std::vector<double>::size_type i = 0; i < d.size(); i++) {
+        num += q[i] * q[i] * q[i] * d[i] * d[i] * d[i];
+    }
+    // N is the number of pixels actually summed, i.e. surviving pixels carrying charge.
+    return std::cbrt(num / (double)d.size());
 }
