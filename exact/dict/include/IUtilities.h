@@ -214,19 +214,32 @@ class IUtilities{
 		*/
 
 		static float GetEventAmplitudeSum(std::vector<float> amplitude);
+		/** Default sample window scanned for a railed sample. Brackets the expected peak
+		 * signal region of the Trinity Demonstrator (TimeBinAll). Named here so callers that
+		 * need to move the window derive it from these rather than restating the bounds. */
+		static constexpr int kSatWindowStart = 230;
+		static constexpr int kSatWindowEnd   = 250;
+
 		/**
 		* Public method to identify saturated pixels based on their trace data.
 		* 
 		* @param trace A vector of vectors of floats, where each inner vector represents the signal trace for a pixel.
 		* 
-		* Note: The signal window is hardcoded to be between indices 230 and 250, corresponding to the expected peak signal region.
-		* This configuration is specific to the Trinity Demonstrator setup.
+		* @param signalStart First sample of the window to scan. Defaults to the Trinity Demonstrator's
+		*        peak signal region.
+		* @param signalEnd One past the last sample of the window to scan. Defaults as above.
+		* 
+		* Note: simulated traces do not put the pulse where the demonstrator's readout does, so they
+		* pass their own window instead of being resampled to match. The window is clamped to the
+		* length of each trace.
 		* 
 		* @return A vector of integers, where each value corresponds to a pixel: 
 		*         1 indicates saturation, and 0 indicates no saturation.
 		*/
 
-		std::vector<int> GetSaturatedPixels(std::vector<std::vector<int>> trace);
+		std::vector<int> GetSaturatedPixels(std::vector<std::vector<int>> trace,
+		                                    int signalStart = kSatWindowStart,
+		                                    int signalEnd   = kSatWindowEnd);
 
 		/**
 		 * Public method to obtain all the files with a certain extension in a directory.

@@ -1,6 +1,7 @@
 #include <string>
 #include <sstream>
 #include <cmath>
+#include <algorithm>
 
 #include "IUtilities.h"
 
@@ -368,15 +369,17 @@ float IUtilities::GetEventAmplitudeSum(std::vector<float> amplitude){
 	return sum;
 }
 
-std::vector<int> IUtilities::GetSaturatedPixels(std::vector<std::vector<int>> trace){
+std::vector<int> IUtilities::GetSaturatedPixels(std::vector<std::vector<int>> trace, int signalStart, int signalEnd){
 	std::vector<int> saturation;
 	int counter = 0;
 	for(std::size_t i = 0; i<trace.size(); i++){
 		
-		int signalStart = 230;
-		int signalEnd = 250;
+		// The window is caller supplied, so keep it inside this trace rather than running off
+		// either end. Callers scanning a simulated pulse pass a window of their own.
+		int start = std::max(0, signalStart);
+		int end   = std::min(static_cast<int>(trace[i].size()), signalEnd);
 		counter = 0;
-		for(int j = signalStart; j<signalEnd; j++){
+		for(int j = start; j<end; j++){
 			if(trace[i][j] <= 1){
 				counter++;
 			}
