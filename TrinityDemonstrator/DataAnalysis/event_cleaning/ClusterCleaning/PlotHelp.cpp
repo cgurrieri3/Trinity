@@ -109,6 +109,10 @@ void PlotHelp::AddtoAngle(double angleRad){
     Anglevector.push_back(angleRad*(180.0/TMath::Pi()));
 }
 
+void PlotHelp::AddtoUpDownSym(double s){
+    UpDownSymvector.push_back(s);
+}
+
 void PlotHelp::AddtoSaturatedPixels(int count){
     SatPixelCountVector.push_back(count);
 }
@@ -262,7 +266,7 @@ void PlotHelp::PlothWL(TCanvas* c, std::string pdf,std::string outDir,std::strin
     // hWL->SetXaxis()->SetTitleOffset(1.2); // Adjust X-axis title offset
     // hWL->SetYaxis()->SetTitleOffset(1.5); // Adjust Y-axis title offset
     c->cd(0);
-    hWL->Draw();
+    hWL->Draw("HIST E1");
     //Create a TLatex object to display the label
     TLatex *latex = new TLatex();
     latex->SetNDC(); // Use normalized coordinates
@@ -312,12 +316,12 @@ void PlotHelp::PlothdistLandW(TCanvas* c, std::string pdf){
     hW->SetLineColor(kBlue);
     hW->SetFillColor(38);
     hW->SetFillStyle(3017);
-    hW->Draw();
+    hW->Draw("HIST E1");
     
     hL->SetLineColor(kRed);
     hL->SetFillColor(46);
     hL->SetFillStyle(3017);
-    hL->Draw("Same");
+    hL->Draw("HIST E1 SAME");
     // //Create a TLatex object to display the label
     // TLatex *latex = new TLatex();
     // latex->SetNDC(); // Use normalized coordinates
@@ -360,7 +364,7 @@ void PlotHelp::PlothSize(TCanvas* c, std::string pdf){
         hSize->Fill(Svector[h]);
     }
     c->cd(0);
-    hSize->Draw();
+    hSize->Draw("HIST E1");
     c->Update();
     c->SetLogx();
     c->SetLogy();
@@ -383,7 +387,7 @@ void PlotHelp::PlothNumberofCores(TCanvas* c, std::string pdf){
         hncore->Fill(NCorevector[h]);
     }
     c->cd(0);
-    hncore->Draw();
+    hncore->Draw("HIST E1");
     c->Update();
     c->SetLogy();
     c->Write("Ncore_Distribution");
@@ -745,7 +749,7 @@ void PlotHelp::PlotPixelsDistanceToMajorAxis(TCanvas* c, std::string pdf){
         //std::cout << "Distance to Major Axis: " << Distance2MajorAxisVector[h] << std::endl;
     }
     c->cd(0);
-    hDistance->Draw();
+    hDistance->Draw("HIST E1");
     c->SetLogy();
     c->Update();
     c->Write("Distance2MajorAxis");
@@ -762,7 +766,7 @@ void PlotHelp::PlotPixelsRatioDistanceToMajorAxis(TCanvas* c, std::string pdf){
         //std::cout << "Distance to Major Axis: " << Distance2MajorAxisVector[h] << std::endl;
     }
     c->cd(0);
-    hDistance->Draw();
+    hDistance->Draw("HIST E1");
     c->SetLogy();
     c->Update();
     c->Write("Ratio2MajorAxis");
@@ -789,12 +793,12 @@ void PlotHelp::PlotdistRMSandWeightedRMS(TCanvas* c, std::string pdf){
     hWRMS->SetLineColor(kBlue);
     hWRMS->SetFillColor(38);
     hWRMS->SetFillStyle(3017);
-    hWRMS->Draw();
+    hWRMS->Draw("HIST E1");
     
     hRMS->SetLineColor(kRed);
     hRMS->SetFillColor(46);
     hRMS->SetFillStyle(3017);
-    hRMS->Draw("Same");
+    hRMS->Draw("HIST E1 SAME");
 
     
     auto legend = new TLegend(0.1,0.8,0.34,0.9);
@@ -828,7 +832,7 @@ void PlotHelp::PlotPixelsOnMajorAxis(TCanvas* c, std::string pdf){
     hOn->SetLineColor(kBlue);
     hOn->SetFillColor(38);
     hOn->SetFillStyle(3017);
-    hOn->Draw();
+    hOn->Draw("HIST E1");
     
     c->Update();
     c->SetLogy();
@@ -856,7 +860,7 @@ void PlotHelp::PlotPixelsOffMajorAxis(TCanvas* c, std::string pdf){
     hOff->SetLineColor(kRed);
     hOff->SetFillColor(46);
     hOff->SetFillStyle(3017);
-    hOff->Draw();
+    hOff->Draw("HIST E1");
   
     
     
@@ -1034,7 +1038,7 @@ void PlotHelp::PlothSurvivingPixelsX(TCanvas* c, std::string pdf){
     hSurvX->SetLineColor(kBlue);
     hSurvX->SetFillColor(38);
     hSurvX->SetFillStyle(3017);
-    hSurvX->Draw();
+    hSurvX->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("SurvivingPixelsX_Distribution");
@@ -1055,7 +1059,7 @@ void PlotHelp::PlothSurvivingPixelsY(TCanvas* c, std::string pdf){
     hSurvY->SetLineColor(kRed);
     hSurvY->SetFillColor(46);
     hSurvY->SetFillStyle(3017);
-    hSurvY->Draw();
+    hSurvY->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("SurvivingPixelsY_Distribution");
@@ -1066,8 +1070,8 @@ void PlotHelp::PlothSurvivingPixelsY(TCanvas* c, std::string pdf){
 }
 
 void PlotHelp::PlothCOGx(TCanvas* c, std::string pdf){
-    // finer than CameraStep because the COG falls between pixel centres
-    TH1D* hCOGx = new TH1D("hCOGx", "Center of Gravity along x axis of Camera", 4*CameraStep, CameraMin, CameraMax);
+    // one bin per camera pixel, so the COG lands in the bin of the pixel it sits on
+    TH1D* hCOGx = new TH1D("hCOGx", "Center of Gravity along x axis of Camera", CameraStep, CameraMin, CameraMax);
     hCOGx->SetStats(0);
     hCOGx->SetXTitle("Pixel Bin along x axis of Camera");
     for (std::vector<double>::size_type h = 0; h < COGxvector.size(); h++) {
@@ -1077,7 +1081,7 @@ void PlotHelp::PlothCOGx(TCanvas* c, std::string pdf){
     hCOGx->SetLineColor(kBlue);
     hCOGx->SetFillColor(38);
     hCOGx->SetFillStyle(3017);
-    hCOGx->Draw();
+    hCOGx->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("COGx_Distribution");
@@ -1088,8 +1092,8 @@ void PlotHelp::PlothCOGx(TCanvas* c, std::string pdf){
 }
 
 void PlotHelp::PlothCOGy(TCanvas* c, std::string pdf){
-    // finer than CameraStep because the COG falls between pixel centres
-    TH1D* hCOGy = new TH1D("hCOGy", "Center of Gravity along y axis of Camera", 4*CameraStep, CameraMin, CameraMax);
+    // one bin per camera pixel, so the COG lands in the bin of the pixel it sits on
+    TH1D* hCOGy = new TH1D("hCOGy", "Center of Gravity along y axis of Camera", CameraStep, CameraMin, CameraMax);
     hCOGy->SetStats(0);
     hCOGy->SetXTitle("Pixel Bin along y axis of Camera");
     for (std::vector<double>::size_type h = 0; h < COGyvector.size(); h++) {
@@ -1099,7 +1103,7 @@ void PlotHelp::PlothCOGy(TCanvas* c, std::string pdf){
     hCOGy->SetLineColor(kRed);
     hCOGy->SetFillColor(46);
     hCOGy->SetFillStyle(3017);
-    hCOGy->Draw();
+    hCOGy->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("COGy_Distribution");
@@ -1123,13 +1127,39 @@ void PlotHelp::PlothAngle(TCanvas* c, std::string pdf){
     hAngle->SetLineColor(kBlue);
     hAngle->SetFillColor(38);
     hAngle->SetFillStyle(3017);
-    hAngle->Draw();
+    hAngle->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("Angle_Distribution");
     hAngle->Write("Angle_DistTH1D");
     c->Print(pdf.c_str());
     delete hAngle;
+    c->SetLogy(0);
+}
+
+// The major axis, oriented head-to-tail by M3Long, dotted with the vertical. +1 means the
+// bright head of the image points straight up, -1 straight down and 0 means the image lies
+// along the camera x axis. Events whose head-tail direction could not be determined are
+// entered as NaN by CompletePanel4 and are skipped here rather than piling up at 0.
+void PlotHelp::PlothUpDownSym(TCanvas* c, std::string pdf){
+    TH1D* hUD = new TH1D("hUD", "Up-Down Symmetry (Major Axis #upoint Vertical, head-tail from M3Long)", UDstep, UDmin, UDmax);
+    hUD->SetStats(0);
+    hUD->SetXTitle("Major Axis #upoint Vertical (+ = head up)");
+    for (std::vector<double>::size_type h = 0; h < UpDownSymvector.size(); h++) {
+        // no head-tail direction to orient by, so there is no up or down to report
+        if (std::isnan(UpDownSymvector[h])) continue;
+        hUD->Fill(UpDownSymvector[h]);
+    }
+    c->cd(0);
+    hUD->SetLineColor(kRed);
+    hUD->SetFillColor(46);
+    hUD->SetFillStyle(3017);
+    hUD->Draw("HIST E1");
+    c->Update();
+    c->Write("UpDownSym_Distribution");
+    hUD->Write("UpDownSym_DistTH1D");
+    c->Print(pdf.c_str());
+    delete hUD;
     c->SetLogy(0);
 }
 
@@ -1144,7 +1174,7 @@ void PlotHelp::PlothSaturatedPixels(TCanvas* c, std::string pdf){
     hSat->SetLineColor(kBlue);
     hSat->SetFillColor(38);
     hSat->SetFillStyle(3017);
-    hSat->Draw();
+    hSat->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("SaturatedPixels_Distribution");
@@ -1168,7 +1198,7 @@ void PlotHelp::PlothSaturatedOverSurviving(TCanvas* c, std::string pdf){
     hSatRatio->SetLineColor(kRed);
     hSatRatio->SetFillColor(46);
     hSatRatio->SetFillStyle(3017);
-    hSatRatio->Draw();
+    hSatRatio->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("SaturatedOverSurviving_Distribution");
@@ -1191,7 +1221,7 @@ void PlotHelp::PlothSaturatedPixelsX(TCanvas* c, std::string pdf){
     hSatX->SetLineColor(kBlue);
     hSatX->SetFillColor(38);
     hSatX->SetFillStyle(3017);
-    hSatX->Draw();
+    hSatX->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("SaturatedPixelsX_Distribution");
@@ -1212,7 +1242,7 @@ void PlotHelp::PlothSaturatedPixelsY(TCanvas* c, std::string pdf){
     hSatY->SetLineColor(kRed);
     hSatY->SetFillColor(46);
     hSatY->SetFillStyle(3017);
-    hSatY->Draw();
+    hSatY->Draw("HIST E1");
     c->Update();
     // c->SetLogy();
     c->Write("SaturatedPixelsY_Distribution");

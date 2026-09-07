@@ -239,6 +239,7 @@ int main(int argc, char **argv){
         
         
         // loops through each event in a file
+        // for(int EventCounter = 0; EventCounter < 1000; EventCounter++){
         for(int EventCounter = 0; EventCounter < TotalEvents; EventCounter++){
             cev = new CEvent(); // creates a new Clean Event object
             eventInfo->Clear();
@@ -286,8 +287,13 @@ int main(int argc, char **argv){
                 
                 for (int k = 0; k < MaxNofChannels; k++) {
                     if (EventCounter < nEntries) {
-                        pulse = new Pulse(ev->GetSignalValue(k));
-                        pulse1 = new Pulse(ev->GetSignalValue(k),TimeBinAll,TimeBinAll,512,true);
+                        // the CARE pulse sits SimTimeBinOffset bins early in the sim traces, so
+                        // slide it onto TimeBinAll before any peak time or amplitude is read
+                        std::vector<Int_t> trace = (whatData == "sim")
+                            ? ShiftTrace(ev->GetSignalValue(k), SimTimeBinOffset)
+                            : ev->GetSignalValue(k);
+                        pulse = new Pulse(trace);
+                        pulse1 = new Pulse(trace,TimeBinAll,TimeBinAll,512,true);
                         eventInfo->SetEventBranch(1);
                     } else {
                         pulse = new Pulse(evHLED->GetSignalValue(k));
@@ -342,7 +348,7 @@ int main(int argc, char **argv){
                 // NumberOfCoresCutoff = 3;
 
                 // CorePixelCutOff = 100;
-                std::vector<double> fakeGain(256, 1.0); 
+                std::vector<double> fakeGain(256, 24.1); // for simulations that assuming is that the Photon detection eff. was done in a prior step so only the conversion from ADC to PE is needed in this step here
                 cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, "all1new",fakeGain,44.0);
             } else {
                 cev->SetAmplitudeValuesTimeBin(AmplitudesTimeBin,CalibrationFactorDir, std::to_string(cev->GetEventDate()),sipmInfo->GetGain(),44.0);
@@ -410,7 +416,20 @@ int main(int argc, char **argv){
             // is the ID of a saturated pixel. This runs before cleaning, so it is the raw list;
             // CompletePanel4 narrows it to the pixels that actually survived. The cut below has
             // to stay on the raw count because there are no surviving pixels yet.
-            std::vector<int> SaturatedPixels = util->GetSaturatedPixels(ev->GetSignalValue());
+            std::vector<int> SaturatedPixels;
+            if (EventCounter < nEntries) {
+                // This reads the RAW trace, unlike the Pulse loop above which slides sim traces
+                // onto TimeBinAll. Move the scan window back onto the CARE pulse by the same
+                // offset rather than shifting all 256 traces a second time just for this check.
+                const int satOffset = (whatData == "sim") ? SimTimeBinOffset : 0;
+                SaturatedPixels = util->GetSaturatedPixels(ev->GetSignalValue(),
+                                                           IUtilities::kSatWindowStart - satOffset,
+                                                           IUtilities::kSatWindowEnd   - satOffset);
+            } else {
+                // HLED events have to come from their own branch: tree->GetEntry is never called
+                // for them, so ev still holds the last Test entry and would report its saturation.
+                SaturatedPixels = util->GetSaturatedPixels(evHLED->GetSignalValue());
+            }
             SaturatedPixelIDsRaw.clear();
             for (std::size_t p = 0; p < SaturatedPixels.size(); p++) {
                 if (SaturatedPixels[p] == 1) SaturatedPixelIDsRaw.push_back((Int_t)p);
@@ -501,6 +520,10 @@ int main(int argc, char **argv){
             
             subtitle->DrawLatex(0.1, 0.92, Form("Avg Amp Whole Camera : %.2f - Avg RMS: %.2f", cev->GetAverageAmplitude(), cev->GetRMS()));
             subtitle->DrawLatex(0.25, 0.12, Form("Triggered MUSIC: %i  Triggered Pixel: %i",cev->GetTriggeredMUSICID(),util->GetMaximumPixelID(cev->GetAmplitudeValuesTimeBin(),TrigMus[0])));
+            // Saturation on the raw image, before cleaning: the boxes say where, the count says
+            // how much. Panel 4 repeats this for the saturated pixels that survived cleaning.
+            DrawSaturationMarkers(SaturatedPixelIDsRaw);
+            subtitle->DrawLatex(0.25, 0.07, Form("Saturated Pixels: %i", (int)SaturatedPixelIDsRaw.size()));
             delete subtitle;
             
             eventInfo->SetHPanel1(hcam_panel1);
@@ -760,6 +783,7 @@ int main(int argc, char **argv){
     plothelp->PlothCOGx(c_cleaned, OutputFilePDF);
     plothelp->PlothCOGy(c_cleaned, OutputFilePDF);
     plothelp->PlothAngle(c_cleaned, OutputFilePDF);
+    plothelp->PlothUpDownSym(c_cleaned, OutputFilePDF);
     plothelp->PlothSaturatedPixels(c_cleaned, OutputFilePDF);
     plothelp->PlothSaturatedOverSurviving(c_cleaned, OutputFilePDF);
     plothelp->PlothSaturatedPixelsX(c_cleaned, OutputFilePDF);

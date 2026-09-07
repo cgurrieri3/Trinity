@@ -38,6 +38,7 @@
 #include <Pulse.h>
 #include <TFile.h>
 #include <TBox.h>
+#include <TMarker.h>
 #include <TMatrixD.h>
 #include <TVectorD.h>
 #include <Getline.h>
@@ -148,6 +149,14 @@ int NumberOfCoresCutoff = 2; // 1, 2,3 cores removed the top row of the camera (
 float CrosstalkAllowanceCutoff = 0.3; // typically 0.3 removed the top row of the camera (sky) 0 = remove, 1 = dont remove
 float CorePixelCutOff = 1.5;
 
+// The CARE traces are embedded into the 512 bin demonstrator window centred, not at the
+// demonstrator's peak bin, so the simulated pulse lands ~59 bins early (offset 156 in
+// PlotCamera::create_root_file_care + kCareTimeBin 25 = 181; measured camera peak 178-183).
+// Every cut downstream assumes the pulse sits at TimeBinAll, so sim traces are shifted onto
+// that bin before any Pulse is built.
+const int SimPeakTimeBin = 184; // time bin the CARE pulse actually lands on in the sim traces
+const int SimTimeBinOffset = TimeBinAll - SimPeakTimeBin; // 239 - 180 = 59
+
 
 void SetBranches(IEvent *evD);
 void SetBranchesHLED(IEvent *evD);
@@ -158,6 +167,7 @@ void saveEventInfo(EventInfo* evI, TTree* treeSims);
 void LoadDataPCA(PCA& pca, TH2F* hist, int totalAmp);
 std::vector<double> CreateWLRatio(PCA& pca, TVectorD& eigenVals, TMatrixD& eigenVecs);
 std::vector<int> CheckCrossPoints(TArrow* arrow, TH2F* hist, EventInfo* eventInfo);
+void DrawSaturationMarkers(const std::vector<Int_t>& pixelIDs);
 void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs, EventInfo* eventInfo);
 bool projectOnMajorAxis(double xcog, double ycog, double anglerad, std::vector<int> sur_pix,
                        std::vector<float> amps, std::vector<double>& d, std::vector<double>& q);
@@ -165,6 +175,7 @@ double getM3Long(double xcog, double ycog, double anglerad, std::vector<int> sur
 double getM3LongPow3(double xcog, double ycog, double anglerad, std::vector<int> sur_pix, std::vector<float> amps);
 std::vector<double> generateRandomNumbers();
 void CreateFileName(std::string filename, bool bkg);
+std::vector<Int_t> ShiftTrace(const std::vector<Int_t>& trace, int offset);
 
 void CreateFileName(std::string filename, std::string dataType) {
     if (dataType == "bkg") {
@@ -273,6 +284,25 @@ void LoadEventsHLED(string NameofFile, std::string treeString)
     //cout << "Loading file for HLED: " << NameofFile << endl;
     TFile *fO = new TFile(NameofFile.c_str(), "READ");
     treeHLED = (TTree*)fO->Get(treeString.c_str());
+}
+
+
+// Slides a trace by offset bins, padding with the leading baseline sample so the pedestal
+// window (the first samples of the trace) is unchanged. A positive offset moves the pulse
+// later in the window, which is what the sim needs to line up with the demonstrator.
+std::vector<Int_t> ShiftTrace(const std::vector<Int_t>& trace, int offset)
+{
+    if (offset == 0 || trace.empty()) {
+        return trace;
+    }
+    std::vector<Int_t> shifted(trace.size(), trace.front());
+    for (std::size_t i = 0; i < trace.size(); i++) {
+        long src = static_cast<long>(i) - offset;
+        if (src >= 0 && src < static_cast<long>(trace.size())) {
+            shifted[i] = trace[src];
+        }
+    }
+    return shifted;
 }
 
 
@@ -462,6 +492,24 @@ std::vector<int> CheckCrossPoints(TArrow* arrow, TH2F* hist,EventInfo* eventInfo
 
 }
 
+// Dots the given pixels on whatever pad is current, so saturation is visible on the camera
+// image itself and not only in the header text. Call it AFTER the panel histogram has been drawn:
+// TH1::Draw() without "same" clears the pad, so the next event's panel takes these markers with it
+// rather than letting them pile up, which is the same lifetime the arrows and ellipse below rely on.
+void DrawSaturationMarkers(const std::vector<Int_t>& pixelIDs)
+{
+    for (std::vector<Int_t>::size_type s = 0; s < pixelIDs.size(); s++) {
+        int nx, ny;
+        plottools->FindBin((int)pixelIDs[s], &nx, &ny);
+        // camera bins are one unit wide and centred on the integer bin index, so the bin index
+        // is the pixel centre the dot goes on
+        TMarker* satDot = new TMarker(nx, ny, kFullCircle);
+        satDot->SetMarkerColor(kBlack);
+        satDot->SetMarkerSize(0.7); // small enough to leave the amplitude colour around it readable
+        satDot->Draw();
+    }
+}
+
 void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double> EllipicRatio, TVectorD& eigenVals, TMatrixD& eigenVecs,  EventInfo* eventInfo) {
     
     
@@ -507,6 +555,9 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
         }
     }
 
+    // Show where the saturation actually is, not just how much of it there is.
+    DrawSaturationMarkers(SaturatedSurvivingIDs);
+
     TLatex* title = new TLatex();
     title->SetNDC(); // Set to Normalized Device Coordinates (NDC)
     title->SetTextSize(0.03);
@@ -519,6 +570,22 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     // and are not interchangeable -- see the header comments on each function.
     double M3Long     = getM3Long(meanx, meany, anglerad, cev->GetSurvivingPixelPanel3(),cev->GetAmplitudeValuesTimeBin());
     double M3LongPow3 = getM3LongPow3(meanx, meany, anglerad, cev->GetSurvivingPixelPanel3(),cev->GetAmplitudeValuesTimeBin());
+    // Up-down symmetry: the major axis dotted with the vertical, oriented head-to-tail so the
+    // value says which way the image actually points. The eigenvector alone cannot: atan()
+    // forces cos(angle) > 0, so it always points toward +x and carries no up/down information.
+    // M3Long supplies the missing direction. M3Long > 0 means the faint tail runs toward +x, so
+    // the bright head sits toward -x and the head direction is -sign(M3Long)*(cos,sin). Dotting
+    // that with the vertical gives +1 for a head pointing straight up, -1 straight down, and 0
+    // for an image lying along the camera x axis.
+    //
+    // getM3Long returns exactly 0.0 only from its guard paths (no usable charge, or an axis too
+    // close to vertical to project onto), never from a real image, so that case has no head-tail
+    // direction to orient by. It is recorded as NaN rather than flattened onto 0, which would
+    // otherwise read as a perfectly horizontal image. PlothUpDownSym skips those entries.
+    double upDownSym = std::numeric_limits<double>::quiet_NaN();
+    if (M3Long != 0.0) {
+        upDownSym = (M3Long > 0.0 ? -1.0 : 1.0) * sin(anglerad);
+    }
     // cev->GetSurvivingPixelTotalAmpPanel3()/util->GetADCtoPEratio(),
     // Split over two lines: one line no longer fits the pad width now that it carries both
     // moments. Sat is the saturated pixels that SURVIVED cleaning, matching Pixels and the
@@ -530,9 +597,10 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
         areaEllipse,
         cev->GetSurvivingPixelTotalAmpPanel3(),
         conc));
-    title->DrawLatex(0.1, 0.870, Form("M3Long:%.2f M3Pow3:%.3g",
+    title->DrawLatex(0.1, 0.870, Form("M3Long:%.2f M3Pow3:%.3g UpDownSym:%.2f",
         M3Long,
-        M3LongPow3));
+        M3LongPow3,
+        upDownSym));
     delete title;
 
     // add values  for creating the plots
@@ -548,6 +616,7 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     plothelp->AddtoCoreRatio(cev->GetCoreRatio());
     plothelp->AddtoNumberOfCores(cev->GetNumberofCorePixels());
     plothelp->AddtoAngle(anglerad);
+    plothelp->AddtoUpDownSym(upDownSym);
     eventInfo->SetSaturatedPixels(SaturatedSurvivingIDs);
     plothelp->AddtoSaturatedPixels((int)SaturatedSurvivingIDs.size());
     // camera position of every saturated pixel that survived, one entry per pixel
@@ -582,6 +651,7 @@ void CompletePanel4(PCA& pca, TH2F* hcam_panel4, CEvent* cev, std::vector<double
     eventInfo->SetArea(areaEllipse);
     eventInfo->SetM3Long(M3Long);
     eventInfo->SetM3LongPow3(M3LongPow3);
+    eventInfo->SetUpDownSym(upDownSym);
 
 
 

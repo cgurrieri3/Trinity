@@ -48,6 +48,8 @@ class EventInfo : public TObject {
         void SetNumberOfCores(Float_t v);
         void SetM3Long(Float_t v);
         void SetM3LongPow3(Float_t v);
+        // |major axis . vertical|, 0 = axis along camera x, 1 = axis vertical
+        void SetUpDownSym(Float_t v);
 
         void SetDistance2MajorAxis(Float_t v);
         void SetRMSMajorAxis(Float_t v);
@@ -89,6 +91,7 @@ class EventInfo : public TObject {
         Float_t GetNumberOfCores() const;
         Float_t GetM3Long() const;
         Float_t GetM3LongPow3() const;
+        Float_t GetUpDownSym() const;
 
         Float_t GetDistance2MajorAxis() const;
         Float_t GetRMSMajorAxis() const;
@@ -129,6 +132,7 @@ class EventInfo : public TObject {
         Float_t NumberOfCores;
         Float_t M3Long;     // standard Hillas 3rd moment along the major axis, q^1 / sum(q)
         Float_t M3LongPow3; // thesis variant, q^3 / N -- sign is NOT the same as M3Long
+        Float_t UpDownSym;  // |major axis . vertical| = |sin(Angle)|, in [0,1]
 
         Float_t Distance2MajorAxis;
         Float_t RMSMajorAxis;
@@ -137,7 +141,7 @@ class EventInfo : public TObject {
         Int_t PixelsoffMajorAxis;
         Float_t RatioPixelsMajorAxis;
 
-        ClassDef(EventInfo, 4);  // ROOT I/O support
+        ClassDef(EventInfo, 5);  // ROOT I/O support
 
 };
 #endif

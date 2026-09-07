@@ -51,6 +51,8 @@ class PlotHelp {
         // camera position of every pixel that survived cleaning, one entry per pixel
         void AddtoSurvivingPixelPosition(double nx, double ny);
         void AddtoAngle(double angleRad); // major axis angle, kept in degrees
+        // major axis (oriented head-to-tail by M3Long) . vertical: +1 head up, -1 head down
+        void AddtoUpDownSym(double s);
         void AddtoSaturatedPixels(int count); // saturated pixels in the event, kept aligned with SPCvector
         // camera position of every saturated pixel that survived cleaning, one entry per pixel
         void AddtoSaturatedPixelPosition(double nx, double ny);
@@ -94,6 +96,7 @@ class PlotHelp {
         void PlothCOGx(TCanvas* c, std::string pdf);
         void PlothCOGy(TCanvas* c, std::string pdf);
         void PlothAngle(TCanvas* c, std::string pdf);
+        void PlothUpDownSym(TCanvas* c, std::string pdf);
         void PlothSaturatedPixels(TCanvas* c, std::string pdf);
         void PlothSaturatedOverSurviving(TCanvas* c, std::string pdf);
         void PlothSaturatedPixelsX(TCanvas* c, std::string pdf);
@@ -135,6 +138,7 @@ class PlotHelp {
         std::vector<double> SurvivingPixelXVector = {}; // one entry per surviving pixel
         std::vector<double> SurvivingPixelYVector = {}; // one entry per surviving pixel
         std::vector<double> Anglevector = {}; // major axis angle in degrees
+        std::vector<double> UpDownSymvector = {}; // signed major axis . vertical per event, in [-1,1]
         std::vector<int> SatPixelCountVector = {}; // saturated pixels per event, index matches SPCvector
         std::vector<double> SaturatedPixelXVector = {}; // one entry per saturated surviving pixel
         std::vector<double> SaturatedPixelYVector = {}; // one entry per saturated surviving pixel
@@ -186,6 +190,11 @@ class PlotHelp {
         int AngleStep = 36;
         float AngleMin = -90.0;
         float AngleMax = 90.0;
+
+        // up/down symmetry is signed once M3Long orients the axis, so it spans [-1,1]
+        int UDstep = 42;
+        float UDmin = -1.05;
+        float UDmax = 1.05;
 
         // saturated pixels are a subset of the surviving pixels, so they share that scale
         int SatStep = SPstep;

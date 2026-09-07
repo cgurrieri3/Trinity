@@ -45,6 +45,7 @@ EventInfo::EventInfo(int size){
     NumberOfCores = 0;
     M3Long = 0;
     M3LongPow3 = 0;
+    UpDownSym = 0;
 
     Distance2MajorAxis = 0;
     RMSMajorAxis = 0;
@@ -97,6 +98,7 @@ void EventInfo::Clear() {
     NumberOfCores = 0;
     M3Long = 0;
     M3LongPow3 = 0;
+    UpDownSym = 0;
 
     Distance2MajorAxis = 0;
     RMSMajorAxis = 0;
@@ -136,6 +138,7 @@ void EventInfo::SetCoreRatio(Float_t v) {CoreRatio = v; }
 void EventInfo::SetNumberOfCores(Float_t v) {NumberOfCores = v; }
 void EventInfo::SetM3Long(Float_t v) {M3Long = v; }
 void EventInfo::SetM3LongPow3(Float_t v) {M3LongPow3 = v; }
+void EventInfo::SetUpDownSym(Float_t v) {UpDownSym = v; }
 
 void EventInfo::SetDistance2MajorAxis(Float_t v) {Distance2MajorAxis = v; }
 void EventInfo::SetRMSMajorAxis(Float_t v) {RMSMajorAxis = v; }
@@ -175,6 +178,7 @@ Float_t EventInfo::GetCoreRatio() const { return CoreRatio; }
 Float_t EventInfo::GetNumberOfCores() const { return NumberOfCores; }
 Float_t EventInfo::GetM3Long() const { return M3Long; }
 Float_t EventInfo::GetM3LongPow3() const { return M3LongPow3; }
+Float_t EventInfo::GetUpDownSym() const { return UpDownSym; }
 
 Float_t EventInfo::GetDistance2MajorAxis() const { return Distance2MajorAxis; }
 Float_t EventInfo::GetRMSMajorAxis() const { return RMSMajorAxis; }
