@@ -35,9 +35,6 @@ IEvent::IEvent(){
     outsideTempature = 0.0f;
     humidity=0.0f;
 
-    //
-    isOpen = false;
-    //
 
 }
 
@@ -335,7 +332,7 @@ const std::vector<float>& IEvent::Gethvc() const {
 
 //////////////////////////////////////////////////////////////////////////////////////
 bool IEvent::GetDoorPosition(const std::vector<float>& hv, const std::vector<float>& hvc){
-    bool isOpen = false;
+    isOpen = false;
     std::vector<float> Current = hvc;
     std::vector<float>  BiasVoltage = hv;
 

@@ -193,7 +193,7 @@ class IEvent : public Event{
 		static int FindClosestTimestampIndex(std::vector<unsigned long long> timeArray, unsigned long long eventTime);
 
 		////
-		static bool GetDoorPosition(const std::vector<float>& hv, const std::vector<float>& hvc);
+		bool GetDoorPosition(const std::vector<float>& hv, const std::vector<float>& hvc);
 		////
 			
 	private:
