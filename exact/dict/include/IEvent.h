@@ -59,9 +59,9 @@ class IEvent : public Event{
 		float outsideTempature;
 		float humidity;
 
-
+		//
 		bool isOpen;
-
+		//
 
 
 	public:
