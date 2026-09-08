@@ -35,6 +35,10 @@ IEvent::IEvent(){
     outsideTempature = 0.0f;
     humidity=0.0f;
 
+    //
+    isOpen = false;
+    //
+
 }
 
 // void IEvent::LoadFromFile(const std::string& filename1, const std::string& filename2) {
