@@ -329,6 +329,38 @@ const std::vector<float>& IEvent::Gethvc() const {
     return hvc;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////
+bool IEvent::GetDoorPosition(const std::vector<float>& hv, const std::vector<float>& hvc){
+    bool isOpen = false;
+    std::vector<float> Current = hvc;
+    std::vector<float>  BiasVoltage = hv;
+
+    auto maxCurrent = std::max_element(Current.begin(), Current.end());
+    float EvCurrent = std::round(10 * *maxCurrent) / 10;
+
+    float sumV = 0.0f;
+
+    for (float i : BiasVoltage){
+        sumV += i;
+    }
+    // float sumV = std::accumulate(BiasVoltage.begin(), BiasVoltage.end(), 0.0);
+    float BVAvg = sumV / BiasVoltage.size();
+    float EvBVAvg = std::round(10 * BVAvg) / 10;
+
+    if((EvCurrent < 3.5) && ((EvBVAvg == 44.0) || (EvBVAvg == 41.5))){
+        isOpen = false;
+    }
+    else if ((EvCurrent >= 3.5) && ((EvBVAvg == 44.0) || (EvBVAvg == 41.5))){
+        isOpen = true;
+    }
+    else{
+        std::cerr << "HLED or weird event. Event BV: " << EvBVAvg << " Event Current: " << EvCurrent << std::endl;
+    }
+
+    return isOpen;
+}
+//////////////////////////////////////////////////////////////////////////////////////
+
 const std::vector<float>& IEvent::GetUCTemp() const {
     return ucTemp;
 }

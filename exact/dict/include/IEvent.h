@@ -60,6 +60,8 @@ class IEvent : public Event{
 		float humidity;
 
 
+		bool isOpen;
+
 
 
 	public:
@@ -189,6 +191,10 @@ class IEvent : public Event{
 		float GetOutsideTempature() const;
 		float GetHumidity() const;
 		static int FindClosestTimestampIndex(std::vector<unsigned long long> timeArray, unsigned long long eventTime);
+
+		////
+		static bool GetDoorPosition(const std::vector<float>& hv, const std::vector<float>& hvc);
+		////
 			
 	private:
 		/**
