@@ -158,7 +158,8 @@ int main(int argc, char **argv){
         std::string simRun = ""; // sim run number pulled from the SEvent class for sim events
         int simEvent = 0; // sim event number pulled from the SEvent class for sim events
         TFile *fSim = nullptr;            // sim file kept open so SEvent can be read per event
-        TTree *simTree = nullptr;         // "Sim" tree holding one SEvent entry per event
+        TTree *simTree = nullptr;         // "Sim" tree holding one SEvent entry per THROWN event
+        std::vector<Long64_t> simTrigIdx;  // "Sim" entry numbers of the triggered events, in order
         SEvent *simRunData = nullptr; // reused across the event loop
         TotalEvents = 0;
         nEntries = 0;
@@ -213,9 +214,25 @@ int main(int argc, char **argv){
             simRunData = new SEvent();
             simTree->SetBranchAddress("GrOptics", &simRunData);
             simTree->GetEntry(0);
-
-            simRun = simRunData->GetSumRun(); // run name is constant across the run
+            simDate = simRunData->GetDate();
             cout << "Sim Run Date from SEvent: " << simDate << endl;
+
+            // The "Sim" tree holds one entry per THROWN event, while "Test" holds only the events
+            // that actually triggered, so indexing "Sim" with the "Test" event counter reads truth
+            // from the wrong shower. Build the list of triggered "Sim" entries once per file so
+            // event k of "Test" maps onto the k-th triggered "Sim" entry.
+            simTrigIdx.clear();
+            for (Long64_t s = 0; s < simTree->GetEntries(); s++){
+                simTree->GetEntry(s);
+                if (simRunData->GetTriggered()) simTrigIdx.push_back(s);
+            }
+            cout << "Sim entries: " << simTree->GetEntries()
+                 << "  triggered: " << simTrigIdx.size()
+                 << "  Test entries: " << tree->GetEntries() << endl;
+            if (static_cast<Long64_t>(simTrigIdx.size()) != tree->GetEntries()){
+                cout << "WARNING: triggered Sim entries != Test entries; the truth info is matched "
+                        "to each event purely by order, so the two counts must agree." << endl;
+            }
 
             // Copy every entry of the input "Sim" tree into the output Sim tree exactly as-is,
             // so the truth info is saved for ALL events regardless of triggered/cleaning class.
@@ -247,12 +264,16 @@ int main(int argc, char **argv){
             if (whatData == "sim"){
                 // read the SEvent entry for THIS event so the event number changes per event
                 float simEnergy = 0.0;
-                if (simTree && EventCounter < simTree->GetEntries()){
-                    simTree->GetEntry(EventCounter);
+                if (simTree && EventCounter < static_cast<int>(simTrigIdx.size())){
+                    // this "Test" event is the EventCounter-th TRIGGERED entry of the "Sim" tree
+                    simTree->GetEntry(simTrigIdx[EventCounter]);
                     simEvent = simRunData->GetSimEventNumber();
                     simEnergy = simRunData->GetNeutrinoEnergy(); // switch to GetTauEnergy() for tau energy
                 }
-                simDate = simRunData->GetDate();  // date is constant across the run
+                simDate = simRunData->GetDate();
+                // The run name changes from sub-run to sub-run within one file, so it has to be
+                // re-read for every event rather than cached from the first entry.
+                simRun = simRunData->GetSumRun();
                 cev->SetEventDate(simDate); // use the date from the SEvent class for sim events
                 cev->SetFilename(simRun); // use the run name from the SEvent class for sim events
                 cev->SetEventNumber(simEvent);
@@ -677,7 +698,8 @@ int main(int argc, char **argv){
             treeSims->Fill();
             
             // For sims, draw the truth info (neutrino energy, distance to and
-            // location of the emergence point) in the middle of the 2x2 display.
+            // location of the emergence point, distance to the tau decay point)
+            // in the middle of the 2x2 display.
             // Drawn BEFORE the canvas is written so it is saved in the .root canvas too.
             TPaveText *simInfo = nullptr;
             if (whatData == "sim"){
@@ -689,8 +711,17 @@ int main(int argc, char **argv){
                 // Emergence angle (azimuth wrapped to [-180,180] from the telescope axis)
                 double emergenceAngle = util->GetEmergenceAngle(simRunData->GetAzimuthAngle());
 
+                // Distance to the tau decay point. The shower start (= decay point) and the
+                // telescope position are both stored in the same emergence-point-centred frame,
+                // so the telescope-to-decay-point distance is the magnitude of their difference.
+                // (|showerStart| on its own is the decay length measured from the emergence point.)
+                double decayDx = simRunData->GetTelescope_Xpos() - simRunData->GetShowerStartX();
+                double decayDy = simRunData->GetTelescope_Ypos() - simRunData->GetShowerStartY();
+                double decayDz = simRunData->GetTelescope_Zpos() - simRunData->GetShowerStartZ();
+                double decayDistance = std::sqrt(decayDx*decayDx + decayDy*decayDy + decayDz*decayDz);
+
                 c_cleaned->cd(0);
-                simInfo = new TPaveText(0.28, 0.49, 0.72, 0.57, "NDC");
+                simInfo = new TPaveText(0.28, 0.463, 0.72, 0.57, "NDC");
                 simInfo->SetFillColorAlpha(0, 0.0);
                 simInfo->SetFillStyle(0);
                 simInfo->SetBorderSize(0);
@@ -698,6 +729,7 @@ int main(int argc, char **argv){
                 simInfo->AddText(Form("Neutrino Energy: %.3g GeV", simRunData->GetNeutrinoEnergy()));
                 simInfo->AddText(Form("Emergence Angle: %.3g deg", emergenceAngle));
                 simInfo->AddText(Form("Distance to Emergence Point: %.3g m", emergenceDistance));
+                simInfo->AddText(Form("Distance to Decay Point: %.3g m", decayDistance));
                 simInfo->Draw();
                 c_cleaned->Update();
             }
