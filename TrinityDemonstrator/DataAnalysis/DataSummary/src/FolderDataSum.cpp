@@ -29,7 +29,7 @@ int main(int argc, char **argv){
     }
 
     dataDir = Form("%sDataAnalysis/",mnt.c_str());
-
+    
     string outStr = Form("%s%s",outDir.c_str(),argv[1]);
     DataSummary ds(argv[1]);
     if(ds.hasData()){
@@ -41,7 +41,6 @@ int main(int argc, char **argv){
         ds.PlotROIMusic();
         ds.t_disp->Print((outStr+".pdf").c_str());
 
-        //
         if(ds.hasData44()){
 
             ds.PlotFF44();
@@ -71,6 +70,7 @@ int main(int argc, char **argv){
             ds.PlotPSF44();
             ds.t_disp->Print((outStr+".pdf").c_str());
         }
+
         if(ds.hasData415()){
             if(ds.hasHLEDData415()){
                 ds.PlotFF415();
@@ -82,9 +82,10 @@ int main(int argc, char **argv){
                 ds.PlotHLEDNorm415();
                 ds.t_disp->Print((outStr+".pdf").c_str());
             }
-            ds.PlotPedestal415();
-            ds.t_disp->Print((outStr+".pdf").c_str());    
 
+            ds.PlotPedestal415();
+            ds.t_disp->Print((outStr+".pdf").c_str()); 
+            
             ds.PlotPedestalRMS415();
             ds.t_disp->Print((outStr+".pdf").c_str()); 
 
@@ -100,22 +101,22 @@ int main(int argc, char **argv){
             ds.PlotPSF415();
             ds.t_disp->Print((outStr+".pdf").c_str());
         }
-        //
 
         ds.t_disp->Print((outStr+".pdf]").c_str());
 
         ofstream csvOutput;
         csvOutput.open((outStr+".csv"));
 
-        //
         if(ds.hasData44()){
-             csvOutput << ds.GetAvgEv44() << "," << ds.GetAmpDist44() << "," << ds.GetHLEDMean44() << "," << ds.GetHLEDNMean44() << "," << ds.GetPedMean44() << "," << ds.GetPedRMSMean44() << "," << ds.GetqMean44() << "," << ds.GetPTMean44();
+            csvOutput << ds.GetAvgEv44() << "," << ds.GetAmpDist44() << "," << ds.GetHLEDMean44() << "," << ds.GetHLEDNMean44() << "," << ds.GetPedMean44() << "," << ds.GetPedRMSMean44() << "," << ds.GetqMean44() << "," << ds.GetPTMean44() << "," << ds.GetPSFSigma44() ;
         }
+        else{
+            csvOutput << "-1,-1,-1,-1,-1,-1,-1,-1,-1" ;
+        }
+        
         if(ds.hasData415()){
-             csvOutput << ds.GetAvgEv415() << "," << ds.GetAmpDist415() << "," << ds.GetHLEDMean415() << "," << ds.GetHLEDNMean415() << "," << ds.GetPedMean415() << "," << ds.GetPedRMSMean415() << "," << ds.GetqMean415() << "," << ds.GetPTMean415();
+            csvOutput << "," << ds.GetAvgEv415() << "," << ds.GetAmpDist415() << "," << ds.GetHLEDMean415() << "," << ds.GetHLEDNMean415() << "," << ds.GetPedMean415() << "," << ds.GetPedRMSMean415() << "," << ds.GetqMean415() << "," << ds.GetPTMean415() << "," << ds.GetPSFSigma415();
         }
-        csvOutput << ds.GetPSFSigma();
-        //
         
         for(vector<int>& vec : ds.GetTrTh()){
             csvOutput << ",(" << vec[0] << "," << vec[1] << ")";

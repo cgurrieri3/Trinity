@@ -46,8 +46,8 @@ DataSummary::DataSummary(char* dateStr){
     hledNMean44 = 0;
     hledNMean415 = 0;
     // pedMean = 0;
-     pedMean44 = 0;
-      pedMean415 = 0;
+    pedMean44 = 0;
+    pedMean415 = 0;
     // pedRMSMean = 0;
     pedRMSMean44 = 0;
     pedRMSMean415 = 0;
@@ -60,8 +60,10 @@ DataSummary::DataSummary(char* dateStr){
     // ptMean = 0;
     ptMean44 = 0;
     ptMean415 = 0;
+    // psfSigma = 0;
+    psfSigma44 = 0;
+    psfSigma415 = 0;
 
-    psfSigma = 0;
     trTh = vector<vector<int>>();
     // hledEv = vector<DtStruct>();
     hledEv44 = vector<DtStruct>();
@@ -91,14 +93,15 @@ DataSummary::DataSummary(char* dateStr){
     isData44 = false;
     isData415 = false;
     isHLEDData415 = false;
-    //
+
     string evStr = Form("%sMergedData/Output/%s/",dataDir.c_str(),dateStr);
+
     string logDir = Form("%sData/%s/LOGS/rc.log",mnt.c_str(),dateStr);
-    //
+
     ReadEv(evStr);
     if(isData){
-        FillTrig();
         ReadTrThresholds(logDir);
+        FillTrig();
     }
 }
 
@@ -114,6 +117,7 @@ void DataSummary::ReadEv(string readStr){
 
     DIR *dir;
     struct dirent *ent;
+
     if((dir = opendir(readStr.c_str())) != NULL){
         while((ent = readdir(dir)) != NULL){
             string fileStr = Form("%s%s",readStr.c_str(),ent->d_name);
@@ -125,6 +129,10 @@ void DataSummary::ReadEv(string readStr){
                     continue;
                 }
                 tree = (TTree*)f0->Get("Test");
+                if (!tree) {
+                    std::cerr << "Tree 'Test' not found in file!" << std::endl;
+                    continue;
+                }
                 ev = new IEvent();
                 tree->SetBranchAddress("Events", &ev);
                 int nEntries = tree->GetEntries();
@@ -137,6 +145,7 @@ void DataSummary::ReadEv(string readStr){
                 }
                 countF++;
                 cout << "\"Test\" Events: " << nEntries << endl;
+                
                 for(int evCount = 0; evCount < nEntries; evCount++){
                     vector<float> evBiasVoltages;
                     tree->GetEntry(evCount);
@@ -244,6 +253,7 @@ void DataSummary::ReadEv(string readStr){
                 isHLEDData415 = true;
             }
             int testEnt415 = testEv415.size();
+
             for(int i = 0; i < maxCh; i++){
                 for(int j = 2; j < 4; j++){
                     pixMeans[j][i] /= hledEnt415;
@@ -280,8 +290,8 @@ void DataSummary::ReadEv(string readStr){
         ampMean415 = accumulate(pixMeans[11].begin(),pixMeans[11].end(),0.0)/maxCh;
         qMean415 = accumulate(pixMeans[12].begin(),pixMeans[12].end(),0.0)/maxCh;
         ptMean415 = accumulate(pixMeans[13].begin(),pixMeans[13].end(),0.0)/maxCh;
+
     }
-    
 }
 
 //isHLED
@@ -311,7 +321,7 @@ bool DataSummary::isHLED415(IEvent *&ev){
     }
     return false;
 }
-//
+
 
 //AddTestEvent
 void DataSummary::AddTestEv44(IEvent *&ev){
@@ -401,7 +411,7 @@ void DataSummary::AddTestEv415(IEvent *&ev){
         delete pulse;
     }
 }
-//
+
 
 //AddHLEDEvent
 void DataSummary::AddHLEDEv44(IEvent *&ev){
@@ -431,6 +441,7 @@ void DataSummary::AddHLEDEv44(IEvent *&ev){
 
     delete ledDist;
 }
+
 void DataSummary::AddHLEDEv415(IEvent *&ev){
     vector<Double_t> amps(maxCh);
     TH1 *ledDist = new TH1F("hledDist","Amplitudes normalized to camera median",100,0,2);
@@ -461,7 +472,7 @@ void DataSummary::AddHLEDEv415(IEvent *&ev){
 
     delete ledDist;
 }
-//
+
 
 void DataSummary::ReadTrThresholds(string readStr){
     ifstream logFile(readStr);
@@ -469,7 +480,9 @@ void DataSummary::ReadTrThresholds(string readStr){
     bool found = false;
     if(!logFile.is_open()){
         cout << "Error opening RC log file" << endl;
+        std::cerr << "Error: " << std::strerror(errno) << std::endl; 
     }
+    else{
     vector<int> tempTr = {0,0};
     while(getline(logFile,line)){
         if(found){
@@ -495,16 +508,17 @@ void DataSummary::ReadTrThresholds(string readStr){
         }
     }
     logFile.close();
+    }
 }
 
 void DataSummary::FillCamera(int dp){
     if(camera){delete camera;}
     camera = new TH2F("camera",hTitles[dp].c_str(),16,-0.5,15.5,16,-0.5,15.5);
-    for(int i = 0; i < maxCh; i++){
-        int nx, ny;
-        FindBin(i,&nx,&ny);
-        camera->SetBinContent(nx+1,ny+1,pixMeans[dp][i]);
-    }
+    // for(int i = 0; i < maxCh; i++){
+    //     int nx, ny;
+    //     FindBin(i,&nx,&ny);
+    //     camera->SetBinContent(nx+1,ny+1,pixMeans[dp][i]);
+    // }
     camera->SetStats(0);
     //below finds histogram scale s.t. it includes 95% of pixels; purpose is to neglect outliers as opposed to just using min and max 
     vector<int> hRangeInd(2);
@@ -544,12 +558,23 @@ void DataSummary::FillCamera(int dp){
     }
     vector<Double_t> hRange = {valSort[hRangeInd[0]],valSort[hRangeInd[1]]};
     Double_t cushion = (hRange[1] - hRange[0]) * 0.05;
+    Double_t zMin = hRange[0] - cushion;
+    Double_t zMax = hRange[1] + cushion;
 
-    camera->SetMinimum(hRange[0] - cushion);
-    camera->SetMaximum(hRange[1] + cushion);
+    for(int i = 0; i < maxCh; i++){
+        int nx, ny;
+        FindBin(i,&nx,&ny);
+        Double_t val = pixMeans[dp][i];
+        val = std::max(val, zMin + inset);
+        val = std::min(val, zMax - inset);
+        camera->SetBinContent(nx+1, ny+1, val);
+    }
+
+    camera->SetMinimum(zMin);
+    camera->SetMaximum(zMax);
 }
 
-//
+
 void DataSummary::FillDt(int dp){
     if(ddt){delete ddt;}
     if(addt){delete addt;}
@@ -571,6 +596,11 @@ void DataSummary::FillDt(int dp){
     else if(dp >= 9 && dp<14){
         thisVec = &testEv415;
         dpt -= 9;
+    }
+
+    if (!thisVec || thisVec->empty()) {
+        std::cerr << "Error: thisVec is null or empty!" << std::endl;
+        return; 
     }
     //below finds y axis range s.t. it includes 99.9% of points; purpose is to neglect outliers as opposed to just using min and max 
     vector<int> yRangeInd(2);
@@ -612,33 +642,47 @@ void DataSummary::FillDt(int dp){
     if(avgVals[dp] < yRange[0]){yRange[0] = avgVals[dp];}
     else if(avgVals[dp] > yRange[1]){yRange[1] = avgVals[dp];}
     Double_t yCushion = (yRange[1] - yRange[0]) * 0.05;
-    ddt = new TH2F("ddt", //Name
-        dTitles[dp].c_str(), //Title
-        ((*thisVec).back().time - (*(*thisVec).begin()).time)/binLen, //number of bins on x axis
-        (*(*thisVec).begin()).time, //x axis minimum
-        (*thisVec).back().time, //x axis maximum
-        1000, //number of bins on y axis
-        yRange[0] - yCushion, //y axis minimum
-        yRange[1] + yCushion //y axis maximum
-    );
-    addt = new TH2F("addt", //Name
-        dTitles[dp].c_str(), //Title
-        ((*thisVec).back().time - (*(*thisVec).begin()).time)/binLen, //number of bins on x axis
-        (*(*thisVec).begin()).time, //x axis minimum
-        (*thisVec).back().time, //x axis maximum
-        1000, //number of bins on y axis
-        yRange[0] - yCushion, //y axis minimum
-        yRange[1] + yCushion //y axis maximum
-    );
-    int count = 0;
-    Double_t runAvg = 0.0;
-    for(auto i: (*thisVec)){
-        runAvg += i.data[dpt];
-        ++count;
-        ddt->Fill(i.time,i.data[dpt]);
-        addt->Fill(i.time,runAvg/count);
+    
+    std::cout << "DEBUG: Checking yRange size: " << yRange.size() << std::endl;
+    
+    double yMin = yRange[0] - yCushion;
+    double yMax = yRange[1] + yCushion;
+
+    double xMin = thisVec->front().time; 
+    double xMax = thisVec->back().time;
+
+    int nBinsX = 1;
+    if (binLen > 0) {
+        nBinsX = static_cast<int>((xMax - xMin) / binLen);
+    }
+    
+    const int MAX_BINS_X = 2000; 
+    if (nBinsX > MAX_BINS_X) {
+        std::cout << "WARNING: nBinsX (" << nBinsX << ") is too large. Capping at " << MAX_BINS_X << std::endl;
+        nBinsX = MAX_BINS_X;
     }
 
+    if (nBinsX <= 0) {
+        nBinsX = 1; 
+    }
+
+        std::cout << "DEBUG: Creating histogram with nBinsX=" << nBinsX << ", xMin=" << xMin << ", xMax=" << xMax << std::endl;
+        std::string uniqueNameddt = "ddt_" + std::to_string(dp);
+        ddt = new TH2F(uniqueNameddt.c_str(), dTitles[dp].c_str(), nBinsX, xMin, xMax, 1000, yMin, yMax);
+        ddt->SetDirectory(nullptr); 
+        std::cout << "DEBUG: ddt successfully created!" << std::endl;
+        std::string uniqueNameaddt = "addt_" + std::to_string(dp);
+        addt = new TH2F(uniqueNameaddt.c_str(), dTitles[dp].c_str(), nBinsX, xMin, xMax, 1000, yMin, yMax);
+        addt->SetDirectory(nullptr);
+        std::cout << "DEBUG: addt successfully created!" << std::endl;
+        int count = 0;
+        Double_t runAvg = 0.0;
+        for(auto i: (*thisVec)){
+            runAvg += i.data[dpt];
+            ++count;
+            ddt->Fill(i.time,i.data[dpt]);
+            addt->Fill(i.time,runAvg/count);
+        }
     lin=new TLine((*(*thisVec).begin()).time, //x1
         avgVals[dp], //y1
         (*thisVec).back().time, //x2
@@ -691,13 +735,13 @@ void DataSummary::PlotAverages(int dp){
     leg->Draw("SAME");
 }
 
-//
+
 void DataSummary::FillTrig(){
     if(trig){delete trig;}
-    //
+
     vector<DtStruct> testEv = testEv44;
     testEv.insert(testEv.end(), testEv415.begin(), testEv415.end());
-    //
+    
     trig = new TH1F("trig", //Name
         "Number of Events", //Title
         (testEv.back().time - (*testEv.begin()).time)/binLen, //number of bins on x axis
@@ -736,7 +780,7 @@ void DataSummary::PlotTrig(){
     misc1->Draw("P");
 }
 
-//
+
 void DataSummary::PlotROIMusic(){
     if(t_disp){delete t_disp;}
     if(camera){delete camera;}
@@ -744,16 +788,28 @@ void DataSummary::PlotROIMusic(){
 
     camera = new TH2F("pixHeat","Highest Amplitude Pixels in Triggered Music [Counts]",16,-0.5,15.5,16,-0.5,15.5);
     ddt = new TH2F("musicHeat","Triggered Music [Counts]",8,-0.5,15.5,4,-0.5,15.5);
-    //
+    
     vector<DtStruct> testEv = testEv44;
     testEv.insert(testEv.end(), testEv415.begin(), testEv415.end());
-    //
+    
     for(auto i: testEv){
         int nx, ny;
 		FindBin(i.pTrig,&nx,&ny);
 		camera->Fill(nx,ny);
 		ddt->Fill(nx,ny);
     }
+
+    
+    Double_t camMax = camera->GetMaximum();
+    Double_t ddtMax = ddt->GetMaximum();
+    Double_t camEps = std::max(1e-6, camMax * 1e-6);
+    Double_t ddtEps = std::max(1e-6, ddtMax * 1e-6);
+
+    camera->SetMinimum(-camEps);
+    camera->SetMaximum(camMax + camEps);
+    ddt->SetMinimum(-ddtEps);
+    ddt->SetMaximum(ddtMax + ddtEps);
+    
 
     t_disp = new TCanvas("Display","DataSummary",2500,1000);
     t_disp->Divide(2,1);
@@ -796,6 +852,7 @@ void DataSummary::PlotFF44(){
 
     ampDist44 = tvar3 / tvar1;
 }
+
 void DataSummary::PlotFF415(){
     if(t_disp){delete t_disp;}
     if(misc1){delete misc1;}
@@ -813,6 +870,7 @@ void DataSummary::PlotFF415(){
     misc1->GetYaxis()->SetTitle("Number of pixels");
     gStyle->SetOptStat(1100);
     t_disp->cd();
+    t_disp->SetLogy();
     misc1->Draw("hist");
     double stats[4];
     misc1->GetStats(stats);
@@ -822,7 +880,7 @@ void DataSummary::PlotFF415(){
 
     ampDist415 = tvar3 / tvar1;
 }
-//
+
 
 //PlotHLED
 void DataSummary::PlotHLED44(){
@@ -838,7 +896,7 @@ void DataSummary::PlotHLED415(){
         t_disp->Clear();
     }
 }
-//
+
 
 //PlotHLEDNorm
 void DataSummary::PlotHLEDNorm44(){
@@ -853,7 +911,7 @@ void DataSummary::PlotHLEDNorm415(){
         t_disp->Clear();
     }
 }
-//
+
 
 //PlotPedestal
 void DataSummary::PlotPedestal44(){
@@ -864,12 +922,12 @@ void DataSummary::PlotPedestal44(){
 }
 
 void DataSummary::PlotPedestal415(){
-    if(testEv415.size() > 0){ PlotAverages(9);}
+    if(testEv415.size() > 0){PlotAverages(9);}
     else{
         t_disp->Clear();
     }
 }
-//
+
 
 //PlotPedestalRMS
 void DataSummary::PlotPedestalRMS44(){
@@ -885,7 +943,7 @@ void DataSummary::PlotPedestalRMS415(){
         t_disp->Clear();
     }
 }
-//
+
 
 //PlotAmplitude
 void DataSummary::PlotAmplitude44(){
@@ -901,7 +959,7 @@ void DataSummary::PlotAmplitude415(){
         t_disp->Clear();
     }
 }
-//
+
 
 //PlotCharge
 void DataSummary::PlotCharge44(){
@@ -917,7 +975,7 @@ void DataSummary::PlotCharge415(){
         t_disp->Clear();
     }
 }
-//
+
 
 //PlotTimePeak
 void DataSummary::PlotTimePeak44(){
@@ -933,7 +991,7 @@ void DataSummary::PlotTimePeak415(){
         t_disp->Clear();
     }
 }
-//
+
 
 //PlotPSF
 void DataSummary::PlotPSF44(){
@@ -952,7 +1010,6 @@ void DataSummary::PlotPSF44(){
     misc2 = new TGraph(16);
 
     for(int i = 0; i < 16; i ++){
-        //
         misc1->SetBinContent(i+1,meanPedRMS44[i]);
         misc2->SetPoint(i,(i+0.5),meanPedRMS44[i]);
     }
@@ -1016,8 +1073,9 @@ void DataSummary::PlotPSF44(){
     misc2->Draw("P same");
     pt->Draw();
 
-    psfSigma = sigma;
+    psfSigma44 = sigma;
 }
+
 void DataSummary::PlotPSF415(){
     if(t_disp){delete t_disp;}
     if(misc1){delete misc1;}
@@ -1034,7 +1092,6 @@ void DataSummary::PlotPSF415(){
     misc2 = new TGraph(16);
 
     for(int i = 0; i < 16; i ++){
-        //
         misc1->SetBinContent(i+1,meanPedRMS415[i]);
         misc2->SetPoint(i,(i+0.5),meanPedRMS415[i]);
     }
@@ -1098,9 +1155,9 @@ void DataSummary::PlotPSF415(){
     misc2->Draw("P same");
     pt->Draw();
 
-    psfSigma = sigma;
+    psfSigma415 = sigma;
 }
-//
+
 
 vector<vector<int>> DataSummary::GetTrTh(){
     return trTh;
@@ -1169,8 +1226,12 @@ double DataSummary::GetPTMean415(){
     return ptMean415;
 }
 
-double DataSummary::GetPSFSigma(){
-    return psfSigma;
+//GetPSFSigma
+double DataSummary::GetPSFSigma44(){
+    return psfSigma44;
+}
+double DataSummary::GetPSFSigma415(){
+    return psfSigma415;
 }
 
 bool DataSummary::hasData(){
