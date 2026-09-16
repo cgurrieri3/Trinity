@@ -50,8 +50,10 @@ class DataSummary {
 		// double ptMean;
 		double ptMean44;
 		double ptMean415;
+		// double psfSigma;
+		double psfSigma44;
+		double psfSigma415;
 
-		double psfSigma;
 		vector<vector<int>> trTh;
 		// vector<DtStruct> testEv;
 		vector<DtStruct> testEv44;
@@ -157,8 +159,9 @@ class DataSummary {
 		// double GetPTMean();
 		double GetPTMean44();
 		double GetPTMean415();
-
-		double GetPSFSigma();
+		// double GetPSFSigma();
+		double GetPSFSigma44();
+		double GetPSFSigma415();
 };
 
 #endif
