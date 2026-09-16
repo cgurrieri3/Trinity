@@ -1,6 +1,8 @@
 #!/bin/bash
 # run_script.sh
 
+LocalPath="/data/TrinityLabComputer" 
+
 echo "Opening container to compile code"
 value=$1
-apptainer exec --bind /storage/osg-otte1/shared/TrinityDemonstrator:/mnt /storage/osg-otte1/shared/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif make $value
+apptainer exec --bind $LocalPath/TrinityDemonstrator:/mnt $LocalPath/TrinityDemonstrator/DataAnalysis/containers/rootandexact.sif make $value
