@@ -96,7 +96,12 @@ DataSummary::DataSummary(char* dateStr){
 
     string evStr = Form("%sMergedData/Output/%s/",dataDir.c_str(),dateStr);
 
+    // // normal
     string logDir = Form("%sData/%s/LOGS/rc.log",mnt.c_str(),dateStr);
+
+    // // if using data from cedar
+    // string logDir = Form("%sData/%s/LOGS/rc.log",cedar.c_str(),dateStr);
+    // cout << logDir << endl;
 
     ReadEv(evStr);
     if(isData){
@@ -128,6 +133,7 @@ void DataSummary::ReadEv(string readStr){
                     cout << "File is a zombie...skipping" << endl;
                     continue;
                 }
+                // cout << "here" << endl;
                 tree = (TTree*)f0->Get("Test");
                 if (!tree) {
                     std::cerr << "Tree 'Test' not found in file!" << std::endl;
@@ -321,7 +327,7 @@ bool DataSummary::isHLED415(IEvent *&ev){
     }
     return false;
 }
-
+//
 
 //AddTestEvent
 void DataSummary::AddTestEv44(IEvent *&ev){
@@ -411,7 +417,7 @@ void DataSummary::AddTestEv415(IEvent *&ev){
         delete pulse;
     }
 }
-
+//
 
 //AddHLEDEvent
 void DataSummary::AddHLEDEv44(IEvent *&ev){
@@ -441,7 +447,6 @@ void DataSummary::AddHLEDEv44(IEvent *&ev){
 
     delete ledDist;
 }
-
 void DataSummary::AddHLEDEv415(IEvent *&ev){
     vector<Double_t> amps(maxCh);
     TH1 *ledDist = new TH1F("hledDist","Amplitudes normalized to camera median",100,0,2);
@@ -472,7 +477,7 @@ void DataSummary::AddHLEDEv415(IEvent *&ev){
 
     delete ledDist;
 }
-
+//
 
 void DataSummary::ReadTrThresholds(string readStr){
     ifstream logFile(readStr);
@@ -556,10 +561,13 @@ void DataSummary::FillCamera(int dp){
         }
         ++valInc;
     }
+    // hRangeInd[0] = std::max(hRangeInd[0], 0);
+    // hRangeInd[1] = std::min(hRangeInd[1], valSize -1);
     vector<Double_t> hRange = {valSort[hRangeInd[0]],valSort[hRangeInd[1]]};
     Double_t cushion = (hRange[1] - hRange[0]) * 0.05;
     Double_t zMin = hRange[0] - cushion;
     Double_t zMax = hRange[1] + cushion;
+    Double_t inset = (zMax - zMin) * 0.01;
 
     for(int i = 0; i < maxCh; i++){
         int nx, ny;
@@ -574,7 +582,7 @@ void DataSummary::FillCamera(int dp){
     camera->SetMaximum(zMax);
 }
 
-
+//
 void DataSummary::FillDt(int dp){
     if(ddt){delete ddt;}
     if(addt){delete addt;}
@@ -602,6 +610,7 @@ void DataSummary::FillDt(int dp){
         std::cerr << "Error: thisVec is null or empty!" << std::endl;
         return; 
     }
+    
     //below finds y axis range s.t. it includes 99.9% of points; purpose is to neglect outliers as opposed to just using min and max 
     vector<int> yRangeInd(2);
     vector<Double_t> valSort;
@@ -683,6 +692,37 @@ void DataSummary::FillDt(int dp){
             ddt->Fill(i.time,i.data[dpt]);
             addt->Fill(i.time,runAvg/count);
         }
+        if (dp == 9){
+            std::cout << "here" << std::endl;
+        }
+    // ddt = new TH2F("ddt", //Name
+    //     dTitles[dp].c_str(), //Title
+    //     ((*thisVec).back().time - (*(*thisVec).begin()).time)/binLen, //number of bins on x axis
+    //     (*(*thisVec).begin()).time, //x axis minimum
+    //     (*thisVec).back().time, //x axis maximum
+    //     1000, //number of bins on y axis
+    //     yRange[0] - yCushion, //y axis minimum
+    //     yRange[1] + yCushion //y axis maximum
+    // );
+    // addt = new TH2F("addt", //Name
+    //     dTitles[dp].c_str(), //Title
+    //     ((*thisVec).back().time - (*(*thisVec).begin()).time)/binLen, //number of bins on x axis
+    //     (*(*thisVec).begin()).time, //x axis minimum
+    //     (*thisVec).back().time, //x axis maximum
+    //     1000, //number of bins on y axis
+    //     yRange[0] - yCushion, //y axis minimum
+    //     yRange[1] + yCushion //y axis maximum
+    // );
+    // int count = 0;
+    // Double_t runAvg = 0.0;
+    // for(auto i: (*thisVec)){
+    //     runAvg += i.data[dpt];
+    //     ++count;
+    //     ddt->Fill(i.time,i.data[dpt]);
+    //     addt->Fill(i.time,runAvg/count);
+        
+    // }    
+
     lin=new TLine((*(*thisVec).begin()).time, //x1
         avgVals[dp], //y1
         (*thisVec).back().time, //x2
@@ -694,7 +734,9 @@ void DataSummary::PlotAverages(int dp){
     if(leg){delete leg;}
     FillCamera(dp);
     FillDt(dp);
+
     if(t_disp){delete t_disp;}
+
     t_disp = new TCanvas("Display","DataSummary",2500,1000);
     t_disp->Divide(2,1);
 
@@ -735,13 +777,13 @@ void DataSummary::PlotAverages(int dp){
     leg->Draw("SAME");
 }
 
-
+//
 void DataSummary::FillTrig(){
     if(trig){delete trig;}
-
+    //
     vector<DtStruct> testEv = testEv44;
     testEv.insert(testEv.end(), testEv415.begin(), testEv415.end());
-    
+    //
     trig = new TH1F("trig", //Name
         "Number of Events", //Title
         (testEv.back().time - (*testEv.begin()).time)/binLen, //number of bins on x axis
@@ -780,7 +822,7 @@ void DataSummary::PlotTrig(){
     misc1->Draw("P");
 }
 
-
+//
 void DataSummary::PlotROIMusic(){
     if(t_disp){delete t_disp;}
     if(camera){delete camera;}
@@ -788,10 +830,10 @@ void DataSummary::PlotROIMusic(){
 
     camera = new TH2F("pixHeat","Highest Amplitude Pixels in Triggered Music [Counts]",16,-0.5,15.5,16,-0.5,15.5);
     ddt = new TH2F("musicHeat","Triggered Music [Counts]",8,-0.5,15.5,4,-0.5,15.5);
-    
+    //
     vector<DtStruct> testEv = testEv44;
     testEv.insert(testEv.end(), testEv415.begin(), testEv415.end());
-    
+    //
     for(auto i: testEv){
         int nx, ny;
 		FindBin(i.pTrig,&nx,&ny);
@@ -799,7 +841,7 @@ void DataSummary::PlotROIMusic(){
 		ddt->Fill(nx,ny);
     }
 
-    
+    //
     Double_t camMax = camera->GetMaximum();
     Double_t ddtMax = ddt->GetMaximum();
     Double_t camEps = std::max(1e-6, camMax * 1e-6);
@@ -809,7 +851,7 @@ void DataSummary::PlotROIMusic(){
     camera->SetMaximum(camMax + camEps);
     ddt->SetMinimum(-ddtEps);
     ddt->SetMaximum(ddtMax + ddtEps);
-    
+    //
 
     t_disp = new TCanvas("Display","DataSummary",2500,1000);
     t_disp->Divide(2,1);
@@ -880,7 +922,7 @@ void DataSummary::PlotFF415(){
 
     ampDist415 = tvar3 / tvar1;
 }
-
+//
 
 //PlotHLED
 void DataSummary::PlotHLED44(){
@@ -896,7 +938,7 @@ void DataSummary::PlotHLED415(){
         t_disp->Clear();
     }
 }
-
+//
 
 //PlotHLEDNorm
 void DataSummary::PlotHLEDNorm44(){
@@ -911,7 +953,7 @@ void DataSummary::PlotHLEDNorm415(){
         t_disp->Clear();
     }
 }
-
+//
 
 //PlotPedestal
 void DataSummary::PlotPedestal44(){
@@ -927,7 +969,7 @@ void DataSummary::PlotPedestal415(){
         t_disp->Clear();
     }
 }
-
+//
 
 //PlotPedestalRMS
 void DataSummary::PlotPedestalRMS44(){
@@ -943,7 +985,7 @@ void DataSummary::PlotPedestalRMS415(){
         t_disp->Clear();
     }
 }
-
+//
 
 //PlotAmplitude
 void DataSummary::PlotAmplitude44(){
@@ -959,7 +1001,7 @@ void DataSummary::PlotAmplitude415(){
         t_disp->Clear();
     }
 }
-
+//
 
 //PlotCharge
 void DataSummary::PlotCharge44(){
@@ -975,7 +1017,7 @@ void DataSummary::PlotCharge415(){
         t_disp->Clear();
     }
 }
-
+//
 
 //PlotTimePeak
 void DataSummary::PlotTimePeak44(){
@@ -991,7 +1033,7 @@ void DataSummary::PlotTimePeak415(){
         t_disp->Clear();
     }
 }
-
+//
 
 //PlotPSF
 void DataSummary::PlotPSF44(){
@@ -1010,6 +1052,7 @@ void DataSummary::PlotPSF44(){
     misc2 = new TGraph(16);
 
     for(int i = 0; i < 16; i ++){
+        //
         misc1->SetBinContent(i+1,meanPedRMS44[i]);
         misc2->SetPoint(i,(i+0.5),meanPedRMS44[i]);
     }
@@ -1075,7 +1118,6 @@ void DataSummary::PlotPSF44(){
 
     psfSigma44 = sigma;
 }
-
 void DataSummary::PlotPSF415(){
     if(t_disp){delete t_disp;}
     if(misc1){delete misc1;}
@@ -1092,6 +1134,7 @@ void DataSummary::PlotPSF415(){
     misc2 = new TGraph(16);
 
     for(int i = 0; i < 16; i ++){
+        //
         misc1->SetBinContent(i+1,meanPedRMS415[i]);
         misc2->SetPoint(i,(i+0.5),meanPedRMS415[i]);
     }
@@ -1157,7 +1200,7 @@ void DataSummary::PlotPSF415(){
 
     psfSigma415 = sigma;
 }
-
+//
 
 vector<vector<int>> DataSummary::GetTrTh(){
     return trTh;
